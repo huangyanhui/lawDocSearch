@@ -1,0 +1,545 @@
+@charset "utf-8";
+html {
+    *overflow: auto;
+}
+
+#hd {
+    padding: 20px 10px;
+}
+
+#bd {
+    margin-bottom: 40px;
+}
+
+.logo {
+    float: left;
+    margin-right: 30px;
+    height: 33px;
+}
+
+/*input搜索区域*/
+.inputArea {
+    float: left;
+    position: relative;
+}
+
+.inputArea .searchInput {
+    border: 1px solid #bfbfbf;
+    padding: 0 15px;
+    outline: none;
+    height: 35px;
+    *line-height: 35px;
+    width: 350px;
+    background: url(../img/inputbg.png);
+    font-size: 14px;
+}
+
+.inputArea .searchButton {
+    position: absolute;
+    left: 382px;
+    top: 0;
+    *top: 1px;
+    *left: 381px;
+    width: 106px;
+    height: 38px;
+    background: url(../img/btn_min.png) no-repeat;
+    border: none;
+    cursor: pointer;
+}
+
+/*返回高级搜索*/
+.inputArea .advanced {
+    position: absolute;
+    font-size: 14px;
+    left: 500px;
+    top: 12px;
+    width: 60px;
+    text-decoration: underline;
+}
+
+/*分界区域，导航*/
+.nav {
+    margin-bottom: 24px;
+    height: 31px;
+    background: #f9f9f9;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 5px 0 0 210px;
+}
+
+.searchList {
+    float: left;
+    padding-left: 5px;
+}
+
+.searchList .searchItem {
+    float: left;
+    margin-right: 15px;
+    font-size: 14px;
+    padding: 0 3px 2px 3px;
+    cursor: pointer;
+    height: 26px;
+    line-height: 26px;
+}
+
+.searchList .searchItem.current {
+    color: #0080cc;
+    border-bottom: 3px solid #9cc813;
+    font-weight: bold;
+}
+
+.nav .tips {
+    color: #969696;
+    font-size: 12px;
+    line-height: 24px;
+    *line-height: 26px;
+}
+
+#container.sideBarHide .nav {
+    padding-left: 35px;
+}
+
+/*#main区域样式*/
+#main {
+    padding: 0 10% 0 10%;
+}
+
+#main.sideBarHide {
+    padding-left: 10px;
+}
+
+/*侧边栏搜索条件*/
+.sideBar {
+    position: relative;
+    float: left;
+    /*margin-left: -182px;*/
+    width:100%;
+    padding:0 0 0 25%;
+}
+
+.sideBar2
+{
+    position: relative;
+    float: left;
+    margin-left: -340px;
+    /*width: 360px;*/
+    width:50%;
+    margin-top: 300px;
+
+}
+
+.sideBar .subfieldContext {
+    margin-bottom: 20px;
+    padding-left: 25px;
+}
+
+.sideBar2 .subfieldContext2 {
+    margin-bottom: 20px;
+    padding-left: 25px;
+}
+
+.sideBar .subfieldContext li {
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.sideBar2 .subfieldContext2 li {
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+
+.sideBar2 .subfieldContext2 input[type=text] {
+    width: 75px;
+}
+
+.sideBar .unit {
+    color: #787878;
+}
+
+/*更多按钮*/
+.sideBar .more a:hover {
+    text-decoration: none;
+}
+
+.sideBar .more .moreIcon {
+    display: inline-block;
+    position: relative;
+    top: -1px;
+    *top: -3px;
+    left: 2px;
+    *left: -1px;
+    width: 9px;
+    height: 5px;
+    background: url(../img/more.png);
+}
+
+.sideBar .more.show .moreIcon {
+    background: url(../img/down.png);
+    top: -2px;
+}
+
+.sideBar .reset {
+    padding-left: 25px;
+}
+
+/*siderBar区域显隐控制*/
+.sideBar .sideBarShowHide {
+    position: absolute;
+    right: 0px;
+    top: 20px;
+    height: 177px;
+    width: 1px;
+    background: url(../img/line.png) right;
+}
+
+.sideBar .sideBarShowHide a {
+    position: absolute;
+    top: 70px;
+    left: -11px;
+    display: inline-block;
+    width: 12px;
+    height: 31px;
+    background: url(../img/lr.png);
+}
+
+.sideBar .sideBarShowHide a:hover {
+    background-position: 0 -31px;
+}
+
+/*左侧收起样式*/
+#main.sideBarHide .sideBar {
+    margin-left: -191px;
+    *margin-left: -182px;
+}
+
+#main.sideBarHide .sideBar .sideBarShowHide {
+    -moz-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+#main.sideBarHide .sideBar .sideBarShowHide a {
+    *background: url(../img/ll.png);
+}
+
+#main.sideBarHide .sideBar .sideBarShowHide a:hover {
+    *background-position: 0 -31px;
+}
+
+#main.sideBarHide .sideBar .sideBarShowHide {
+    background: none;
+}
+
+.resultArea {
+    float: left;
+    width: 95%;
+    margin-top: 50px;
+
+}
+
+.resultArea .resultTotal {
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 20px;
+}
+.totalResult{
+    color: #d90909;
+}
+.resultArea .resultTotal .info {
+    /*color: #9a9a9a;*/
+    color: #333333;
+}
+
+.resultArea .resultTotal .orderOpt {
+    position: absolute;
+    right: 50px;
+}
+
+.resultArea .resultTotal .orderOpt a {
+    margin-right: 10px;
+    color: #0080cc;
+}
+
+/*搜索结果列表区域*/
+.resultArea .resultList {
+    padding-left: 30px;
+}
+
+.resultArea .resultList .resultItem {
+    margin-bottom: 20px;
+    border:1px solid #DDDDDD;
+    border-radius:4px;
+}
+
+.resultArea .resultList .resultItem {
+    margin-bottom: 30px;
+}
+/*设置鼠标移动到案例上面，边框有阴影，产生凸起的效果*/
+.resultArea .resultList .resultItem:hover{
+    box-shadow: 4px 0px 6px #D9D9D9,
+               -4px 0px 6px #D9D9D9,
+                0px 4px 6px #D9D9D9,
+                0px -4px 6px #D9D9D9;
+
+}
+.resultArea .resultList .itemHead {
+    margin-bottom:4px;
+    margin-top: 10px;
+    color: #8C8C8C;
+    font-size: 22px;
+    margin-left:2%;
+    font-family:微软雅黑;
+
+}
+
+.itembottom{
+    margin-left:2%;
+    font-size:16px;
+    color:#8C8C8C;
+    font-family:微软雅黑;
+}
+.resultArea .resultList .itemHead .keyWord {
+    color: #d90909;
+}
+
+.resultArea .resultList .itemBody .keyWord {
+    color: #d90909;
+}
+
+.resultArea .resultList .itemHead a.title {
+    font-size: 16px;
+    color: #0080cc;
+    text-decoration: underline;
+}
+
+.resultArea .resultList .itemHead .value {
+    color: #008000;
+}
+
+.resultArea .resultList .itemHead .divsion {
+    margin: 0 5px;
+}
+
+.resultArea .resultList .itemHead .fileType {
+    margin-right: 10px;
+}
+
+/*搜索内容主体*/
+.resultArea .resultList .itemBody {
+    margin-bottom: 5px;
+    margin-left:5%;
+    margin-right:5%;
+    line-height: 18px;
+    font-size:16px;
+    color:#333333;
+    font-family:"微软雅黑";
+    letter-spacing:2px;       /*字距*/
+
+}
+
+.resultArea .resultList .itemFoot {
+    color: #008000;
+}
+
+.resultArea .resultList .itemFoot .info {
+    margin-right: 10px;
+}
+
+.resultArea .pagination {
+    margin-bottom: 25px;
+    padding-left: 32px;
+}
+
+/*相关搜索*/
+.resultArea .dependSearch {
+    margin-bottom: 30px;
+    padding-left: 32px;
+    font-size: 14px;
+}
+
+.resultArea .dependSearch h6 {
+    float: left;
+    margin-right: 15px;
+    font-weight: bold;
+}
+
+.resultArea .dependSearch p {
+    margin-bottom: 5px;
+}
+
+.resultArea .dependSearch a {
+    display: inline-block;
+    margin-right: 15px;
+    text-decoration: underline;
+    width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.resultArea .searchInResult {
+    padding-left: 35px;
+}
+
+.resultArea .searchInResult .inResult {
+    position: absolute;
+    right: -190px;
+    top: 8px;
+    font-size: 14px;
+    text-decoration: underline;
+}
+
+.resultArea .searchInResult .searchButton {
+    left: 417px;
+}
+
+/*历史搜索区域*/
+.historyArea {
+    float: right;
+    margin-right: -212px;
+    width: 212px;
+}
+
+.historyArea h6 {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.historyArea .historyList {
+    margin-bottom: 20px;
+}
+
+.historyArea .historyList li {
+    margin-bottom: 5px;
+}
+
+/*左侧分栏区域*/
+.subfield {
+    margin-bottom: 50px;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 2px 0 2px 24px;
+}
+
+.subfield:first-child {
+
+    padding-left: 20px;
+}
+
+/*立即搜索样式*/
+.subfieldContent .search {
+    margin: 45px 0 0 135px;
+    width: 130px;
+    height: 36px;
+    background: url(../img/btnbg.png);
+    font-weight: bold;
+    border: none;
+    border: 1px solid #bfbfbf;
+    line-height: 36px;
+}
+
+/*联想下拉区域*/
+.inputArea .dataList {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 42px;
+    *top: 43px;
+    width: 550px;
+    padding: 5px 0;
+    background: #fff;
+    border: 1px solid #bfbfbf;
+    border-top: none;
+}
+
+.inputArea .dataList li {
+    padding: 2px 15px;
+    font-size: 14px;
+}
+
+.inputArea .dataList li:hover {
+    background: #f0f0f0;
+    color: #0080cc;
+    font-weight: bold;
+}
+
+button {
+    background-color: transparent;
+    border: 0;
+}
+
+#pagination {
+    display: inline-block;
+    vertical-align: middle;
+    border-radius: 4px;
+    padding: 1px 2px 4px 2px;
+    border-top: 1px solid #AEAEAE;
+    border-bottom: 1px solid #FFFFFF;
+    background-color: #DADADA;
+    background-image: -webkit-linear-gradient(top, #DBDBDB, #E2E2E2);
+    background-image: -moz-linear-gradient(top, #DBDBDB, #E2E2E2);
+    background-image: -ms-linear-gradient(top, #DBDBDB, #E2E2E2);
+    background-image: -o-linear-gradient(top, #DBDBDB, #E2E2E2);
+    background-image: linear-gradient(top, #DBDBDB, #E2E2E2);
+}
+
+#pagination a, #pagination i {
+    display: inline-block;
+    vertical-align: middle;
+    width: 22px;
+    color: #7D7D7D;
+    text-align: center;
+    font-size: 10px;
+    padding: 3px 0 2px 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+#pagination a {
+    margin: 0 2px 0 2px;
+    border-radius: 4px;
+    border: 1px solid #E3E3E3;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 0 #FFF, 0 1px 2px #666;
+    text-shadow: 0 1px 1px #FFF;
+    background-color: #E6E6E6;
+    background-image: -webkit-linear-gradient(top, #F3F3F3, #D7D7D7);
+    background-image: -moz-linear-gradient(top, #F3F3F3, #D7D7D7);
+    background-image: -ms-linear-gradient(top, #F3F3F3, #D7D7D7);
+    background-image: -o-linear-gradient(top, #F3F3F3, #D7D7D7);
+    background-image: linear-gradient(top, #F3F3F3, #D7D7D7);
+}
+
+#pagination i {
+    margin: 0 3px 0 3px;
+}
+
+#pagination a.current {
+    border: 1px solid #E9E9E9;
+    box-shadow: 0 1px 1px #999;
+    background-color: #DFDFDF;
+    background-image: -webkit-linear-gradient(top, #D0D0D0, #EBEBEB);
+    background-image: -moz-linear-gradient(top, #D0D0D0, #EBEBEB);
+    background-image: -ms-linear-gradient(top, #D0D0D0, #EBEBEB);
+    background-image: -o-linear-gradient(top, #D0D0D0, #EBEBEB);
+    background-image: linear-gradient(top, #D0D0D0, #EBEBEB);
+}
+
+/*加载更多按钮*/
+#getmore {
+    margin-left:4%;
+    width: 96%;
+    height: 50px;
+    background-color: rgb(50, 112, 165);
+    color:white;
+    font-size:20px;
+    font-family:微软雅黑;
+    border-radius: 4px;
+}
+
+
+

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<link href="/css/showDetail.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/js/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/js/sendjs.js"></script>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body >
+
+   <!-- <div class="row">
+        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+            hello world
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+            hello world
+        </div>
+
+    </div>-->
+
+
+       <div class="detail-main" id="content">
+           <div style="float:right;width:20%;margin-right:10%">
+               <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
+                   <span class="nav-title-text">相似案例</span>
+               </div>
+               <div id="caseText" class="col-lg-12 col-lg-12-padding detail-middle-main ">
+                   <div style="padding-top:15px;" th:each="legalbt:${legaldoclist}">
+
+                       <button class="detail-btn" th:text="${legalbt.bt}" onclick="recommondDetail(this)" th:value="${legalbt.id}"></button>
+                   </div>
+
+               </div>
+           </div>
+            <div class="detail-middle fl">
+
+                <div class="detail-container">
+
+
+                    <!--文章标题-->
+                    <div class="detail-title">
+                        <div class="col-lg-9" style="width: 100%;">
+                            <div class="text-center text-black" id="btvalue" th:text="${legaldoc.bt}"></div>
+                        </div>
+                    </div>
+                    <!--正文展示-->
+                    <div class="row row-position">
+                        <div class="col-lg-9" style="width: 100%">
+                            <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
+                                <span class="nav-title-text">基本信息</span>
+                            </div>
+                            <div class="detail-middle-text">
+                                <div class="detail-middle-text-container">
+                                    <div class="col-lg-6 detail-info-right "style="float:right" >
+                                        <span class="title-area"id="wslx" th:text="文书类型"></span>
+                                        <span class="info-item info-item-gray info-area"id="wslxvalue" th:text="${legaldoc.wslx}"></span>
+                                    </div>
+
+                                    <div class="col-lg-6 detail-info-left "  >
+                                        <span class="title-area"id="ah" th:text="案号"></span>
+                                        <span class="info-item info-item-gray info-area"id="ahvalue" th:text="${legaldoc.ah}"></span>
+                                    </div>
+                                    <div class="col-lg-6 detail-info-right " style="float:right" >
+                                        <span class="title-area" th:text="审理程序"></span>
+                                        <span class="info-item info-item-gray info-area" th:text="${legaldoc.slcx}""></span>
+                                    </div>
+                                    <div class="col-lg-6 detail-info-left "  >
+                                        <span class="title-area" th:text="年份"></span>
+                                        <span class="info-item info-item-gray info-area" th:text="${legaldoc.nf}""></span>
+                                    </div>
+                                    <div class="col-lg-6 detail-info-right "  style="float:right">
+                                        <span class="title-area" th:text="法院层级"></span>
+                                        <span class="info-item info-item-gray info-area"th:text="${legaldoc.fycj}""></span>
+                                    </div>
+                                    <div class="col-lg-6 detail-info-left "  >
+
+                                        <span class="title-area" th:text="地域"></span>
+                                        <span class="info-item info-item-gray info-area" th:text="${legaldoc.dy}""></span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
+                                <span class="nav-title-text">文书正文</span>
+                            </div>
+
+                            <div class="col-lg-12 col-lg-12-padding detail-middle-main">
+
+
+
+                                <div style="padding-top:30px;">
+
+                                    <div class="detail-middle-item"id="dsrxx" th:text="当事人信息"></div>
+                                </div>
+
+                                <p class="detail-word" id="dsrxxvalue" th:text="${legaldoc.dsrxx}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item" id="ajms" th:text="案件描述"></div>
+                                </div>
+                                <p class="detail-word"   id="ajmsvalue" th:text="${legaldoc.ajms}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item"  id="sljg" th:text="审理经过"></div>
+                                </div>
+                                <p class="detail-word"  id="sljgvalue" th:text="${legaldoc.sljg}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item" id="ysqqqk" th:text="一审请求情况"></div>
+                                </div>
+                                <p class="detail-word"  id="ysqqqkvalue" th:text="${legaldoc.ysqqqk}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item"id="ysdbqk" th:text="一审答辩情况"></div>
+                                </div>
+                                <p class="detail-word"  id="ysdbqkvalue" th:text="${legaldoc.ysdbqk}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item" id="ysfycm" th:text="一审法院查明"></div>
+                                </div>
+                                <p class="detail-word" id="ysfycmvalue" th:text="${legaldoc.ysfycm}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item"id="ysfyrw" th:text="一审法院认为"></div>
+                                </div>
+                                <p class="detail-word" id="ysfyrwvalue" th:text="${legaldoc.ysfyrw}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item" id="esqqqk" th:text="二审请求情况"></div>
+                                </div>
+                                <p class="detail-word" id="esqqqkvalue" th:text="${legaldoc.esqqqk}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item"id="bycm" th:text="本院查明"></div>
+                                </div>
+                                <p class="detail-word" id="bycmvalue" th:text="${legaldoc.bycm}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item" id="byrw" th:text="本院认为"></div>
+                                </div>
+                                <p class="detail-word" id="byrwvalue" th:text="${legaldoc.byrw}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item"  id="spjg" th:text="审判结果"></div>
+                                </div>
+                                <p class="detail-word" id="spjgvalue" th:text="${legaldoc.spjg}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item" id="spry" th:text="审判人员"></div>
+                                </div>
+                                <p class="detail-word" id="spryvalue" name="spry" th:text="${legaldoc.spry}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item" id="sprq" th:text="审判日期"></div>
+                                </div>
+                                <p class="detail-word" id="sprqvalue" th:text="${legaldoc.sprq}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item"id="sjy" th:text="书记员"></div>
+                                </div>
+                                <p class="detail-word" id="sjyvalue" th:text="${legaldoc.sjy}"></p>
+                                <div class="detail-item">
+                                    <div class="detail-middle-item"id="xgft" th:text="相关法条"></div>
+                                </div>
+                                <p class="detail-word" id="xgftvalue" th:text="${legaldoc.xgft}"></p>
+                                <div style="background-color: white;height:15px;"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+</body>
+<script th:inline="javascript">
+    var bt=[[${legaldoc.bt}]];
+    $("#btvalue").html(bt);
+
+    var wslx=[[${legaldoc.wslx}]];
+    if(wslx=="")
+    {
+        document.getElementById("wslx").style.display="none";
+    }
+    else
+    {
+        $("#wslxvalue").html(wslx);
+    }
+
+    var ay=[[${legaldoc.ay}]];
+    if(ay=="")
+    {
+        document.getElementById("ay").style.display="none";
+    }
+    else
+    {
+        $("#ayvalue").html(ay);
+    }
+
+    var dsrxx=[[${legaldoc.dsrxx}]];
+    if(dsrxx=="")
+    {
+        document.getElementById("dsrxx").style.display="none";
+    }
+    else
+    {
+        $("#dsrxxvalue").html(dsrxx);
+    }
+
+    var ajms=[[${legaldoc.ajms}]];
+    if(ajms=="")
+    {
+        document.getElementById("ajms").style.display="none";
+    }
+    else
+    {
+        $("#ajmsvalue").html(ajms);
+    }
+
+
+
+    var sljg=[[${legaldoc.sljg}]];
+    if(sljg=="")
+    {
+        document.getElementById("sljg").style.display="none";
+    }
+    else
+    {
+        $("#sljgvalue").html(sljg);
+    }
+
+
+
+    var ysqqqk=[[${legaldoc.ysqqqk}]];
+    if(ysqqqk=="")
+    {
+        document.getElementById("ysqqqk").style.display="none";
+    }
+    else
+    {
+        $("#ysqqqkvalue").html(ysqqqk);
+    }
+
+
+
+    var ysdbqk=[[${legaldoc.ysdbqk}]];
+    if(ysdbqk=="")
+    {
+        document.getElementById("ysdbqk").style.display="none";
+    }
+    else
+    {
+        $("#ysdbqkvalue").html(ysdbqk);
+    }
+
+
+
+    var ysfycm=[[${legaldoc.ysfycm}]];
+    if(ysfycm=="")
+    {
+        document.getElementById("ysfycm").style.display="none";
+    }
+    else
+    {
+        $("#ysfycmvalue").html(ysfycm);
+    }
+
+
+
+    var ysfyrw=[[${legaldoc.ysfyrw}]];
+    if(ysfyrw=="")
+    {
+        document.getElementById("ysfyrw").style.display="none";
+    }
+    else
+    {
+        $("#ysfyrwvalue").html(ysfyrw);
+    }
+
+
+
+    var esqqqk=[[${legaldoc.esqqqk}]];
+    if(esqqqk=="")
+    {
+        document.getElementById("esqqqk").style.display="none";
+    }
+    else
+    {
+        $("#esqqqkvalue").html(esqqqk);
+    }
+
+
+
+    var bycm=[[${legaldoc.bycm}]];
+    if(bycm=="")
+    {
+        document.getElementById("bycm").style.display="none";
+    }
+    else
+    {
+        $("#bycmvalue").html(bycm);
+    }
+
+
+
+    var byrw=[[${legaldoc.byrw}]];
+    if(byrw=="")
+    {
+        document.getElementById("byrw").style.display="none";
+    }
+    else
+    {
+        $("#byrwvalue").html(byrw);
+    }
+
+
+
+    var spjg=[[${legaldoc.spjg}]];
+    if(spjg=="")
+    {
+        document.getElementById("spjg").style.display="none";
+    }
+    else
+    {
+        $("#spjgvalue").html(spjg);
+    }
+
+
+
+    var spry=[[${legaldoc.spry}]];
+    if(spry=="")
+    {
+        document.getElementById("spry").style.display="none";
+    }
+    else
+    {
+        var spryhtml="";
+        var spryArray=new Array();
+        spryArray=spry.split("/n");
+        for(i=0;i<spryArray.length-2;i++)
+        {
+            spryhtml=spryhtml+spryArray[i+1]+"<br />";
+        }
+        spryhtml=spryhtml+spryArray[spryArray.length-1];
+        $('#spryvalue').html(spryhtml);
+
+    }
+
+    var sprq=[[${legaldoc.sprq}]];
+    if(sprq=="")
+    {
+        document.getElementById("sprq").style.display="none";
+
+    }
+    else
+    {
+        $("#sprqvalue").html(sprq);
+    }
+
+
+
+    var sjy=[[${legaldoc.sjy}]];
+    if(sjy=="")
+    {
+        document.getElementById("sjy").style.display="none";
+    }
+    else
+    {
+        $("#sjyvalue").html(sjy);
+    }
+
+
+
+    var xgft=[[${legaldoc.xgft}]];
+    if(xgft=="")
+    {
+        document.getElementById("xgft").style.display="none";
+    }
+    else
+    {
+        $("#xgftvalue").html(xgft);
+    }
+
+
+
+</script>
+</html>

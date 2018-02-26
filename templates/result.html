@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<script type="text/javascript">
+    $(function () {
+        $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
+        $('.tree li.parent_li > span').on('click', function (e) {
+            var children = $(this).parent('li.parent_li').find(' > ul > li');
+            if (children.is(":visible")) {
+                children.hide('fast');
+                $(this).attr('title', 'Expand this branch').find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
+            } else {
+                children.show('fast');
+                $(this).attr('title', 'Collapse this branch').find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
+            }
+            e.stopPropagation();
+        });
+    });
+</script>
+
+
+    <div id="bd" class="ue-clear">
+        <div id="main">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <div class="sideBar">
+                        <div class="subfield"style="font-size:26px;font-weight:bold;font-family:微软雅黑；"  id="mymenu1">法院层级</div>
+
+                        <div class="tree">
+                            <ul>
+                                <li class="parent_li">
+                            <span title="Expand this branch "style="font-size:22px;font-weight:bold"><i
+                                    class="fa fa-sitemap " ></i>法院层级</span>
+                                    <ul th:each="fayuancj : ${fayuancengji}">
+                                        <li class="parent_li" >
+                                    <span class="badge badge-success" title="Collapse this branch"><i
+                                            class="icon-minus-sign"></i>
+                                        <button class="name" th:name="fycj" th:value="${fayuancj.field}" th:text="${fayuancj.field}" onclick="searchgroupby(this)"></button>
+                                         <span class="unit" th:text="${fayuancj.count}"></span></span>
+                                        </li>
+
+                                    </ul>
+                                </li>
+
+                                <li class="parent_li">
+                            <span title="Expand this branch"style="font-size:22px;font-weight:bold"><i
+                                    class="fa fa-clipboard" ></i>文书性质</span>
+                                    <ul th:each="wslx : ${wenshuleixing}">
+                                        <li class="parent_li" >
+                                    <span class="badge badge-success" title="Collapse this branch"><i
+                                            class="icon-minus-sign"></i>
+                                        <button  class="name" th:name="wslx" th:value="${wslx.field}" th:text="${wslx.field}" onclick="searchgroupby(this)"></button>
+                                         <span class="unit" th:text="${wslx.count}"></span></span>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <li class="parent_li">
+                            <span title="Expand this branch"style="font-size:22px;font-weight:bold"><i
+                                    class="fa fa-calendar " ></i>文书年份</span>
+                                    <ul th:each="nf : ${nianfen}">
+                                        <li class="parent_li">
+                                    <span class="badge badge-success" title="Collapse this branch"><i
+                                            class="icon-minus-sign"></i>
+                                        <button  class="name" th:name="nf" th:value="${nf.field}" th:text="${nf.field}" onclick="searchgroupby(this)"></button>
+                                         <span class="unit" th:text="${nf.count}"></span></span>
+                                        </li>
+                                    </ul>
+                                </li>
+
+
+                                <li class="parent_li">
+                            <span title="Expand this branch"style="font-size:22px;font-weight:bold"><i
+                                    class="fa fa-list-alt "></i>案由</span>
+                                    <ul th:each="ay : ${anyou}">
+                                        <li class="parent_li" >
+                                    <span class="badge badge-success" title="Collapse this branch"><i
+                                            class="icon-minus-sign"></i>
+                                        <button  class="name" th:name="ay" th:value="${ay.field}" th:text="${ay.field}" onclick="searchgroupby(this)"></button>
+                                         <span class="unit" th:text="${ay.count}"></span></span>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <li class="parent_li">
+                            <span title="Expand this branch"style="font-size:22px;font-weight:bold"><i
+                                    class="fa fa-university album-hide "></i>地域</span>
+                                    <ul th:each="dy : ${diyu}">
+                                        <li class="parent_li" >
+                                    <span class="badge badge-success" title="Collapse this branch"><i
+                                            class="icon-minus-sign"></i>
+                                        <button  class="name" th:name="dy" th:value="${dy.field}" th:text="${dy.field}" onclick="searchgroupby(this)"></button>
+                                         <span class="unit" th:text="${dy.count}"></span></span>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <li class="parent_li">
+                            <span title="Expand this branch"style="font-size:22px;font-weight:bold"><i
+                                    class="fa fa-legal"></i>审理程序</span>
+                                    <ul th:each="slcx : ${shenlichengxu}">
+                                        <li class="parent_li">
+                                    <span class="badge badge-success" title="Collapse this branch"><i
+                                            class="icon-minus-sign"></i>
+                                        <button  class="name" th:name="slcx" th:value="${slcx.field}" th:text="${slcx.field}" onclick="searchgroupby(this)"></button>
+                                         <span class="unit" th:text="${slcx.count}"></span></span>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+
+                    <div class="resultArea">
+                        <p class="resultTotal">
+                    <span class="info">找到约&nbsp;<span class="totalResult"
+                                                      th:text="${resultcount}"></span>&nbsp;条结果</span>
+                            <span class="orderOpt">
+                    </span>
+                        </p>
+
+                        <div th:each="legaldoc : ${LegalDocList}" class="resultList">
+                            <form th:action="@{/searchresult}" th:with="i=0" method="post">
+                                <div class="resultItem">
+                                    <div class="itemHead">
+                                        <input type="hidden" name="id" th:value="${legaldocStat.index}"/>
+                                        <button th:action="@{/searchresult}" th:text="${legaldoc.bt}" target="_blank"
+                                                class="title"></button>
+
+
+                                    </div>
+                                    <div class=" itembottom " >
+                                        <div class="row">
+                                            <div class="col-lg-5 " th:text="${legaldoc.ah}"></div>
+                                            <div class="col-lg-5" th:text="${legaldoc.fy}"></div>
+                                            <div class="col-lg-2"  th:text="${legaldoc.nf}"></div>
+                                        </div>
+
+                                    </div>
+
+                                    <hr style="border:0;border-top:1px dashed #9FB6CD">
+                                    <div class="itemBody wordControl" th:text="${legaldoc.byrw}">
+                                    </div>
+                                    <div class="itemFoot">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!--加载更多按钮-->
+                        <button id="getmore" type="button" class="morebtn"onclick="sendpageid()"><i class="fa fa-chevron-down"></i>&nbsp;加载更多</button>
+                        <!-- 分页 -->
+                        <div class="pagination ue-clear"></div>
+                        <!-- 相关搜索 -->
+
+
+                        <!--结果中搜索-->
+
+                    </div>
+                </div>
+            </div>
+
+
+
+
+        </div><!-- End of main -->
+    </div><!--End of bd-->
+
+<script th:inline="javascript">
+    var ledocarray=new Array();
+    ledocarray=[[${LegalDocList}]];
+    var i=0;
+    var j=0;
+    $(".title").each(function () {
+
+        $(this).html("<button>"+ledocarray[i].bt+"</button>");
+        i=i+1;
+    });
+    $(".itemBody").each(function () {
+
+        $(this).html(ledocarray[j].byrw);
+        j=j+1;
+    })
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        //限制字符个数
+        $(".wordControl").each(function() {
+            var maxwidth = 130;
+            if ($(this).text().length > maxwidth) {
+                $(this).text($(this).text().substring(0, maxwidth));
+                $(this).html($(this).html() + '...');
+            }
+        });
+    });
+</script>
+
+
+

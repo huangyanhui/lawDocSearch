@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<link href="/css/bootstrap.css" rel="stylesheet" type="text/css" />
+<link href="/css/bootstrap-theme.css" rel="stylesheet" type="text/css" />
+<link href="/css/style.css" rel="stylesheet" type="text/css" />
+<link href="/css/result.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="/js/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/js/bootstrap.js"></script>
+<script type="text/javascript" src="/js/sendjs.js"></script>
+
+
+
+<html lang="en">
+<meta>
+<meta charset="UTF-8"/>
+<title>搜索结果</title>
+</head>
+
+
+<body>
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> <a class="navbar-brand" href="#">Brand</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <div class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input id="searchkey" type="text" name="name" value="" class="form-control" />
+                        </div>
+                        <button type="submit" id="SearchInResultbtn" class="btn btn-default" onclick="searchinresult()">结果中搜索</button>
+                        <button type="submit" id="NewSearchbtn" class="btn btn-default" onclick="newsearch()">新搜索</button>
+                    </div>
+                </div>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div id="content">
+    <div id="bd" class="ue-clear">
+        <div id="main">
+            <div class="sideBar">
+                <div class="subfield" id="mymenu1">法院层级</div>
+
+                <ul class="subfieldContext" th:each="fayuan : ${fayuancengji}">
+                    <li>
+                        <button id="xianshi1" class="name" th:value="${fayuan.field}" th:text="${fayuan.field}" onclick="searchgroupby(this)"></button>
+                        <span class="unit" th:text="${fayuan.count}"></span>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="resultArea">
+                <p class="resultTotal">
+                    <span class="info">找到约&nbsp;<span class="totalResult">2,608,495</span>&nbsp;条结果(用时<span class="time">0.36</span>秒)，共约<span class="totalPage">1900</span>页</span>
+                    <span class="orderOpt">
+                    	<a href="javascript:;" class="byTime">按时间排序</a>
+                        <a href="javascript:;" class="byDependence">按相关度排序</a>
+                    </span>
+                </p>
+
+                <div th:each="legaldoc : ${LegalDocList}"  class="resultList">
+                    <form th:action="@{/searchresult}" th:with="i=0" method="post">
+                        <div class="resultItem" >
+                            <div class="itemHead">
+                                <input type="hidden" name="id" th:value="${legaldocStat.index}"/>
+                                <button th:action="@{/searchresult}" th:text="${legaldoc.id}+${legaldoc.bt}"  target="_blank" class="title"><span class="keyWord">UI设计</span></button>
+                                <span class="divsion">-</span>
+                                <span class="fileType">
+                            </span>
+                                <span class="dependValue">
+                            	<span class="label">相关度：</span>
+                                <span class="value">91.78%</span>
+                            </span>
+
+                            </div>
+
+                            <div class="itemBody" th:text="${legaldoc.ah}"></div>
+                            <div th:text="${legaldoc.fy}"</div>
+                        <div th:text="${legaldoc.nf}"</div>
+                            <div class="itemBody" th:text="${legaldoc.byrw}">
+                            </div>
+                            <div class="itemFoot">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 分页 -->
+                <div class="pagination ue-clear"></div>
+                <!-- 相关搜索 -->
+
+
+                <!--结果中搜索-->
+
+            </div>
+
+        </div><!-- End of main -->
+    </div><!--End of bd-->
+    <input id="pagecount" type="hidden" th:value="${pagecount}">
+
+</div>
+
+<div id="pagination"></div>
+
+</body>
+<script>
+    var search=document.getElementById("pagecount").value;
+    var pagecount=parseInt(search);
+    pagination12(pagecount);
+
+</script>
+
+</html>
