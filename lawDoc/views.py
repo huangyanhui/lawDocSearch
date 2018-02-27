@@ -32,7 +32,6 @@ def indexSearch(request):
     # 全域搜索
     else:
         searchStruct.allFieldKeyWord = keyWord.split(" ")
-    print(searchStruct.OrderFieldKey)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
 
@@ -101,12 +100,12 @@ def searchByStrcut(searchStruct):
 
             fieldKeyWordQuery.append({"bool": {"must": fieldKeyWordMiniQuery}})
 
-            must_list = []
-            must_list.append({"bool": {"should": fieldKeyWordQuery}})
+        must_list = []
+        must_list.append({"bool": {"should": fieldKeyWordQuery}})
 
-            query = {"query": {"bool": {"must": must_list}}}
+        query = {"query": {"bool": {"must": must_list}}}
 
-            # f.write(json.dumps(query, ensure_ascii=False) + '\n')
+        # f.write(json.dumps(query, ensure_ascii=False) + '\n')
 
     # 顺序搜索
     orderFieldKeyWord = searchStruct.OrderFieldKey
@@ -128,7 +127,7 @@ def searchByStrcut(searchStruct):
             wildcard_str += '*'
             orderFieldKeyWordMiniQuery.append({
                 "wildcard": {
-                    field: wildcard_str
+                    field + 'copy': wildcard_str
                 }
             })
             orderFieldKeyWordQuery.append({
