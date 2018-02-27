@@ -26,10 +26,13 @@ def indexSearch(request):
         keyWord = keyWord.replace("~", " ")
         searchStruct.FieldKeyWord = keyWord.split(" ")
     # 顺序搜索
+    elif ">" in keyWord:
+        keyWord = keyWord.replace(">", " ")
+        searchStruct.OrderFieldKey = keyWord.split(" ")
     # 全域搜索
     else:
         searchStruct.allFieldKeyWord = keyWord.split(" ")
-    print(searchStruct.FieldKeyWord)
+    print(searchStruct.OrderFieldKey)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
 
@@ -85,11 +88,9 @@ def searchByStrcut(searchStruct):
 
     # query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
 
-    f = open('/home/cowlog/Project/lawDocSearch/lawDoc/test.txt', 'w+')
     # 同域搜索
     fieldKeyWord = searchStruct.FieldKeyWord
     fieldKeyWordQuery = []
-    fieldQuery = []
     if len(fieldKeyWord) > 0:
 
         for field in allSearchField:
@@ -100,19 +101,50 @@ def searchByStrcut(searchStruct):
 
             fieldKeyWordQuery.append({"bool": {"must": fieldKeyWordMiniQuery}})
 
-    must_list = []
-    must_list.append({"bool": {"should": fieldKeyWordQuery}})
+            must_list = []
+            must_list.append({"bool": {"should": fieldKeyWordQuery}})
 
-    query = {"query": {"bool": {"must": must_list}}}
+            query = {"query": {"bool": {"must": must_list}}}
 
-    f.write(json.dumps(query, ensure_ascii=False) + '\n')
-    f.close()
+            # f.write(json.dumps(query, ensure_ascii=False) + '\n')
 
     # 顺序搜索
+    orderFieldKeyWord = searchStruct.OrderFieldKey
+    orderFieldKeyWordQuery = []
+    if len(orderFieldKeyWord) > 0:
 
-    # query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
-    # query = {"query": {"bool": {"must": fieldKeyWordQuery}}}
+        for field in allSearchField:
+            orderFieldKeyWordMiniQuery = []
+            wildcard_str = ''
+
+            for key in orderFieldKeyWord:
+                orderFieldKeyWordMiniQuery.append({
+                    "match_phrase": {
+                        field: key
+                    }
+                })
+                wildcard_str += '*' + key
+
+            wildcard_str += '*'
+            orderFieldKeyWordMiniQuery.append({
+                "wildcard": {
+                    field: wildcard_str
+                }
+            })
+            orderFieldKeyWordQuery.append({
+                "bool": {
+                    "must": orderFieldKeyWordMiniQuery
+                }
+            })
+
+        must_list = []
+        must_list.append({"bool": {"should": orderFieldKeyWordQuery}})
+
+        query = {"query": {"bool": {"must": must_list}}}
+        # f.write(json.dumps(query, ensure_ascii=False) + '\n')
+
     print(json.dumps(query, ensure_ascii=False))
+
     results = es.search(
         index='legal_index',
         doc_type='lagelDocument',
