@@ -64,6 +64,7 @@ def searchByStrcut(searchStruct):
         for j in allSearchField:
             allFieldKeyWordMiniQuery.append({"match_phrase":{j:i}})
         allFieldKeyWordQuery.append({"bool":{"should":allFieldKeyWordMiniQuery}})
+        allFieldKeyWordMiniQuery=[]
 
     query = {
     "query": {
