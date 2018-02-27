@@ -3,8 +3,7 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from elasticsearch import Elasticsearch
-from lawDoc.Variable import legalDocuments, allSearchField
-
+from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList
 
 # Create your views here.
 
@@ -19,10 +18,27 @@ def index(request):
 def indexSearch(request):
     print("1111111111111111")
     keyWord=request.POST.get('keyword')
+    print(keyWord)
+    searchStruct = SearchStruct()
+    if '@' in keyWord:
+        field=keyWord.split("@")[1]
+        keyWord = keyWord.split("@")[0]
+    else:
+        field="all"
+    if '!'in keyWord:
+        keywords = keyWord.split("!")[0].split(" ")
+        notkeywords = keyWord.split("!")[1].split(" ")
+        if field == "all":
+            searchStruct.allFieldKeyWord = keywords
+            searchStruct.allFieldNotKeyWord = notkeywords
+        else:
+            searchStruct.oneFieldKeyWord = {"field":field,"keywords":keywords}
+            searchStruct.oneFieldNotKeyWord = {"field":field,"notkeywords":notkeywords}
 
-    searchStruct=SearchStruct()
-    searchStruct.allFieldKeyWord=keyWord.split(" ")
-    print(searchStruct.allFieldKeyWord)
+    print("****************/n")
+    print(searchStruct.oneFieldKeyWord)
+    print("****************/n")
+    print(searchStruct.oneFieldNotKeyWord)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
 
@@ -59,22 +75,56 @@ def searchByStrcut(searchStruct):
     allFieldKeyWord=searchStruct.allFieldKeyWord
     allFieldKeyWordQuery=[]
     allFieldKeyWordMiniQuery=[]
-    #全领域搜索的解决思路是对每个域进行搜索，之间用should连接
-    for i in allFieldKeyWord:
-        for j in allSearchField:
-            allFieldKeyWordMiniQuery.append({"match_phrase":{j:i}})
-        allFieldKeyWordQuery.append({"bool":{"should":allFieldKeyWordMiniQuery}})
-
-    query = {
-    "query": {
-        "bool": {
-            "must": allFieldKeyWordQuery
+    #单领域否定搜索
+    if len(searchStruct.oneFieldNotKeyWord) != 0:
+        oneFieldKeyWord = searchStruct.oneFieldKeyWord
+        oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord
+        field = allSearchFieldList[oneFieldNotKeyWord["field"]]
+        print(field)
+        oneFieldKeyNotWordMiniQuery = []
+        oneFieldKeyNotWordQuery = []
+        for i in oneFieldNotKeyWord["notkeywords"]:
+            print(i)
+            oneFieldKeyNotWordMiniQuery.append({"match_phrase":{field:i}})
+        query = {
+            "query":{
+                "bool":{
+                    "must_not":oneFieldKeyNotWordMiniQuery
+                }
+            }
         }
-    }
-}
-    print(json.dumps(query))
-    results = es.search(index='legal_index', doc_type='lagelDocument', body=json.dumps(query))['hits']['hits']
+        print(json.dumps(query))
+        results = es.search(index='legal_index', doc_type='lagelDocument', body=json.dumps(query))['hits']['hits']
 
-    for result in results:
-        lines=result['_source']['byrw'].split("\n")
-        print(lines)
+
+        for result in results:
+            lines=result['_source']['byrw'].split("\n")
+            print(lines)
+
+
+
+
+
+
+
+
+    # for i in allFieldKeyWord:
+    #     for j in allSearchField:
+    #         allFieldKeyWordMiniQuery.append({"match_phrase":{j:i}})
+    #     allFieldKeyWordQuery.append({"bool":{"should":allFieldKeyWordMiniQuery}})
+    #
+    # query = {
+    # "query": {
+    #     "bool": {
+    #         "must": allFieldKeyWordQuery
+    #     }
+    # }
+    # }
+    #
+    # print(json.dumps(query))
+    # results = es.search(index='legal_index', doc_type='lagelDocument', body=json.dumps(query))['hits']['hits']
+    #
+    #
+    # for result in results:
+    #     lines=result['_source']['byrw'].split("\n")
+    #     print(lines)
