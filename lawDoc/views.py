@@ -3,7 +3,7 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from elasticsearch import Elasticsearch
-from lawDoc.Variable import legalDocuments, allSearchField
+from lawDoc.Variable import legalDocuments, allSearchField,allSearchFieldList
 
 # Create your views here.
 
@@ -166,11 +166,30 @@ def searchByStrcut(searchStruct):
             }
         }
 
-    print(json.dumps(query, ensure_ascii=False))
-    results = es.search(
-        index='legal_index',
-        doc_type='lagelDocument',
-        body=json.dumps(query, ensure_ascii=False))['hits']['hits']
+    }
+}
+    # 单领域否定搜索:输出：oneFieldKeyNotWordQuery
+    if len(searchStruct.oneFieldNotKeyWord) != 0:
+        oneFieldKeyWord = searchStruct.oneFieldKeyWord
+        oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord
+        field = allSearchFieldList[oneFieldNotKeyWord["field"]]
+        oneFieldKeyNotWordMiniQuery = []
+        oneFieldKeyNotWordQuery = []
+        for i in oneFieldNotKeyWord["notkeywords"]:
+            oneFieldKeyNotWordMiniQuery.append({"match_phrase": {field: i}})
+        oneFieldKeyNotWordQuery = {
+                "bool": {
+                    "must_not": oneFieldKeyNotWordMiniQuery
+                }
+
+        }
+
+    print(json.dumps(query))
+    results = es.search(index='legal_index', doc_type='lagelDocument', body=json.dumps(query))['hits']['hits']
+
+
+    
+
 
     for result in results:
         lines = result['_source']['byrw'].split("\n")
