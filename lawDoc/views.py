@@ -3,7 +3,7 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from elasticsearch import Elasticsearch
-from lawDoc.Variable import legalDocuments, allSearchField
+from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldDict
 
 
 # Create your views here.
@@ -65,6 +65,13 @@ def searchByStrcut(searchStruct):
             allFieldKeyWordMiniQuery.append({"match_phrase":{j:i}})
         allFieldKeyWordQuery.append({"bool":{"should":allFieldKeyWordMiniQuery}})
         allFieldKeyWordMiniQuery=[]
+
+    #单领域搜索
+    oneFieldKeyWord = searchStruct.oneFieldKeyWord["keyword"]
+    oneFieldKeyWordQuery = []
+    field = allSearchFieldDict.get(searchStruct.oneFieldKeyWord["field"])
+    for i in oneFieldKeyWord:
+        oneFieldKeyWordQuery.append({"match_phrase": {field: i}})
 
     query = {
     "query": {
