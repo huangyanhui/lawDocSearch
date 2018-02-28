@@ -179,3 +179,7 @@ venv.bak/
 
 
 # End of https://www.gitignore.io/api/django,python,pycharm
+#
+# Pipenv
+Pipfile
+Pipfile.lock

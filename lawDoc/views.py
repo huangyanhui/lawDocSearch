@@ -7,7 +7,7 @@ from lawDoc.Variable import legalDocuments, allSearchField
 
 # Create your views here.
 
-#展示首页,java版本对应路径为“/”
+# 展示首页,java版本对应路径为“/”
 from lawDoc.models import SearchStruct
 
 
@@ -15,66 +15,57 @@ def index(request):
     return render(request, 'index.html')
 
 
-#首页的搜索，java版本对应路径为“indexsearch”
+# 首页的搜索，java版本对应路径为“indexsearch”
 def indexSearch(request):
     print("1111111111111111")
     keyWord = request.POST.get('keyword')
 
     searchStruct = SearchStruct()
-    # 同域搜索
-    if "~" in keyWord:
-        keyWord = keyWord.replace("~", " ")
-        searchStruct.FieldKeyWord = keyWord.split(" ")
-    # 顺序搜索
-    elif ">" in keyWord:
-        keyWord = keyWord.replace(">", " ")
-        searchStruct.OrderFieldKey = keyWord.split(" ")
-    # 全域搜索
-    else:
-        searchStruct.allFieldKeyWord = keyWord.split(" ")
+    searchStruct.allFieldKeyWord = keyWord.split(" ")
+    print(searchStruct.allFieldKeyWord)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
 
 
-#搜索结果页的重新搜索，java版本对应路径为“newsearch”
+# 搜索结果页的重新搜索，java版本对应路径为“newsearch”
 def newSearch(request):
     pass
 
 
-#搜索结果页的结果内搜索，java版本对应路径为“addsearch”
+# 搜索结果页的结果内搜索，java版本对应路径为“addsearch”
 def addSearch(request):
     pass
 
 
-#加载更多，java版本对应路径为getMore
+# 加载更多，java版本对应路径为getMore
 def getMore(request):
     pass
 
 
-#聚类搜索，java版本对应路径为addsearchandterm
+# 聚类搜索，java版本对应路径为addsearchandterm
 def groupBySearch(request):
     pass
 
 
-#进入详细页面，java版本对应路径为searchresult
+# 进入详细页面，java版本对应路径为searchresult
 def getDetail(request):
     pass
 
 
-#进入推荐页面，java版本对应路径为recommondDetail
+# 进入推荐页面，java版本对应路径为recommondDetail
 def getRecommondDetail(request):
     pass
 
 
 # searchStruct 为搜索结构体，包含搜索搜索条件
 def searchByStrcut(searchStruct):
-    #连接es
+    # 连接es
     es = Elasticsearch()
-    #取出searchstruct中的allFieldKeyWord
+    # 取出searchstruct中的allFieldKeyWord
     allFieldKeyWord = searchStruct.allFieldKeyWord
     allFieldKeyWordQuery = []
     allFieldKeyWordMiniQuery = []
-    #全领域搜索的解决思路是对每个域进行搜索，之间用should连接
+    # 全领域搜索的解决思路是对每个域进行搜索，之间用should连接
     for i in allFieldKeyWord:
         for j in allSearchField:
             allFieldKeyWordMiniQuery.append({"match_phrase": {j: i}})
@@ -104,8 +95,6 @@ def searchByStrcut(searchStruct):
         must_list.append({"bool": {"should": fieldKeyWordQuery}})
 
         query = {"query": {"bool": {"must": must_list}}}
-
-        # f.write(json.dumps(query, ensure_ascii=False) + '\n')
 
     # 顺序搜索
     orderFieldKeyWord = searchStruct.OrderFieldKey
@@ -140,7 +129,6 @@ def searchByStrcut(searchStruct):
         must_list.append({"bool": {"should": orderFieldKeyWordQuery}})
 
         query = {"query": {"bool": {"must": must_list}}}
-        # f.write(json.dumps(query, ensure_ascii=False) + '\n')
 
     print(json.dumps(query, ensure_ascii=False))
     results = es.search(
