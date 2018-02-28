@@ -3,7 +3,11 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from elasticsearch import Elasticsearch
+
+
+
 from lawDoc.Variable import legalDocuments, allSearchField,allSearchFieldList
+
 
 # Create your views here.
 
@@ -77,6 +81,13 @@ def searchByStrcut(searchStruct):
 
     query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
 
+    #单领域搜索
+    oneFieldKeyWord = searchStruct.oneFieldKeyWord["keyword"]
+    oneFieldKeyWordQuery = []
+    field = allSearchFieldList.get(searchStruct.oneFieldKeyWord["field"])
+    for i in oneFieldKeyWord:
+        oneFieldKeyWordQuery.append({"match_phrase": {field: i}})
+          
     # 同域搜索
 
     # 变量：
