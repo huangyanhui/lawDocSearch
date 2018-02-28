@@ -77,6 +77,20 @@ def searchByStrcut(searchStruct):
 
     query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
 
+
+
+    #全域非搜索
+    allFieldNotKeyWord=searchStruct.allNotFieldKeyWord
+    allFieldNotKeyWordQuery=[]
+    allFieldNotKeyWordMiniQuery=[]
+    for i in allFieldNotKeyWord:
+        for j in allSearchField:
+            allFieldNotKeyWordMiniQuery.append({"match_phrase":{j:i}})
+        allFieldNotKeyWordQuery.append({"bool":{"must_not":allFieldNotKeyWordMiniQuery}})
+        allFieldNotKeyWordMiniQuery = []
+
+
+
     # 同域搜索
 
     # 变量：
