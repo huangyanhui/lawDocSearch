@@ -16,10 +16,10 @@ def index(request):
     return render(request,'index.html')
 
 #首页的搜索，java版本对应路径为“indexsearch”
-def indexSearch():
+def indexSearch(request):
     print("1111111111111111")
-   # keyWord=request.POST.get('keyword')
-    keyWord = "杀人 抢劫"
+    keyWord=request.POST.get('keyword')
+
 
     searchStruct=SearchStruct()
     searchStruct.allFieldKeyWord=keyWord.split(" ")
@@ -65,6 +65,19 @@ def searchByStrcut(searchStruct):
         for j in allSearchField:
             allFieldKeyWordMiniQuery.append({"match_phrase":{j:i}})
         allFieldKeyWordQuery.append({"bool":{"should":allFieldKeyWordMiniQuery}})
+        allFieldKeyWordMiniQuery = []
+
+    allFieldNotKeyWord=searchStruct.allNotFieldKeyWord
+    allFieldNotKeyWordQuery=[]
+    allFieldNotKeyWordMiniQuery=[]
+    #全领域非搜索 对！后面的词进行非搜索
+    for i in allFieldNotKeyWord:
+        for j in allSearchField:
+            allFieldNotKeyWordMiniQuery.append({"match_phrase":{j:i}})
+        allFieldNotKeyWordQuery.append({"bool":{"must_not":allFieldNotKeyWordMiniQuery}})
+        allFieldNotKeyWordMiniQuery = []
+        #将全搜索和非搜索加起来
+        allFieldKeyWordQuery = allFieldKeyWordQuery + allFieldNotKeyWordQuery
 
     query = {
     "query": {
