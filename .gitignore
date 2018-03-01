@@ -183,3 +183,4 @@ venv.bak/
 # Pipenv
 Pipfile
 Pipfile.lock
+.idea/
