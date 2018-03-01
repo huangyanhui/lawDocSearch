@@ -1,0 +1,49 @@
+{% load static %}
+<!doctype html>
+<html lang="zh">	
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8" /> 
+        <title>注册</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+        <link href="{% static 'css/login_style.css' %}" rel='stylesheet' type='text/css' />
+        <link href="{% static 'css/register_style.css' %}" rel='stylesheet' type='text/css' />
+    </head>
+    <body>
+        <script>$(document).ready(function(c) {
+             $('.close').on('click', function(c){
+                 $('.login-form').fadeOut('slow', function(c){
+                     $('.login-form').remove();
+                 });
+             });	  
+         });
+        </script>
+        <!--REGISTER-->
+        <h1>注册</h1>
+        <div class="login-form">
+            <div class="close"> </div>
+            <div class="head-info">
+                <label class="lbl-1"> </label>
+                <label class="lbl-2"> </label>
+                <label class="lbl-3"> </label>
+            </div>
+            <div class="clear"> </div>
+            <div class="avtar">
+                <img src="{% static 'images/avtar.png' %}" />
+            </div>
+            {% csrf_token %}
+            <form action="register" method="post">
+                <input type="text" name="username" class="text" value="用户名" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = '用户名';}" >
+                <input type="password" name="password" value="密码" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = '密码';}">
+                <input type="email" name="email" class="text" value="电子邮箱" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = '电子邮箱';}" >
+	              <div class="signin">
+		                <input type="submit" value="注册" >
+	              </div>
+            </form>
+        </div>
+        <div class="copy-rights">
+            <p>Copyright &copy; </p>
+			  </div>
+
+    </body>
+</html>
