@@ -82,11 +82,17 @@ def searchByStrcut(searchStruct):
     query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
 
     #单领域搜索
-    oneFieldKeyWord = searchStruct.oneFieldKeyWord["keyword"]
     oneFieldKeyWordQuery = []
-    field = allSearchFieldList.get(searchStruct.oneFieldKeyWord["field"])
-    for i in oneFieldKeyWord:
-        oneFieldKeyWordQuery.append({"match_phrase": {field: i}})
+    oneFieldKeyWordMiniQuery  = []
+    oneFieldKeyWord = searchStruct.oneFieldKeyWord
+    #oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
+    fieldSet = oneFieldKeyWord.keys()
+    for field in fieldSet:
+        for keyWord in oneFieldKeyWord[field]:
+            oneFieldKeyWordMiniQuery.append({"match_phrase":{field:keyWord}})
+        oneFieldKeyWordQuery.append({"bool": {"must": oneFieldKeyWordMiniQuery}})
+        oneFieldKeyWordMiniQuery = []
+    query = {"query": {"bool": {"must": oneFieldKeyWordQuery}}}
           
     # 同域搜索
 
