@@ -3,11 +3,7 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from elasticsearch import Elasticsearch
-
-
-
-from lawDoc.Variable import legalDocuments, allSearchField,allSearchFieldList
-
+from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList
 
 # Create your views here.
 
@@ -83,17 +79,21 @@ def searchByStrcut(searchStruct):
 
     #单领域搜索
     oneFieldKeyWordQuery = []
-    oneFieldKeyWordMiniQuery  = []
+    oneFieldKeyWordMiniQuery = []
     oneFieldKeyWord = searchStruct.oneFieldKeyWord
     #oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
     fieldSet = oneFieldKeyWord.keys()
     for field in fieldSet:
         for keyWord in oneFieldKeyWord[field]:
-            oneFieldKeyWordMiniQuery.append({"match_phrase":{field:keyWord}})
-        oneFieldKeyWordQuery.append({"bool": {"must": oneFieldKeyWordMiniQuery}})
+            oneFieldKeyWordMiniQuery.append({"match_phrase": {field: keyWord}})
+        oneFieldKeyWordQuery.append({
+            "bool": {
+                "must": oneFieldKeyWordMiniQuery
+            }
+        })
         oneFieldKeyWordMiniQuery = []
     query = {"query": {"bool": {"must": oneFieldKeyWordQuery}}}
-          
+
     # 同域搜索
 
     # 变量：
@@ -193,18 +193,15 @@ def searchByStrcut(searchStruct):
         for i in oneFieldNotKeyWord["notkeywords"]:
             oneFieldKeyNotWordMiniQuery.append({"match_phrase": {field: i}})
         oneFieldKeyNotWordQuery = {
-                "bool": {
-                    "must_not": oneFieldKeyNotWordMiniQuery
-                }
-
+            "bool": {
+                "must_not": oneFieldKeyNotWordMiniQuery
+            }
         }
 
     print(json.dumps(query))
-    results = es.search(index='legal_index', doc_type='lagelDocument', body=json.dumps(query))['hits']['hits']
-
-
-    
-
+    results = es.search(
+        index='legal_index', doc_type='lagelDocument',
+        body=json.dumps(query))['hits']['hits']
 
     for result in results:
         lines = result['_source']['byrw'].split("\n")
