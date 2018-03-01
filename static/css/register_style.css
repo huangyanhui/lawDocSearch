@@ -1,0 +1,17 @@
+input[type="password"]{
+    margin-bottom: 0;
+    color: #9199aa;
+}
+input[name="email"] {
+    width: 70%;
+    padding: 1em 2em 1em 3em;
+    color: #9199aa;
+    font-size: 18px;
+    outline: none;
+    background: url(../img/at.png) no-repeat 10px 15px;
+    border: none;
+    font-weight: 100;
+    border-bottom: 1px solid#484856;
+    margin-top: 0;
+    margin-bottom: 3em;
+}

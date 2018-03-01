@@ -25,7 +25,7 @@ from lawDoc.views import index, indexSearch
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^$',index,name="index"),
-    url(r'^indexsearch$',indexSearch),
+    url(r'^$', index, name="index"),
+    url(r'^indexsearch$', indexSearch),
+    path('account/', include('account.urls')),
 ]
-
