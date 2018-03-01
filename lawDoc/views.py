@@ -78,6 +78,8 @@ def searchByStrcut(searchStruct):
     query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
 
 
+
+
     #全域非搜索
     allFieldNotKeyWord=searchStruct.allNotFieldKeyWord
     allFieldNotKeyWordQuery=[]
