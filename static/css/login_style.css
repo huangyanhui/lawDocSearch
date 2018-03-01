@@ -24,7 +24,7 @@ img{max-width:100%;}
 /*end reset*/
 /****-----start-body----****/
 body{
-	background: url(../images/bg1.jpg) no-repeat 0px 0px;
+	background: url(../img/bg1.jpg) no-repeat 0px 0px;
 	font-family: 'Open Sans', sans-serif;
 	background-size:cover;
 	-webkit-background-size:cover;
@@ -44,7 +44,7 @@ body a,form li,input[type="submit"],input[type="text"],.sixth-login input[type="
 }
 /*--close--*/
 .close{
-background: url('../images/close.png') no-repeat 0px 0px;
+background: url('../img/close.png') no-repeat 0px 0px;
   cursor: pointer;
   width: 20px;
   height: 20px;
@@ -105,7 +105,7 @@ input[type="text"] {
 	  color: #9199aa;
 	  font-size: 18px;
 	  outline: none;
-	  background: url(../images/adm.png) no-repeat 10px 15px;
+	  background: url(../img/adm.png) no-repeat 10px 15px;
 	  border: none;
 	  font-weight: 100;
 	  border-bottom: 1px solid#484856;
@@ -117,14 +117,14 @@ input[type="text"] {
 	  color: #dd3e3e;
 	  font-size: 18px;
 	  outline: none;
-	  background: url(../images/key.png) no-repeat 10px 23px;
+	  background: url(../img/key.png) no-repeat 10px 23px;
 	  border: none;
 	  font-weight: 100;
 	  border-bottom: 1px solid#484856;
 	  margin-bottom: 3em;
  }
 .key {
-   background: url(../images/pass.png) no-repeat 447px 17px;
+   background: url(../img/pass.png) no-repeat 447px 17px;
 }
 input[type="submit"]{
   font-size: 30px;
@@ -217,7 +217,7 @@ label.lbl-3 {
 /*--start-responsive-design--*/
 @media (max-width:1440px){
 	.key {
-	  background: url(../images/pass.png) no-repeat 376px 17px;
+	  background: url(../img/pass.png) no-repeat 376px 17px;
 	}
 	
 	body {
@@ -226,7 +226,7 @@ label.lbl-3 {
 }
 @media (max-width:1366px){
 	.key {
-	  background: url(../images/pass.png) no-repeat 358px 19px;
+	  background: url(../img/pass.png) no-repeat 358px 19px;
 	}
 	.copy-rights {
 	  margin-top: 3em;
@@ -237,7 +237,7 @@ label.lbl-3 {
 }
 @media (max-width:1280px){
 	.key {
-	   background: url(../images/pass.png) no-repeat 336px 18px;
+	   background: url(../img/pass.png) no-repeat 336px 18px;
 	}
 	body {
 	  min-height: 711px;
@@ -251,7 +251,7 @@ label.lbl-3 {
 	  width: 37%;
 	}
 	.key {
-	   background: url(../images/pass.png) no-repeat 339px 18px;
+	   background: url(../img/pass.png) no-repeat 339px 18px;
 	}
 	.copy-rights {
 	  margin-top: 3em;
@@ -269,7 +269,7 @@ label.lbl-3 {
 	    margin: 12% auto 0 auto;
 	}
 	.key {
-	  background: url(../images/pass.png) no-repeat 342px 18px;
+	  background: url(../img/pass.png) no-repeat 342px 18px;
 	}
 	body {
 	  min-height: 929px;
@@ -281,7 +281,7 @@ label.lbl-3 {
 	  margin: 20% auto 0 auto;
 	}
 	.key {
-	  background: url(../images/pass.png) no-repeat 342px 19px;
+	  background: url(../img/pass.png) no-repeat 342px 19px;
 	}
 }
 @media (max-width:480px){
@@ -310,10 +310,10 @@ label.lbl-3 {
 		font-size: 17px;
 		margin-top: .5em;
 		margin-bottom: 2em;
-		  background: url(../images/key.png) no-repeat 8px 23px;
+		  background: url(../img/key.png) no-repeat 8px 23px;
 	}
 	.key {
-	  background: url(../images/pass.png) no-repeat 235px 27px;
+	  background: url(../img/pass.png) no-repeat 235px 27px;
 	}
 	.avtar img {
 	  margin: 1.1em 0 0;
