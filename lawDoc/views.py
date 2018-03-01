@@ -3,12 +3,12 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from elasticsearch import Elasticsearch
-from lawDoc.Variable import legalDocuments, allSearchField,allSearchFieldList
+from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList
 
 # Create your views here.
 
 # 展示首页,java版本对应路径为“/”
-from lawDoc.models import SearchStruct
+from lawDoc.models import SearchStruct, LegalDocument
 
 
 def index(request):
@@ -17,13 +17,13 @@ def index(request):
 
 # 首页的搜索，java版本对应路径为“indexsearch”
 def indexSearch(request):
-    print("1111111111111111")
     keyWord = request.POST.get('keyword')
     searchStruct = SearchStruct()
     searchStruct.allFieldKeyWord = keyWord.split(" ")
     print(searchStruct.allFieldKeyWord)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
+    return render(request,"searchresult.html",{"LegalDocList":legalDocuments})
 
 
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
@@ -79,6 +79,7 @@ def searchByStrcut(searchStruct):
 
 
 
+
     #全域非搜索
     allFieldNotKeyWord=searchStruct.allNotFieldKeyWord
     allFieldNotKeyWordQuery=[]
@@ -91,6 +92,24 @@ def searchByStrcut(searchStruct):
     query = {"query": {"bool": {"must": allFieldNotKeyWordQuery}}}
 
 
+
+
+    #单领域搜索
+    oneFieldKeyWordQuery = []
+    oneFieldKeyWordMiniQuery = []
+    oneFieldKeyWord = searchStruct.oneFieldKeyWord
+    #oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
+    fieldSet = oneFieldKeyWord.keys()
+    for field in fieldSet:
+        for keyWord in oneFieldKeyWord[field]:
+            oneFieldKeyWordMiniQuery.append({"match_phrase": {field: keyWord}})
+        oneFieldKeyWordQuery.append({
+            "bool": {
+                "must": oneFieldKeyWordMiniQuery
+            }
+        })
+        oneFieldKeyWordMiniQuery = []
+    query = {"query": {"bool": {"must": oneFieldKeyWordQuery}}}
 
 
     # 同域搜索
@@ -193,19 +212,49 @@ def searchByStrcut(searchStruct):
         for i in oneFieldNotKeyWord["notkeywords"]:
             oneFieldKeyNotWordMiniQuery.append({"match_phrase": {field: i}})
         oneFieldKeyNotWordQuery = {
-                "bool": {
-                    "must_not": oneFieldKeyNotWordMiniQuery
-                }
-
+            "bool": {
+                "must_not": oneFieldKeyNotWordMiniQuery
+            }
         }
 
     print(json.dumps(query))
-    results = es.search(index='legal_index', doc_type='lagelDocument', body=json.dumps(query))['hits']['hits']
-
-
-    
-
+    results = es.search(
+        index='legal_index', doc_type='lagelDocument',
+        body=json.dumps(query))['hits']['hits']
 
     for result in results:
-        lines = result['_source']['byrw'].split("\n")
-        print(lines)
+        legalDoc=LegalDocument()
+        legalDoc.fy=result['_source']['fy']
+        legalDoc.dsrxx= result['_source']['dsrxx']
+        legalDoc.ah = result['_source']['ah']
+        legalDoc.spry = result['_source']['spry']
+        legalDoc.ysfycm = result['_source']['ysfycm']
+        legalDoc.ysqqqk = result['_source']['ysqqqk']
+        legalDoc.byrw = result['_source']['byrw']
+        legalDoc.spjg = result['_source']['spjg']
+        legalDoc.ysdbqk = result['_source']['ysdbqk']
+        legalDoc.esqqqk = result['_source']['esqqqk']
+        legalDoc.ysfyrw = result['_source']['ysfyrw']
+        legalDoc.wslx = result['_source']['wslx']
+        legalDoc.ajms = result['_source']['ajms']
+        legalDoc.xgft = result['_source']['xgft']
+        legalDoc.sprq = result['_source']['sprq']
+        legalDoc.sljg = result['_source']['sljg']
+        legalDoc.bycm = result['_source']['bycm']
+        legalDoc.sjy = result['_source']['sjy']
+        legalDoc.bt = result['_source']['bt']
+        legalDoc.dy = result['_source']['dy']
+        legalDoc.nf = result['_source']['nf']
+        legalDoc.slcx = result['_source']['slcx']
+        legalDoc.ay = result['_source']['ay']
+        legalDoc.ft = result['_source']['ft']
+        legalDoc.tz = result['_source']['tz']
+        legalDocuments.append(legalDoc)
+        print(legalDoc.fy)
+
+    return legalDocuments
+
+
+
+
+

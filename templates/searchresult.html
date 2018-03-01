@@ -1,264 +1,284 @@
-<!DOCTYPE html>
-<link href="/css/bootstrap.css" rel="stylesheet" type="text/css"/>
-<link href="/css/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
-<link href="/css/style.css" rel="stylesheet" type="text/css"/>
-<link href="/css/result.css" rel="stylesheet" type="text/css"/>
-<link href="/css/treestyle.css" rel="stylesheet" type="text/css"/>
-<link href="/css/mystyle.css" rel="stylesheet" type="text/css"/>
-<link href="http://cdn.bootcss.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-<script type="text/javascript" src="/js/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/js/bootstrap.js"></script>
-<script type="text/javascript" src="/js/sendjs.js"></script>
+{% load static %}
 
-<script type="text/javascript">
-    $(function () {
-        $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
-        $('.tree li.parent_li > span').on('click', function (e) {
-            var children = $(this).parent('li.parent_li').find(' > ul > li');
-            if (children.is(":visible")) {
-                children.hide('fast');
-                $(this).attr('title', 'Expand this branch').find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
-            } else {
-                children.show('fast');
-                $(this).attr('title', 'Collapse this branch').find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
-            }
-            e.stopPropagation();
-        });
-    });
-</script>
+<!doctype html>
+<html lang="zh-Hans">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>搜索结果</title>
+        <link href="{% static '/css/bootstrap.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="{% static '/css/bootstrap-theme.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="{% static '/css/style.css' %}'" rel="stylesheet" type="text/css"/>
+        <link href="{% static '/css/result.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="{% static '/css/treestyle.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="{% static '/css/mystyle.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="http://cdn.bootcss.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+        <script type="text/javascript" src="{% static '/js/jquery-3.2.1.js' %}"></script>
+        <script type="text/javascript" src="{% static '/js/bootstrap.js' %}"></script>
+        <script type="text/javascript" src="{% static '/js/sendjs.js' %}"></script>
+        <script type="text/javascript">
+         $(function () {
+             $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
+             $('.tree li.parent_li > span').on('click', function (e) {
+                 var children = $(this).parent('li.parent_li').find(' > ul > li');
+                 if (children.is(":visible")) {
+                     children.hide('fast');
+                     $(this).attr('title', 'Expand this branch').find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
+                 } else {
+                     children.show('fast');
+                     $(this).attr('title', 'Collapse this branch').find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
+                 }
+                 e.stopPropagation();
+             });
+         });
+        </script>
+    </head>
 
+    <body>
+        <div class="container">
+            <div class="row clearfix">
+                <div class="col-md-12 column" style="border-bottom: 2px solid #3270a5">
+                    <nav class="navbar navbar-default navbar-fixed-top " role="navigation" style="padding:20px 20px 20px 20px">
 
-<html lang="en">
-<meta>
-<meta charset="UTF-8"/>
-<title>搜索结果</title>
-</head>
-
-
-<body>
-
-<div class="container">
-    <div class="row clearfix">
-        <div class="col-md-12 column" style="border-bottom: 2px solid #3270a5">
-            <nav class="navbar navbar-default navbar-fixed-top " role="navigation" style="padding:20px 20px 20px 20px">
-
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse"
-                            data-target="#bs-example-navbar-collapse-1"><span
-                            class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span
-                            class="icon-bar"></span><span class="icon-bar"></span></button>
-
-                </div>
-
-                <div class="collapse navbar-collapse tab-pane active" id="bs-example-navbar-collapse-1">
-                    <div class="navbar-form navbar-left search-inner" role="search">
-                        <a class="navbar-brand" href="/" style="font-size:24px;"><i class="fa fa-github-alt"></i>Intelligence&nbsp;Law&nbsp;&nbsp;&nbsp;&nbsp;</a>
-                        <div class="form-group " >
-                            <input id="searchkey" type="text" name="name" value="" class="form-control" style="width:480px"/>
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                                    data-target="#bs-example-navbar-collapse-1">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>l
+                            </button>
                         </div>
 
-                        <button class="btn jufa-btn-success search-btn newSearch-btn but" type="submit" id="NewSearchbtn" title="新搜索" onclick="newsearch()"><span class="fa fa-search"></span></button>
-                        <button class="btn jufa-btn-success search-btn oldSeach-btn but" type="submit" id="SearchInResultbtn"onclick="searchinresult()">在结果中搜索</button>
-
-
-                    </div>
-                </div>
-
-            </nav>
-        </div>
-    </div>
-</div>
-
-
-<div class="header-sub-background" style="height:93px ">
-
-</div>
-
-
-
-<div id="content" >
-    <div id="bd" class="ue-clear">
-        <div id="main">
-            <div class="row">
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                    <div class="sideBar">
-                        <div class="subfield" id="mymenu1"></div>
-
-                        <div class="tree">
-                            <ul>
-                                <li class="parent_li">
-                            <span title="Expand this branch" style="font-size:22px;font-weight:bold" ><i
-                                    class="fa fa-sitemap "></i>&nbsp;法院层级</span>
-                                    <ul th:each="fayuancj : ${fayuancengji}">
-                                        <li class="parent_li nextli">
-                                    <span class="badge badge-success" title="Collapse this branch"><i
-                                            class="icon-minus-sign"></i>
-                                        <button class="name" th:name="fycj" th:value="${fayuancj.field}" th:text="${fayuancj.field}" onclick="searchgroupby(this)"></button>
-                                         <span class="unit" th:text="${fayuancj.count}"></span></span>
-                                        </li>
-
-                                    </ul>
-                                </li>
-                                <hr style="background-color:#9FB6CD;height:1px;border:none;">
-                                <li class="parent_li">
-                            <span title="Expand this branch"style="font-size:22px;font-weight:bold"><i
-                                    class=" fa fa-clipboard "></i>&nbsp;文书性质</span>
-                                    <ul th:each="wslx : ${wenshuleixing}">
-                                        <li class="parent_li nextli" >
-                                    <span class="badge badge-success" title="Collapse this branch"><i
-                                            class="icon-minus-sign"></i>
-                                        <button  class="name" th:name="wslx" th:value="${wslx.field}" th:text="${wslx.field}" onclick="searchgroupby(this)"></button>
-                                         <span class="unit" th:text="${wslx.count}"></span></span>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <hr style="background-color:#9FB6CD;height:1px;border:none;">
-                                <li class="parent_li">
-                            <span title="Expand this branch"style="font-size:22px;font-weight:bold"><i
-                                    class=" fa fa-calendar "></i>&nbsp;文书年份</span>
-                                    <ul th:each="nf : ${nianfen}">
-                                        <li class="parent_li nextli" >
-                                    <span class="badge badge-success" title="Collapse this branch"><i
-                                            class="icon-minus-sign"></i>
-                                        <button  class="name" th:name="nf" th:value="${nf.field}" th:text="${nf.field}" onclick="searchgroupby(this)"></button>
-                                         <span class="unit" th:text="${nf.count}"></span></span>
-                                        </li>
-                                    </ul>
-                                </li>
-
-                                <hr style="background-color:#9FB6CD;height:1px;border:none;">
-                                <li class="parent_li ">
-                            <span title="Expand this branch"style="font-size:22px;font-weight:bold"><i
-                                    class=" fa fa-list-alt "></i>&nbsp;案由</span>
-                                    <ul th:each="ay : ${anyou}">
-                                        <li class="parent_li nextli" >
-                                    <span class="badge badge-success" title="Collapse this branch"><i
-                                            class="icon-minus-sign"></i>
-                                        <button  class="name" th:name="ay" th:value="${ay.field}" th:text="${ay.field}" onclick="searchgroupby(this)"></button>
-                                         <span class="unit" th:text="${ay.count}"></span></span>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <hr style="background-color:#9FB6CD;height:1px;border:none;">
-                                <li class="parent_li ">
-                            <span title="Expand this branch"style="font-size:22px;font-weight:bold"><i
-                                    class="fa fa-university album-hide "></i>&nbsp;地域</span>
-                                    <ul th:each="dy : ${diyu}">
-                                        <li class="parent_li nextli">
-                                    <span class="badge badge-success" title="Collapse this branch"><i
-                                            class="icon-minus-sign"></i>
-                                        <button  class="name" th:name="dy" th:value="${dy.field}" th:text="${dy.field}" onclick="searchgroupby(this)"></button>
-                                         <span class="unit" th:text="${dy.count}"></span></span>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <hr style="background-color:#9FB6CD;height:1px;border:none;">
-                                <li class="parent_li ">
-                            <span title="Expand this branch"style="font-size:22px;font-weight:bold"><i
-                                    class="fa fa-legal "></i>&nbsp;审理程序</span>
-                                    <ul th:each="slcx : ${shenlichengxu}">
-                                        <li class="parent_li nextli" >
-                                    <span class="badge badge-success" title="Collapse this branch"><i
-                                            class="icon-minus-sign"></i>
-                                        <button  class="name" th:name="slcx" th:value="${slcx.field}" th:text="${slcx.field}" onclick="searchgroupby(this)"></button>
-                                         <span class="unit" th:text="${slcx.count}"></span></span>
-                                        </li>
-                                    </ul>
-                                </li>
-
-                            </ul>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <div class="resultArea">
-                        <p class="resultTotal">
-                            <span class="info">找到约&nbsp;<span class="totalResult"
-                                                              th:text="${resultcount}"></span>&nbsp;条结果</span>
-                                    <span class="orderOpt">
-                            </span>
-                        </p>
-
-                        <div class="searchitem" th:each="legaldoc : ${LegalDocList}" class="resultList">
-                            <form th:action="@{/searchresult}" th:with="i=0" method="post">
-                                <div class="resultItem">
-                                    <div class="itemHead">
-                                        <input type="hidden" name="id" th:value="${legaldocStat.index}"/>
-                                        <button th:action="@{/searchresult}" target="_blank"
-                                                class="title"><span ></span></button>
-
-                                    </div>
-                                    <div class=" itembottom " >
-                                        <div class="row">
-                                            <div class="col-lg-5 " th:text="${legaldoc.ah}"></div>
-                                            <div class="col-lg-5" th:text="${legaldoc.fy}"></div>
-                                            <div class="col-lg-2"  th:text="${legaldoc.nf}"></div>
-                                        </div>
-
-                                    </div>
-
-                                    <hr style="border:0;border-top:1px dashed #9FB6CD">
-
-
-                                    <div class="itemBody wordControl" th:text="${legaldoc.byrw}">
-                                    </div>
-                                    <div class="itemFoot">
-                                    </div>
+                        <div class="collapse navbar-collapse tab-pane active" id="bs-example-navbar-collapse-1">
+                            <div class="navbar-form navbar-left search-inner" role="search">
+                                <a class="navbar-brand" href="/" style="font-size:24px;">
+                                    <i class="fa fa-github-alt"></i>Intelligence&nbsp;Law&nbsp;&nbsp;&nbsp;&nbsp;
+                                </a>
+                                <div class="form-group " >
+                                    <input id="searchkey" type="text" name="name" value="" class="form-control" style="width:480px"/>
                                 </div>
-                            </form>
+
+                                <button class="btn jufa-btn-success search-btn newSearch-btn but" type="submit" id="NewSearchbtn" title="新搜索" onclick="newsearch()">
+                                    <span class="fa fa-search"></span>
+                                </button>
+                                <button class="btn jufa-btn-success search-btn oldSeach-btn but" type="submit" id="SearchInResultbtn" onclick="searchinresult()">在结果中搜索</button>
+                            </div>
                         </div>
-                        <!--加载更多按钮-->
-                        <button id="getmore" type="button" class="morebtn"onclick="sendpageid()"><i class="fa fa-chevron-down"></i>&nbsp;加载更多</button>
-                        <!-- 分页 -->
-                        <div class="pagination ue-clear"></div>
-                        <!-- 相关搜索 -->
 
-
-                        <!--结果中搜索-->
-
-                    </div>
+                    </nav>
                 </div>
             </div>
+        </div>
+
+
+        <div class="header-sub-background" style="height:93px ">
+
+        </div>
+
+        <div id="content" >
+            <div id="bd" class="ue-clear">
+                <div id="main">
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                            <div class="sideBar">
+                                <div class="subfield" id="mymenu1"></div>
+
+                                <div class="tree">
+                                    <ul>
+                                        <li class="parent_li">
+                                            <span title="Expand this branch" style="font-size:22px;font-weight:bold" >
+                                                <i class="fa fa-sitemap "></i>&nbsp;法院层级
+                                            </span>
+                                            <ul>
+                                                {% for fayuancj in fayuancengji %}
+                                                <li class="parent_li nextli">
+                                                    <span class="badge badge-success" title="Collapse this branch">
+                                                        <i class="icon-minus-sign"></i>
+                                                        <button class="name" name="fycj" value="{{ fayuancj.field }}" text="{{ fayuancj.field }}" onclick="searchgroupby(this)"></button>
+                                                        <span class="unit" text="{{ fayuancj.count }}"></span>
+                                                    </span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+
+                                        <hr style="background-color:#9FB6CD;height:1px;border:none;">
+
+                                        <li class="parent_li">
+                                            <span title="Expand this branch" style="font-size:22px;font-weight:bold">
+                                                <i class=" fa fa-clipboard "></i>&nbsp;文书性质
+                                            </span>
+                                            <ul>
+                                                {% for wslx in wenshuleixing %}
+                                                <li class="parent_li nextli" >
+                                                    <span class="badge badge-success" title="Collapse this branch">
+                                                        <i class="icon-minus-sign"></i>
+                                                        <button class="name" name="wslx" value="{{ wslx.field }}" text="{{ wslx.field }}" onclick="searchgroupby(this)"></button>
+                                                        <span class="unit" text="${wslx.count}"></span>
+                                                    </span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+
+                                        <hr style="background-color:#9FB6CD;height:1px;border:none;">
+
+                                        <li class="parent_li">
+                                            <span title="Expand this branch" style="font-size:22px;font-weight:bold">
+                                                <i class=" fa fa-calendar "></i>&nbsp;文书年份
+                                            </span>
+                                            <ul>
+                                                {% for nf in nianfen %}
+                                                <li class="parent_li nextli" >
+                                                    <span class="badge badge-success" title="Collapse this branch">
+                                                        <i class="icon-minus-sign"></i>
+                                                        <button class="name" name="nf" value="{{ nf.field }}" text="{{ nf.field }}" onclick="searchgroupby(this)"></button>
+                                                        <span class="unit" text="{{ nf.count }}"></span>
+                                                    </span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+
+                                        <hr style="background-color:#9FB6CD;height:1px;border:none;">
+
+                                        <li class="parent_li ">
+                                            <span title="Expand this branch" style="font-size:22px;font-weight:bold">
+                                                <i class=" fa fa-list-alt "></i>&nbsp;案由
+                                            </span>
+                                            <ul>
+                                                {% for ay in anyou %}
+                                                <li class="parent_li nextli" >
+                                                    <span class="badge badge-success" title="Collapse this branch">
+                                                        <i class="icon-minus-sign"></i>
+                                                        <button class="name" name="ay" value="{{ ay.field }}" text="{{ ay.field }}" onclick="searchgroupby(this)"></button>
+                                                        <span class="unit" text="{{ ay.count }}"></span>
+                                                    </span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+
+                                        <hr style="background-color:#9FB6CD;height:1px;border:none;">
+
+                                        <li class="parent_li ">
+                                            <span title="Expand this branch" style="font-size:22px;font-weight:bold">
+                                                <i class="fa fa-university album-hide "></i>&nbsp;地域
+                                            </span>
+                                            <ul>
+                                                {% for dy in diyu %}
+                                                <li class="parent_li nextli">
+                                                    <span class="badge badge-success" title="Collapse this branch">
+                                                        <i class="icon-minus-sign"></i>
+                                                        <button class="name" name="dy" value="{{ dy.field }}" text="{{ dy.field }}" onclick="searchgroupby(this)"></button>
+                                                        <span class="unit" text="{{ dy.count }}"></span>
+                                                    </span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+
+                                        <hr style="background-color:#9FB6CD;height:1px;border:none;">
+
+                                        <li class="parent_li ">
+                                            <span title="Expand this branch" style="font-size:22px;font-weight:bold">
+                                                <i class="fa fa-legal "></i>&nbsp;审理程序
+                                            </span>
+                                            <ul>
+                                                {% for slcx in shenlichengxu %}
+                                                <li class="parent_li nextli" >
+                                                    <span class="badge badge-success" title="Collapse this branch">
+                                                        <i class="icon-minus-sign"></i>
+                                                        <button class="name" name="slcx" value="{{ slcx.field }}" text="{{ slcx.field }}" onclick="searchgroupby(this)"></button>
+                                                        <span class="unit" text="{{ slcx.count }}"></span>
+                                                    </span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                            <div class="resultArea">
+                                <p class="resultTotal">
+                                    <span class="info">找到约&nbsp;
+                                        <span class="totalResult" text="{{ resultcount }}"></span>
+                                        &nbsp;条结果
+                                    </span>
+                                    <span class="orderOpt">
+                                    </span>
+                                </p>
+
+                                {% for legaldoc in LegalDocList %}
+                                <div class="searchitem resultList">
+                                    <form action="/searchresult" method="post">
+                                        <!-- <form th:action="@{/searchresult}" th:with="i=0" method="post"> -->
+                                            <div class="resultItem">
+                                            <div class="itemHead">
+                                                <input type="hidden" name="id"/>
+                                                <button action="/searchresult" target="_blank" class="title">
+                                                    <span></span>
+                                                    {{ legaldoc.bt }}
+                                                </button>
+                                            </div>
+
+                                            <div class="itembottom">
+                                                <div class="row">
+                                                    <div class="col-lg-5">{{ legaldoc.ah }}</div>
+                                                    <div class="col-lg-5">{{ legaldoc.fy }}</div>
+                                                    <div class="col-lg-2">{{ legaldoc.nf }}</div>
+                                                </div>
+                                            </div>
+
+                                            <hr style="border:0;border-top:1px dashed #9FB6CD">
+
+                                            <div class="itemBody wordControl"> {{ legaldoc.byrw }}</div>
+
+                                            <div class="itemFoot"></div>
+
+                                        </div>
+                                    </form>
+                                </div>
+                                {% endfor %}
+                                <!--加载更多按钮-->
+                                <button id="getmore" type="button" class="morebtn"onclick="sendpageid()"><i class="fa fa-chevron-down"></i>&nbsp;加载更多</button>
+                                <!-- 分页 -->
+                                <div class="pagination ue-clear"></div>
+                                <!-- 相关搜索 -->
+
+
+                                <!--结果中搜索-->
+
+                            </div>
+                        </div>
+                    </div>
 
 
 
 
-        </div><!-- End of main -->
-    </div><!--End of bd-->
+                </div><!-- End of main -->
+            </div><!--End of bd-->
 
 
-</div>
+        </div>
+        
 
+        <script type="text/javascript">
+            $(document).ready(function() {
+                //限制字符个数
+                $(".wordControl").each(function() {
+                    var maxwidth = 130;
+                    if ($(this).text().length > maxwidth) {
+                        $(this).text($(this).text().substring(0, maxwidth));
+                        $(this).html($(this).html() + '...');
+                    }
+                });
+            });
+        </script>
+    </body>
 
-
-</body>
-<script th:inline="javascript">
-    var ledocarray=new Array();
-    ledocarray=[[${LegalDocList}]];
-    var i=0;
-    var j=0;
-    $(".title").each(function () {
-
-        $(this).html("<button>"+ledocarray[i].bt+"</button>");
-        i=i+1;
-    });
-    $(".itemBody").each(function () {
-
-        $(this).html(ledocarray[j].byrw);
-        j=j+1;
-    })
-</script>
-<script type="text/javascript">
-    $(document).ready(function() {
-        //限制字符个数
-        $(".wordControl").each(function() {
-            var maxwidth = 130;
-            if ($(this).text().length > maxwidth) {
-                $(this).text($(this).text().substring(0, maxwidth));
-                $(this).html($(this).html() + '...');
-            }
-        });
-    });
-</script>
 </html>

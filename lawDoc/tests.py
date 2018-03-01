@@ -4,4 +4,7 @@ from lawDoc.views import indexSearch, searchByStrcut
 
 # Create your tests here.
 
+from lawDoc.views import indexSearch,searchByStrcut
+
 indexSearch()
+
