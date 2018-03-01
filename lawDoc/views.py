@@ -77,6 +77,23 @@ def searchByStrcut(searchStruct):
 
     query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
 
+
+
+
+    #全域非搜索
+    allFieldNotKeyWord=searchStruct.allNotFieldKeyWord
+    allFieldNotKeyWordQuery=[]
+    allFieldNotKeyWordMiniQuery=[]
+    for i in allFieldNotKeyWord:
+        for j in allSearchField:
+            allFieldNotKeyWordMiniQuery.append({"match_phrase":{j:i}})
+        allFieldNotKeyWordQuery.append({"bool":{"must_not":allFieldNotKeyWordMiniQuery}})
+        allFieldNotKeyWordMiniQuery = []
+    query = {"query": {"bool": {"must": allFieldNotKeyWordQuery}}}
+
+
+
+
     #单领域搜索
     oneFieldKeyWordQuery = []
     oneFieldKeyWordMiniQuery = []
@@ -93,6 +110,7 @@ def searchByStrcut(searchStruct):
         })
         oneFieldKeyWordMiniQuery = []
     query = {"query": {"bool": {"must": oneFieldKeyWordQuery}}}
+
 
     # 同域搜索
 
@@ -182,6 +200,7 @@ def searchByStrcut(searchStruct):
                 "should": orderFieldKeyWordQueryCopy
             }
         }
+
 
     # 单领域否定搜索:输出：oneFieldKeyNotWordQuery
     if len(searchStruct.oneFieldNotKeyWord) != 0:
