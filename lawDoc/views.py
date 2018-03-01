@@ -8,7 +8,7 @@ from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList
 # Create your views here.
 
 # 展示首页,java版本对应路径为“/”
-from lawDoc.models import SearchStruct
+from lawDoc.models import SearchStruct, LegalDocument
 
 
 def index(request):
@@ -17,13 +17,13 @@ def index(request):
 
 # 首页的搜索，java版本对应路径为“indexsearch”
 def indexSearch(request):
-    print("1111111111111111")
     keyWord = request.POST.get('keyword')
     searchStruct = SearchStruct()
     searchStruct.allFieldKeyWord = keyWord.split(" ")
     print(searchStruct.allFieldKeyWord)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
+    return render(request,"searchresult.html",{"LegalDocList":legalDocuments})
 
 
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
@@ -204,5 +204,35 @@ def searchByStrcut(searchStruct):
         body=json.dumps(query))['hits']['hits']
 
     for result in results:
-        lines = result['_source']['byrw'].split("\n")
-        print(lines)
+        legalDoc=LegalDocument()
+        legalDoc.dsrxx= result['_source']['dsrxx']
+        legalDoc.ah = result['_source']['ah']
+        legalDoc.spry = result['_source']['spry']
+        legalDoc.ysfycm = result['_source']['ysfycm']
+        legalDoc.ysqqqk = result['_source']['ysqqqk']
+        legalDoc.byrw = result['_source']['byrw']
+        legalDoc.spjg = result['_source']['spjg']
+        legalDoc.ysdbqk = result['_source']['ysdbqk']
+        legalDoc.esqqqk = result['_source']['esqqqk']
+        legalDoc.ysfyrw = result['_source']['ysfyrw']
+        legalDoc.wslx = result['_source']['wslx']
+        legalDoc.ajms = result['_source']['ajms']
+        legalDoc.xgft = result['_source']['xgft']
+        legalDoc.sprq = result['_source']['sqrq']
+        legalDoc.sljg = result['_source']['sljg']
+        legalDoc.bycm = result['_source']['bycm']
+        legalDoc.sjy = result['_source']['sjy']
+        legalDoc.bt = result['_source']['bt']
+        legalDoc.dy = result['_source']['dy']
+        legalDoc.nf = result['_source']['nf']
+        legalDoc.slcx = result['_source']['slcx']
+        legalDoc.ay = result['_source']['ay']
+        legalDoc.ft = result['_source']['ft']
+        legalDoc.tz = result['_source']['tz']
+        legalDocuments.append(legalDoc)
+    return legalDocuments
+
+
+
+
+
