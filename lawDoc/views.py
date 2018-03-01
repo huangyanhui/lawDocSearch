@@ -20,7 +20,7 @@ def indexSearch(request):
     print("1111111111111111")
     keyWord = request.POST.get('keyword')
     searchStruct = SearchStruct()
-    searchStruct.allFieldKeyWord = keyWord.split(" ")
+    searchStruct.allNotFieldKeyWord = keyWord.split(" ")
     print(searchStruct.allFieldKeyWord)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
@@ -78,7 +78,6 @@ def searchByStrcut(searchStruct):
     query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
 
 
-
     #全域非搜索
     allFieldNotKeyWord=searchStruct.allNotFieldKeyWord
     allFieldNotKeyWordQuery=[]
@@ -88,6 +87,8 @@ def searchByStrcut(searchStruct):
             allFieldNotKeyWordMiniQuery.append({"match_phrase":{j:i}})
         allFieldNotKeyWordQuery.append({"bool":{"must_not":allFieldNotKeyWordMiniQuery}})
         allFieldNotKeyWordMiniQuery = []
+    query = {"query": {"bool": {"must": allFieldNotKeyWordQuery}}}
+
 
 
 
@@ -180,8 +181,7 @@ def searchByStrcut(searchStruct):
             }
         }
 
-    }
-}
+
     # 单领域否定搜索:输出：oneFieldKeyNotWordQuery
     if len(searchStruct.oneFieldNotKeyWord) != 0:
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
