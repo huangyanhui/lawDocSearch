@@ -79,7 +79,6 @@ def searchByStrcut(searchStruct):
 
 
 
-
     #全域非搜索
     allFieldNotKeyWord=searchStruct.allNotFieldKeyWord
     allFieldNotKeyWordQuery=[]
