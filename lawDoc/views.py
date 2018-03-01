@@ -205,6 +205,7 @@ def searchByStrcut(searchStruct):
 
     for result in results:
         legalDoc=LegalDocument()
+        legalDoc.fy=result['_source']['fy']
         legalDoc.dsrxx= result['_source']['dsrxx']
         legalDoc.ah = result['_source']['ah']
         legalDoc.spry = result['_source']['spry']
@@ -218,7 +219,7 @@ def searchByStrcut(searchStruct):
         legalDoc.wslx = result['_source']['wslx']
         legalDoc.ajms = result['_source']['ajms']
         legalDoc.xgft = result['_source']['xgft']
-        legalDoc.sprq = result['_source']['sqrq']
+        legalDoc.sprq = result['_source']['sprq']
         legalDoc.sljg = result['_source']['sljg']
         legalDoc.bycm = result['_source']['bycm']
         legalDoc.sjy = result['_source']['sjy']
@@ -230,6 +231,8 @@ def searchByStrcut(searchStruct):
         legalDoc.ft = result['_source']['ft']
         legalDoc.tz = result['_source']['tz']
         legalDocuments.append(legalDoc)
+        print(legalDoc.fy)
+
     return legalDocuments
 
 

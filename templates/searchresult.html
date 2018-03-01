@@ -1,4 +1,4 @@
-{% load staticfile %}
+{% load static %}
 
 <!doctype html>
 <html lang="zh-Hans">
@@ -219,23 +219,24 @@
                                         <!-- <form th:action="@{/searchresult}" th:with="i=0" method="post"> -->
                                             <div class="resultItem">
                                             <div class="itemHead">
-                                                <input type="hidden" name="id" value="{{ legaldocStat.index }}"/>
+                                                <input type="hidden" name="id"/>
                                                 <button action="/searchresult" target="_blank" class="title">
                                                     <span></span>
+                                                    {{ legaldoc.bt }}
                                                 </button>
                                             </div>
 
                                             <div class="itembottom">
                                                 <div class="row">
-                                                    <div class="col-lg-5" text="{{ legaldoc.ah }}"></div>
-                                                    <div class="col-lg-5" text="{{ legaldoc.fy }}"></div>
-                                                    <div class="col-lg-2" text="{{ legaldoc.nf }}"></div>
+                                                    <div class="col-lg-5">{{ legaldoc.ah }}</div>
+                                                    <div class="col-lg-5">{{ legaldoc.fy }}</div>
+                                                    <div class="col-lg-2">{{ legaldoc.nf }}</div>
                                                 </div>
                                             </div>
 
                                             <hr style="border:0;border-top:1px dashed #9FB6CD">
 
-                                            <div class="itemBody wordControl" text="{{ legaldoc.byrw }}"></div>
+                                            <div class="itemBody wordControl"> {{ legaldoc.byrw }}</div>
 
                                             <div class="itemFoot"></div>
 
@@ -264,34 +265,20 @@
 
 
         </div>
+        
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+                //限制字符个数
+                $(".wordControl").each(function() {
+                    var maxwidth = 130;
+                    if ($(this).text().length > maxwidth) {
+                        $(this).text($(this).text().substring(0, maxwidth));
+                        $(this).html($(this).html() + '...');
+                    }
+                });
+            });
+        </script>
     </body>
 
-    <script th:inline="javascript">
-     var ledocarray=new Array();
-     ledocarray=[[${LegalDocList}]];
-     var i=0;
-     var j=0;
-     $(".title").each(function () {
-
-         $(this).html("<button>"+ledocarray[i].bt+"</button>");
-         i=i+1;
-     });
-     $(".itemBody").each(function () {
-
-         $(this).html(ledocarray[j].byrw);
-         j=j+1;
-     })
-    </script>
-    <script type="text/javascript">
-     $(document).ready(function() {
-         //限制字符个数
-         $(".wordControl").each(function() {
-             var maxwidth = 130;
-             if ($(this).text().length > maxwidth) {
-                 $(this).text($(this).text().substring(0, maxwidth));
-                 $(this).html($(this).html() + '...');
-             }
-         });
-     });
-    </script>
 </html>
