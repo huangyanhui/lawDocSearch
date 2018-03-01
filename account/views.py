@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import make_password, check_password
 from .models import User
 
 import re
@@ -20,15 +21,24 @@ def login(request):
             username = request.POST['username']
             password = request.POST['password']
             # 用户名和密码验证
-            filter_result = User.objects.filter(
-                username=username, password=password)
+            filter_result = User.objects.filter(username=username)
+            # 用户存在
             if len(filter_result) > 0:
-                request.session['allowed_count'] = filter_result[
-                    0].allowed_count
-                return render(request, 'account/status.html', {
-                    'operation': 'login',
-                    'status': 'True'
-                })
+                # 密码匹配
+                if check_password(password, filter_result[0].password):
+                    request.session['allowed_count'] = filter_result[
+                        0].allowed_count
+                    return render(request, 'account/status.html', {
+                        'operation': 'login',
+                        'status': 'True'
+                    })
+                # 密码不匹配
+                else:
+                    return render(request, 'account/status.html', {
+                        'operation': 'login',
+                        'status': 'Wrong password'
+                    })
+            # 用户不存在
             else:
                 return render(request, 'account/status.html', {
                     'operation': 'login',
@@ -59,7 +69,8 @@ def register(request):
         # 未登录
         if 'allowed_count' not in request.session:
             username = request.POST['username']
-            password = request.POST['password']
+            password = make_password(request.POST['password'])
+            print(password)
             email = request.POST['email']
             # 默认查询次数
             allowed_count = 5
