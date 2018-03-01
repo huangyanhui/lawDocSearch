@@ -82,9 +82,9 @@ def searchByStrcut(searchStruct):
     query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
 
     #单领域搜索
-    oneFieldKeyWord = searchStruct.oneFieldKeyWord["keyword"]
+    oneFieldKeyWord = searchStruct.oneFieldKeyWord
     oneFieldKeyWordQuery = []
-    field = allSearchFieldList.get(searchStruct.oneFieldKeyWord["field"])
+    field = allSearchFieldList.get(searchStruct.oneFieldKeyWord)
     for i in oneFieldKeyWord:
         oneFieldKeyWordQuery.append({"match_phrase": {field: i}})
           
@@ -177,8 +177,8 @@ def searchByStrcut(searchStruct):
             }
         }
 
-    }
-}
+
+
     # 单领域否定搜索:输出：oneFieldKeyNotWordQuery
     if len(searchStruct.oneFieldNotKeyWord) != 0:
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
