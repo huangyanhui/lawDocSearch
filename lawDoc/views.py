@@ -20,7 +20,7 @@ def indexSearch(request):
     print("1111111111111111")
     keyWord = request.POST.get('keyword')
     searchStruct = SearchStruct()
-    searchStruct.allNotFieldKeyWord = keyWord.split(" ")
+    searchStruct.allFieldKeyWord = keyWord.split(" ")
     print(searchStruct.allFieldKeyWord)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
