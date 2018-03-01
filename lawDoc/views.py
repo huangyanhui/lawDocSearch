@@ -177,8 +177,6 @@ def searchByStrcut(searchStruct):
             }
         }
 
-    }
-}
     # 单领域否定搜索:输出：oneFieldKeyNotWordQuery
     if len(searchStruct.oneFieldNotKeyWord) != 0:
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
