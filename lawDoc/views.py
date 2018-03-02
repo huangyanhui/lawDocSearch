@@ -81,7 +81,7 @@ def searchByStrcut(searchStruct):
 
 
     #全域非搜索
-    allFieldNotKeyWord=searchStruct.allNotFieldKeyWord
+    allFieldNotKeyWord=searchStruct.allFieldNotKeyWord
     allFieldNotKeyWordQuery=[]
     allFieldNotKeyWordMiniQuery=[]
     for i in allFieldNotKeyWord:
