@@ -5,6 +5,8 @@ from django.http import HttpResponse
 from elasticsearch import Elasticsearch
 from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList
 
+from django.views.decorators.csrf import csrf_exempt
+
 # Create your views here.
 
 # 展示首页,java版本对应路径为“/”
@@ -23,7 +25,8 @@ def indexSearch(request):
     print(searchStruct.allFieldKeyWord)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
-    return render(request,"searchresult.html",{"LegalDocList":legalDocuments})
+    return render(request, "searchresult.html",
+                  {"LegalDocList": legalDocuments})
 
 
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
@@ -46,9 +49,17 @@ def groupBySearch(request):
     pass
 
 
+@csrf_exempt
 # 进入详细页面，java版本对应路径为searchresult
 def getDetail(request):
-    pass
+    if request.method == "POST":
+        legalDocuments_pos = int(request.POST["legalDocuments_id"])
+        print(legalDocuments_pos)
+        legalDocument = legalDocuments[legalDocuments_pos]
+        return render(request, "resultDetail.html",
+                      {"legaldoc": legalDocument})
+    else:
+        return render(request, "resultDetail.html")
 
 
 # 进入推荐页面，java版本对应路径为recommondDetail
@@ -77,22 +88,20 @@ def searchByStrcut(searchStruct):
 
     query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
 
-
-
-
     #全域非搜索
-    allFieldNotKeyWord=searchStruct.allFieldNotKeyWord
-    allFieldNotKeyWordQuery=[]
-    allFieldNotKeyWordMiniQuery=[]
+    allFieldNotKeyWord = searchStruct.allFieldNotKeyWord
+    allFieldNotKeyWordQuery = []
+    allFieldNotKeyWordMiniQuery = []
     for i in allFieldNotKeyWord:
         for j in allSearchField:
-            allFieldNotKeyWordMiniQuery.append({"match_phrase":{j:i}})
-        allFieldNotKeyWordQuery.append({"bool":{"must_not":allFieldNotKeyWordMiniQuery}})
+            allFieldNotKeyWordMiniQuery.append({"match_phrase": {j: i}})
+        allFieldNotKeyWordQuery.append({
+            "bool": {
+                "must_not": allFieldNotKeyWordMiniQuery
+            }
+        })
         allFieldNotKeyWordMiniQuery = []
     query = {"query": {"bool": {"must": allFieldNotKeyWordQuery}}}
-
-
-
 
     #单领域搜索
     oneFieldKeyWordQuery = []
@@ -110,7 +119,6 @@ def searchByStrcut(searchStruct):
         })
         oneFieldKeyWordMiniQuery = []
     query = {"query": {"bool": {"must": oneFieldKeyWordQuery}}}
-
 
     # 同域搜索
 
@@ -201,7 +209,6 @@ def searchByStrcut(searchStruct):
             }
         }
 
-
     # 单领域否定搜索:输出：oneFieldKeyNotWordQuery
     if len(searchStruct.oneFieldNotKeyWord) != 0:
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
@@ -223,9 +230,9 @@ def searchByStrcut(searchStruct):
         body=json.dumps(query))['hits']['hits']
 
     for result in results:
-        legalDoc=LegalDocument()
-        legalDoc.fy=result['_source']['fy']
-        legalDoc.dsrxx= result['_source']['dsrxx']
+        legalDoc = LegalDocument()
+        legalDoc.fy = result['_source']['fy']
+        legalDoc.dsrxx = result['_source']['dsrxx']
         legalDoc.ah = result['_source']['ah']
         legalDoc.spry = result['_source']['spry']
         legalDoc.ysfycm = result['_source']['ysfycm']
@@ -253,8 +260,3 @@ def searchByStrcut(searchStruct):
         print(legalDoc.fy)
 
     return legalDocuments
-
-
-
-
-
