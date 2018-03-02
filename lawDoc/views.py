@@ -55,16 +55,11 @@ def getDetail(request):
 def getRecommondDetail(request):
     pass
 
-
-# searchStruct 为搜索结构体，包含搜索搜索条件
-def searchByStrcut(searchStruct):
-    # 连接es
-    es = Elasticsearch()
-    # 取出searchstruct中的allFieldKeyWord
+# 全领域搜索的解决思路是对每个域进行搜索，之间用should连接
+def allFieldSearch(searchStruct):
     allFieldKeyWord = searchStruct.allFieldKeyWord
     allFieldKeyWordQuery = []
     allFieldKeyWordMiniQuery = []
-    # 全领域搜索的解决思路是对每个域进行搜索，之间用should连接
     for i in allFieldKeyWord:
         for j in allSearchField:
             allFieldKeyWordMiniQuery.append({"match_phrase": {j: i}})
@@ -74,31 +69,27 @@ def searchByStrcut(searchStruct):
             }
         })
         allFieldKeyWordMiniQuery = []
+    return allFieldKeyWordQuery
 
-    query = {"query": {"bool": {"must": allFieldKeyWordQuery}}}
-
-
-
-
-    #全域非搜索
-    allFieldNotKeyWord=searchStruct.allFieldNotKeyWord
-    allFieldNotKeyWordQuery=[]
-    allFieldNotKeyWordMiniQuery=[]
+# 全域非搜索
+def allFieldNotSearch(searchStruct):
+    allFieldNotKeyWord = searchStruct.allFieldNotKeyWord
+    allFieldNotKeyWordQuery = []
+    allFieldNotKeyWordMiniQuery = []
     for i in allFieldNotKeyWord:
         for j in allSearchField:
-            allFieldNotKeyWordMiniQuery.append({"match_phrase":{j:i}})
-        allFieldNotKeyWordQuery.append({"bool":{"must_not":allFieldNotKeyWordMiniQuery}})
+            allFieldNotKeyWordMiniQuery.append({"match_phrase": {j: i}})
+        allFieldNotKeyWordQuery.append({"bool": {"must_not": allFieldNotKeyWordMiniQuery}})
         allFieldNotKeyWordMiniQuery = []
-    query = {"query": {"bool": {"must": allFieldNotKeyWordQuery}}}
 
+    return allFieldNotKeyWordQuery
 
-
-
-    #单领域搜索
+#单领域搜索
+def oneFieldSearch(searchStruct):
     oneFieldKeyWordQuery = []
     oneFieldKeyWordMiniQuery = []
     oneFieldKeyWord = searchStruct.oneFieldKeyWord
-    #oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
+    # oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
     fieldSet = oneFieldKeyWord.keys()
     for field in fieldSet:
         for keyWord in oneFieldKeyWord[field]:
@@ -109,11 +100,10 @@ def searchByStrcut(searchStruct):
             }
         })
         oneFieldKeyWordMiniQuery = []
-    query = {"query": {"bool": {"must": oneFieldKeyWordQuery}}}
+    return oneFieldKeyWordQuery
 
-
-    # 同域搜索
-
+# 同域搜索
+def fieldSearch(searchStruct):
     # 变量：
     #     fieldKeyWord: 获取 searchStruct 中的 FieldKeyWord 列表
     #     fieldKeyWordQuery: 同域搜索 json 列表（对应 json 层: bool -> should）
@@ -143,9 +133,10 @@ def searchByStrcut(searchStruct):
         # fieldKeyWordQueryCopy: 对 fieldKeyWordQuery 深复制
         fieldKeyWordQueryCopy = fieldKeyWordQuery[:]
         fieldKeyWordQuery = {"bool": {"should": fieldKeyWordQueryCopy}}
+    return fieldKeyWordQuery
 
-    # 顺序搜索
-
+# 顺序搜索
+def orderFieldSearch(searchStruct):
     # 变量：
     #     orderFieldKeyWord: 获取 searchStruct 中的 OrderFieldKey
     #     orderFieldKeyWordQuery: 顺序搜索 json 列表（对应 json 层: bool -> should）
@@ -201,14 +192,17 @@ def searchByStrcut(searchStruct):
             }
         }
 
+    return orderFieldKeyWordQuery
 
-    # 单领域否定搜索:输出：oneFieldKeyNotWordQuery
+# 单领域否定搜索:输出：oneFieldKeyNotWordQuery
+def oneFieldNotSearch(searchStruct):
+    oneFieldKeyNotWordQuery = []
     if len(searchStruct.oneFieldNotKeyWord) != 0:
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
         oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord
         field = allSearchFieldList[oneFieldNotKeyWord["field"]]
         oneFieldKeyNotWordMiniQuery = []
-        oneFieldKeyNotWordQuery = []
+
         for i in oneFieldNotKeyWord["notkeywords"]:
             oneFieldKeyNotWordMiniQuery.append({"match_phrase": {field: i}})
         oneFieldKeyNotWordQuery = {
@@ -216,6 +210,27 @@ def searchByStrcut(searchStruct):
                 "must_not": oneFieldKeyNotWordMiniQuery
             }
         }
+    return oneFieldKeyNotWordQuery
+
+
+
+# searchStruct 为搜索结构体，包含搜索搜索条件
+def searchByStrcut(searchStruct):
+    # 连接es
+    es = Elasticsearch()
+    # 取出searchstruct中的allFieldKeyWord
+    allFieldKeyWordQuery=allFieldSearch(searchStruct)
+    allFieldNotKeyWordQuery=allFieldNotSearch(searchStruct)
+    oneFieldKeyWordQuery=oneFieldSearch(searchStruct)
+    fieldKeyWordQuery=fieldSearch(searchStruct)
+    orderFieldKeyWordQuery=orderFieldSearch(searchStruct)
+    oneFieldKeyNotWordQuery=oneFieldNotSearch(searchStruct)
+
+
+
+
+    query = {"query": {"bool": {"must": [allFieldKeyWordQuery,allFieldNotKeyWordQuery,oneFieldKeyWordQuery,fieldKeyWordQuery,orderFieldKeyWordQuery,oneFieldKeyNotWordQuery]}}}
+
 
     print(json.dumps(query))
     results = es.search(
