@@ -94,8 +94,8 @@
                                                 <li class="parent_li nextli">
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="fycj" value="{{ fayuancj.field }}" text="{{ fayuancj.field }}" onclick="searchgroupby(this)"></button>
-                                                        <span class="unit" text="{{ fayuancj.count }}"></span>
+                                                        <button class="name" name="fycj" value="{{ fayuancj.field }}" onclick="searchgroupby(this)">{{ fayuancj.field }}</button>
+                                                        <span class="unit">{{ fayuancj.count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -113,8 +113,8 @@
                                                 <li class="parent_li nextli" >
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="wslx" value="{{ wslx.field }}" text="{{ wslx.field }}" onclick="searchgroupby(this)"></button>
-                                                        <span class="unit" text="${wslx.count}"></span>
+                                                        <button class="name" name="wslx" value="{{ wslx.field }}" onclick="searchgroupby(this)">{{ wslx.field }}</button>
+                                                        <span class="unit">{{ wslx.count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -132,8 +132,8 @@
                                                 <li class="parent_li nextli" >
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="nf" value="{{ nf.field }}" text="{{ nf.field }}" onclick="searchgroupby(this)"></button>
-                                                        <span class="unit" text="{{ nf.count }}"></span>
+                                                        <button class="name" name="nf" value="{{ nf.field }}" onclick="searchgroupby(this)">{{ nf.field }}</button>
+                                                        <span class="unit">{{ nf.count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -151,8 +151,8 @@
                                                 <li class="parent_li nextli" >
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="ay" value="{{ ay.field }}" text="{{ ay.field }}" onclick="searchgroupby(this)"></button>
-                                                        <span class="unit" text="{{ ay.count }}"></span>
+                                                        <button class="name" name="ay" value="{{ ay.field }}" onclick="searchgroupby(this)">{{ ay.field }}</button>
+                                                        <span class="unit">{{ ay.count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -170,8 +170,8 @@
                                                 <li class="parent_li nextli">
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="dy" value="{{ dy.field }}" text="{{ dy.field }}" onclick="searchgroupby(this)"></button>
-                                                        <span class="unit" text="{{ dy.count }}"></span>
+                                                        <button class="name" name="dy" value="{{ dy.field }}" onclick="searchgroupby(this)">{{ dy.field }}</button>
+                                                        <span class="unit">{{ dy.count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -189,8 +189,8 @@
                                                 <li class="parent_li nextli" >
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="slcx" value="{{ slcx.field }}" text="{{ slcx.field }}" onclick="searchgroupby(this)"></button>
-                                                        <span class="unit" text="{{ slcx.count }}"></span>
+                                                        <button class="name" name="slcx" value="{{ slcx.field }}" onclick="searchgroupby(this)">{{ slcx.field }}</button>
+                                                        <span class="unit">{{ slcx.count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -206,21 +206,23 @@
                             <div class="resultArea">
                                 <p class="resultTotal">
                                     <span class="info">找到约&nbsp;
-                                        <span class="totalResult" text="{{ resultcount }}"></span>
+                                        <span class="totalResult"> {{ resultcount }}</span>
                                         &nbsp;条结果
                                     </span>
                                     <span class="orderOpt">
                                     </span>
                                 </p>
 
-                                {% for legaldoc in LegalDocList %}
                                 <div class="searchitem resultList">
-                                    <form action="/searchresult" method="post">
+                                    {% for legaldoc in LegalDocList %}
+                                    <form action="searchresult" method="post">
+                                        
+                                    {% csrf_token %}
                                         <!-- <form th:action="@{/searchresult}" th:with="i=0" method="post"> -->
-                                            <div class="resultItem">
+                                        <div class="resultItem">
                                             <div class="itemHead">
-                                                <input type="hidden" name="id"/>
-                                                <button action="/searchresult" target="_blank" class="title">
+                                                <input type="hidden" name="legalDocuments_id" value="{{ forloop.counter0 }}" />
+                                                <button target="_blank" class="title" action="searchresult">
                                                     <span></span>
                                                     {{ legaldoc.bt }}
                                                 </button>
@@ -242,8 +244,8 @@
 
                                         </div>
                                     </form>
+                                    {% endfor %}
                                 </div>
-                                {% endfor %}
                                 <!--加载更多按钮-->
                                 <button id="getmore" type="button" class="morebtn"onclick="sendpageid()"><i class="fa fa-chevron-down"></i>&nbsp;加载更多</button>
                                 <!-- 分页 -->
@@ -278,7 +280,8 @@
                     }
                 });
             });
-        </script>
+
+         <!-- </script> -->
     </body>
 
 </html>
