@@ -3,7 +3,7 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from elasticsearch import Elasticsearch
-from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList
+from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList, countResults
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -22,11 +22,10 @@ def indexSearch(request):
     keyWord = request.POST.get('keyword')
     searchStruct = SearchStruct()
     searchStruct.allFieldKeyWord = keyWord.split(" ")
-    print(searchStruct.allFieldKeyWord)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
     return render(request, "searchresult.html",
-                  {"LegalDocList": legalDocuments})
+                  {"LegalDocList": legalDocuments,"countResults":countResults})
 
 
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
@@ -255,13 +254,62 @@ def searchByStrcut(searchStruct):
                     orderFieldKeyWordQuery, oneFieldKeyNotWordQuery
                 ]
             }
+        },
+        "aggs": {
+            "fycj": {
+                "terms": {
+                    "field": "fycj"
+                }
+            },
+            "wslx":{
+                "terms": {
+                    "field": "wslx"
+                }
+            },
+            "nf":{
+                "terms": {
+                    "field": "nf"
+                }
+
+            },
+            "ay":{
+                "terms": {
+                    "field": "ay"
+                }
+
+            },
+            "dy":{
+                "terms": {
+                    "field": "dy"
+                }
+
+            },
+            "slcx":{
+                "terms": {
+                    "field": "slcx"
+                }
+
+            }
+
         }
     }
 
     print(json.dumps(query))
-    results = es.search(
+
+    searchResults=es.search(
         index='legal_index', doc_type='lagelDocument',
-        body=json.dumps(query))['hits']['hits']
+        body=json.dumps(query))
+
+    results = searchResults['hits']['hits']
+    countResults['dy']=searchResults['aggregations']['dy']['buckets']
+    countResults['nf'] = searchResults['aggregations']['nf']['buckets']
+    countResults['ay'] = searchResults['aggregations']['ay']['buckets']
+    countResults['fycj'] = searchResults['aggregations']['fycj']['buckets']
+    countResults['slcx'] = searchResults['aggregations']['slcx']['buckets']
+    countResults['wslx'] = searchResults['aggregations']['wslx']['buckets']
+
+
+
 
     for result in results:
         legalDoc = LegalDocument()
@@ -290,7 +338,8 @@ def searchByStrcut(searchStruct):
         legalDoc.ay = result['_source']['ay']
         legalDoc.ft = result['_source']['ft']
         legalDoc.tz = result['_source']['tz']
+        legalDoc.fycj=result['_source']['fycj']
         legalDocuments.append(legalDoc)
-        print(legalDoc.fy)
+    print(results)
 
-    return legalDocuments
+    return legalDocuments,countResults

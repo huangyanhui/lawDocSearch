@@ -90,12 +90,12 @@
                                                 <i class="fa fa-sitemap "></i>&nbsp;法院层级
                                             </span>
                                             <ul>
-                                                {% for fayuancj in fayuancengji %}
+                                                {% for fayuancj in countResults.fycj %}
                                                 <li class="parent_li nextli">
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="fycj" value="{{ fayuancj.field }}" onclick="searchgroupby(this)">{{ fayuancj.field }}</button>
-                                                        <span class="unit">{{ fayuancj.count }}</span>
+                                                        <button class="name" name="fycj" value="{{ fayuancj.key }}" onclick="searchgroupby(this)">{{ fayuancj.key }}</button>
+                                                        <span class="unit">{{ fayuancj.doc_count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -109,12 +109,12 @@
                                                 <i class=" fa fa-clipboard "></i>&nbsp;文书性质
                                             </span>
                                             <ul>
-                                                {% for wslx in wenshuleixing %}
+                                                {% for wslx in countResults.wslx %}
                                                 <li class="parent_li nextli" >
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="wslx" value="{{ wslx.field }}" onclick="searchgroupby(this)">{{ wslx.field }}</button>
-                                                        <span class="unit">{{ wslx.count }}</span>
+                                                        <button class="name" name="wslx" value="{{ wslx.key }}" onclick="searchgroupby(this)">{{ wslx.key }}</button>
+                                                        <span class="unit">{{ wslx.doc_count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -128,12 +128,12 @@
                                                 <i class=" fa fa-calendar "></i>&nbsp;文书年份
                                             </span>
                                             <ul>
-                                                {% for nf in nianfen %}
+                                                {% for nf in countResults.nf %}
                                                 <li class="parent_li nextli" >
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="nf" value="{{ nf.field }}" onclick="searchgroupby(this)">{{ nf.field }}</button>
-                                                        <span class="unit">{{ nf.count }}</span>
+                                                        <button class="name" name="nf" value="{{ nf.key }}" onclick="searchgroupby(this)">{{ nf.key }}</button>
+                                                        <span class="unit">{{ nf.odc_count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -147,12 +147,12 @@
                                                 <i class=" fa fa-list-alt "></i>&nbsp;案由
                                             </span>
                                             <ul>
-                                                {% for ay in anyou %}
+                                                {% for ay in countResults.ay %}
                                                 <li class="parent_li nextli" >
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="ay" value="{{ ay.field }}" onclick="searchgroupby(this)">{{ ay.field }}</button>
-                                                        <span class="unit">{{ ay.count }}</span>
+                                                        <button class="name" name="ay" value="{{ ay.key }}" onclick="searchgroupby(this)">{{ ay.key }}</button>
+                                                        <span class="unit">{{ ay.doc_count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -166,12 +166,12 @@
                                                 <i class="fa fa-university album-hide "></i>&nbsp;地域
                                             </span>
                                             <ul>
-                                                {% for dy in diyu %}
+                                                {% for dy in countResults.dy %}
                                                 <li class="parent_li nextli">
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="dy" value="{{ dy.field }}" onclick="searchgroupby(this)">{{ dy.field }}</button>
-                                                        <span class="unit">{{ dy.count }}</span>
+                                                        <button class="name" name="dy" value="{{ dy.key }}" onclick="searchgroupby(this)">{{ dy.key }}</button>
+                                                        <span class="unit">{{ dy.doc_count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -185,12 +185,12 @@
                                                 <i class="fa fa-legal "></i>&nbsp;审理程序
                                             </span>
                                             <ul>
-                                                {% for slcx in shenlichengxu %}
+                                                {% for slcx in countResults.slcx %}
                                                 <li class="parent_li nextli" >
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
-                                                        <button class="name" name="slcx" value="{{ slcx.field }}" onclick="searchgroupby(this)">{{ slcx.field }}</button>
-                                                        <span class="unit">{{ slcx.count }}</span>
+                                                        <button class="name" name="slcx" value="{{ slcx.key }}" onclick="searchgroupby(this)">{{ slcx.key }}</button>
+                                                        <span class="unit">{{ slcx.doc_count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -206,7 +206,7 @@
                             <div class="resultArea">
                                 <p class="resultTotal">
                                     <span class="info">找到约&nbsp;
-                                        <span class="totalResult"> {{ resultcount }}</span>
+                                        <span class="totalResult"> {{ resultCount }}</span>
                                         &nbsp;条结果
                                     </span>
                                     <span class="orderOpt">
