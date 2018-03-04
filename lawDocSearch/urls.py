@@ -21,12 +21,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 
-from lawDoc.views import index, indexSearch, getDetail
+from lawDoc.views import index, indexSearch, getDetail, groupBySearch
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', index, name="index"),
     url(r'^indexsearch$', indexSearch),
     url(r'^searchresult$', getDetail, name="getDetail"),
+    url(r'^addsearchandterm$', groupBySearch),
     path('account/', include('account.urls')),
 ]

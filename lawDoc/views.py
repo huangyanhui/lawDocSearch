@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 # 展示首页,java版本对应路径为“/”
 from lawDoc.models import SearchStruct, LegalDocument
 
-
+searchStruct = SearchStruct()
 def index(request):
     return render(request, 'index.html')
 
@@ -20,7 +20,6 @@ def index(request):
 # 首页的搜索，java版本对应路径为“indexsearch”
 def indexSearch(request):
     keyWord = request.POST.get('keyword')
-    searchStruct = SearchStruct()
     searchStruct.allFieldKeyWord = keyWord.split(" ")
     legalDocuments.clear()
     searchByStrcut(searchStruct)
@@ -45,7 +44,19 @@ def getMore(request):
 
 # 聚类搜索，java版本对应路径为addsearchandterm
 def groupBySearch(request):
-    pass
+    countResults.clear()
+    username = request.POST.get('name')
+    keyword = username.split('@')[0].split(' ')
+    if '@' in username:
+        field = username.split('@')[1]
+    else:
+        field = "all"
+    if field == "all":
+        searchStruct.allFieldKeyWord = keyword
+    else:
+        searchStruct.oneFieldKeyWord.update({field:keyword})
+    searchByStrcut(searchStruct)
+    return render(request, "searchresult.html", {"LegalDoczList":legalDocuments, "countResults":countResults})
 
 
 @csrf_exempt
@@ -105,19 +116,20 @@ def allFieldNotSearch(searchStruct):
 def oneFieldSearch(searchStruct):
     oneFieldKeyWordQuery = []
     oneFieldKeyWordMiniQuery = []
-    oneFieldKeyWord = searchStruct.oneFieldKeyWord
-    # oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
-    fieldSet = oneFieldKeyWord.keys()
-    for field in fieldSet:
-        for keyWord in oneFieldKeyWord[field]:
-            oneFieldKeyWordMiniQuery.append({"match_phrase": {field: keyWord}})
-        oneFieldKeyWordQuery.append({
-            "bool": {
-                "must": oneFieldKeyWordMiniQuery
-            }
-        })
-        oneFieldKeyWordMiniQuery = []
-    return oneFieldKeyWordQuery
+    if len(searchStruct.oneFieldKeyWord) != 0:
+        oneFieldKeyWord = searchStruct.oneFieldKeyWord
+        # oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
+        fieldSet = oneFieldKeyWord.keys()
+        for field in fieldSet:
+            for keyWord in oneFieldKeyWord[field]:
+                oneFieldKeyWordMiniQuery.append({"match_phrase": {field: keyWord}})
+            oneFieldKeyWordQuery.append({
+                "bool": {
+                    "must": oneFieldKeyWordMiniQuery
+                }
+            })
+            oneFieldKeyWordMiniQuery = []
+        return oneFieldKeyWordQuery
 
 
 # 同域搜索
