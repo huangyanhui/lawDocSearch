@@ -1,8 +1,11 @@
 import json
 
+import time
 from django.shortcuts import render
 from django.http import HttpResponse
 from elasticsearch import Elasticsearch
+import pdfkit
+
 from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList, countResults
 
 from django.views.decorators.csrf import csrf_exempt
@@ -56,9 +59,58 @@ def getDetail(request):
         print(legalDocuments_pos)
         legalDocument = legalDocuments[legalDocuments_pos]
         return render(request, "resultDetail.html",
-                      {"legaldoc": legalDocument})
+                      {"legaldoc": legalDocument,
+                       "legalDocuments_id": legalDocuments_pos})
     else:
         return render(request, "resultDetail.html")
+
+
+@csrf_exempt
+def download(request):
+    if request.method == "POST":
+        print("abcabc" + request.POST["legalDocuments_id"])
+        legalDocuments_pos = int(request.POST["legalDocuments_id"])
+        print("abc" + str(legalDocuments_pos))
+        legalDocument = legalDocuments[legalDocuments_pos]
+    # 临时文件名
+    curr_date = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    css = r'static\css\showDetail.css'
+    options = {
+        'page-size': 'Letter',
+        'margin-top': '0.75in',
+        'margin-right': '0.75in',
+        'margin-bottom': '0.75in',
+        'margin-left': '0.75in',
+        'encoding': "UTF-8",
+        'no-outline': None
+    }
+    path_wk = r'C:\Users\jeafi\Desktop\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
+    config = pdfkit.configuration(wkhtmltopdf=path_wk)
+    # 读文件并且替换动态内容
+    fp = open("pdf.html", 'w', encoding='utf-8')  # 打开你要写得文件test2.txt
+    lines = open('demo.html', 'r', encoding='utf-8').readlines()  # 打开文件，读入每一行
+    for s in lines:
+        fp.write(s.replace("标题", legalDocument.bt)
+                 .replace('diyu', legalDocument.dy)
+                .replace('anhao',legalDocument.ah)
+                 .replace('dangshirenxingxi', legalDocument.dsrxx)
+                 .replace('anjianmiaoshu', legalDocument.ajms)
+                 .replace('shenlijingguo', legalDocument.sljg)
+                 .replace('yishenqingqiuqingkuang', legalDocument.ysqqqk)
+                 .replace('yishendabianqingkuang', legalDocument.ysdbqk)
+                 .replace('yishenfayuanchaming', legalDocument.ysfycm)
+                 .replace('yishenfayuanrenwei', legalDocument.ysfyrw)
+                 .replace('ershenqingqiuqingkuang', legalDocument.esqqqk)
+                 .replace('benyuanchaming', legalDocument.bycm)
+                 .replace('benyuanrenwei', legalDocument.byrw)
+                 .replace('shenpanjieguo', legalDocument.spjg)
+                 .replace('shenpanrenyuan', legalDocument.spry)
+                 .replace('shenpanriqi', legalDocument.sprq)
+                 .replace('shujiyuan', legalDocument.sjy)
+                 .replace('xiangguanfatiao', legalDocument.xgft))  # replace是替换，write是写入
+    fp.close()  # 关闭文件
+
+    pdfkit.from_file('pdf.html', options=options, css=css, output_path='out%s.pdf' % (curr_date), configuration=config)
 
 
 # 进入推荐页面，java版本对应路径为recommondDetail
