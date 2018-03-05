@@ -41,7 +41,7 @@ def addSearch(request):
 def getMore(request):
     pass
 
-
+@csrf_exempt
 # 聚类搜索，java版本对应路径为addsearchandterm
 def groupBySearch(request):
     countResults.clear()
@@ -56,7 +56,7 @@ def groupBySearch(request):
     else:
         searchStruct.oneFieldKeyWord.update({field:keyword})
     searchByStrcut(searchStruct)
-    return render(request, "searchresult.html", {"LegalDoczList":legalDocuments, "countResults":countResults})
+    return render(request, "searchresult.html", {"LegalDocList":legalDocuments, "countResults":countResults})
 
 
 @csrf_exempt

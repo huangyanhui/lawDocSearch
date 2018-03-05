@@ -28,6 +28,6 @@ urlpatterns = [
     url(r'^$', index, name="index"),
     url(r'^indexsearch$', indexSearch),
     url(r'^searchresult$', getDetail, name="getDetail"),
-    url(r'^addsearchandterm$', groupBySearch),
+    url(r'^addsearchandterm$', groupBySearch, name="addsearchandterm"),
     path('account/', include('account.urls')),
 ]
