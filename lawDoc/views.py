@@ -1,8 +1,16 @@
 import json
 
+import time
+
+import os
 from django.shortcuts import render
+
+from django.http import HttpResponse, FileResponse, StreamingHttpResponse
+
 from elasticsearch import Elasticsearch
-from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList
+import pdfkit
+
+from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList, countResults
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -27,11 +35,10 @@ def indexSearch(request):
     keyWord = request.POST.get('keyword')
     searchStruct = SearchStruct()
     searchStruct.allFieldKeyWord = keyWord.split(" ")
-    print(searchStruct.allFieldKeyWord)
     legalDocuments.clear()
     searchByStrcut(searchStruct)
     return render(request, "searchresult.html",
-                  {"LegalDocList": legalDocuments})
+                  {"LegalDocList": legalDocuments,"countResults":countResults})
 
 
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
@@ -62,9 +69,73 @@ def getDetail(request):
         print(legalDocuments_pos)
         legalDocument = legalDocuments[legalDocuments_pos]
         return render(request, "resultDetail.html",
-                      {"legaldoc": legalDocument})
+                      {"legaldoc": legalDocument,
+                       "legalDocuments_id": legalDocuments_pos})
     else:
         return render(request, "resultDetail.html")
+
+
+def readFile(filename,chunk_size=512):
+    with open(filename,'rb') as f:
+        while True:
+            c=f.read(chunk_size)
+            if c:
+                yield c
+            else:
+                break
+
+@csrf_exempt
+def download(request):
+    if request.method == "POST":
+        print("abcabc" + request.POST["legalDocuments_id"])
+        legalDocuments_pos = int(request.POST["legalDocuments_id"])
+        print("abc" + str(legalDocuments_pos))
+        legalDocument = legalDocuments[legalDocuments_pos]
+    # 临时文件名
+    curr_date = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    css = r'static\css\showDetail.css'
+    options = {
+        'page-size': 'Letter',
+        'margin-top': '0.75in',
+        'margin-right': '0.75in',
+        'margin-bottom': '0.75in',
+        'margin-left': '0.75in',
+        'encoding': "UTF-8",
+        'no-outline': None
+    }
+    path_wk = r'C:\Users\jeafi\Desktop\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
+    config = pdfkit.configuration(wkhtmltopdf=path_wk)
+    # 读文件并且替换动态内容
+    fp = open("pdf.html", 'w', encoding='utf-8')  # 打开你要写得文件test2.txt
+    lines = open('demo.html', 'r', encoding='utf-8').readlines()  # 打开文件，读入每一行
+    for s in lines:
+        fp.write(s.replace("标题", legalDocument.bt)
+                 .replace('diyu', legalDocument.dy)
+                .replace('anhao',legalDocument.ah)
+                 .replace('dangshirenxingxi', legalDocument.dsrxx)
+                 .replace('anjianmiaoshu', legalDocument.ajms)
+                 .replace('shenlijingguo', legalDocument.sljg)
+                 .replace('yishenqingqiuqingkuang', legalDocument.ysqqqk)
+                 .replace('yishendabianqingkuang', legalDocument.ysdbqk)
+                 .replace('yishenfayuanchaming', legalDocument.ysfycm)
+                 .replace('yishenfayuanrenwei', legalDocument.ysfyrw)
+                 .replace('ershenqingqiuqingkuang', legalDocument.esqqqk)
+                 .replace('benyuanchaming', legalDocument.bycm)
+                 .replace('benyuanrenwei', legalDocument.byrw)
+                 .replace('shenpanjieguo', legalDocument.spjg)
+                 .replace('shenpanrenyuan', legalDocument.spry)
+                 .replace('shenpanriqi', legalDocument.sprq)
+                 .replace('shujiyuan', legalDocument.sjy)
+                 .replace('xiangguanfatiao', legalDocument.xgft))  # replace是替换，write是写入
+    fp.close()  # 关闭文件
+    outpath = 'out%s.pdf' % (curr_date)
+    pdfkit.from_file('pdf.html', options=options, css=css, output_path=outpath, configuration=config)
+    # 文件下载
+    file =open( '%s'%(outpath),'rb')
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="%s"'%(outpath)
+    return response
 
 
 # 进入推荐页面，java版本对应路径为recommondDetail
@@ -260,13 +331,62 @@ def searchByStrcut(searchStruct):
                     orderFieldKeyWordQuery, oneFieldKeyNotWordQuery
                 ]
             }
+        },
+        "aggs": {
+            "fycj": {
+                "terms": {
+                    "field": "fycj"
+                }
+            },
+            "wslx":{
+                "terms": {
+                    "field": "wslx"
+                }
+            },
+            "nf":{
+                "terms": {
+                    "field": "nf"
+                }
+
+            },
+            "ay":{
+                "terms": {
+                    "field": "ay"
+                }
+
+            },
+            "dy":{
+                "terms": {
+                    "field": "dy"
+                }
+
+            },
+            "slcx":{
+                "terms": {
+                    "field": "slcx"
+                }
+
+            }
+
         }
     }
 
     print(json.dumps(query))
-    results = es.search(
+
+    searchResults=es.search(
         index='legal_index', doc_type='lagelDocument',
-        body=json.dumps(query))['hits']['hits']
+        body=json.dumps(query))
+
+    results = searchResults['hits']['hits']
+    countResults['dy']=searchResults['aggregations']['dy']['buckets']
+    countResults['nf'] = searchResults['aggregations']['nf']['buckets']
+    countResults['ay'] = searchResults['aggregations']['ay']['buckets']
+    countResults['fycj'] = searchResults['aggregations']['fycj']['buckets']
+    countResults['slcx'] = searchResults['aggregations']['slcx']['buckets']
+    countResults['wslx'] = searchResults['aggregations']['wslx']['buckets']
+
+
+
 
     for result in results:
         legalDoc = LegalDocument()
@@ -295,7 +415,8 @@ def searchByStrcut(searchStruct):
         legalDoc.ay = result['_source']['ay']
         legalDoc.ft = result['_source']['ft']
         legalDoc.tz = result['_source']['tz']
+        legalDoc.fycj=result['_source']['fycj']
         legalDocuments.append(legalDoc)
-        print(legalDoc.fy)
+    print(results)
 
-    return legalDocuments
+    return legalDocuments,countResults
