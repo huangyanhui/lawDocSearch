@@ -36,14 +36,7 @@
 
 
 
-                        <form action="/indexsearch" method="post">
-                            <!--搜索框-->
-                            <input type="text" name="keyword" id="searchBox" class="form-control jufa-main-search"  autoFocus maxlength="255" autocomplete="off"  placeholder="在此填入搜索关键词">
-                            <!--<ul class="drop-option" id="searchTipsObj" style="display: none;"></ul>-->
-                            <!--搜索按钮-->
-                            <span class="input-group-btn">
-                        <button class="btn main-btn-lg jufa-main-search-46px" id="searchbtn" action="/indexsearch"><span class="fa fa-search"></span></button>
-                    </span>
+
 
                 <form action="/indexsearch" method="post">
                     {% csrf_token %}
@@ -63,22 +56,16 @@
                                         <span class="input-group-btn">
                                             <button class="btn main-btn-lg jufa-main-search-46px" id="searchbtn" action="/indexsearch"><span class="fa fa-search"></span></button>
                                         </span>
-
-
                                     </form>
-
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!--<input  name="name" style="display:inline" type="text"  class="search-field" autoFocus />
-                     <button  id="searchbtn" class="searchbtn" style="display:inline" th:action="@{/indexsearch}">搜索</button>-->
-            </form>
-            <ul id="searchResults" class="term-list hidden"></ul>
-        </div>
+                </form>
+                <ul id="searchResults" class="term-list hidden"></ul>
+            </div>
         <br><br><br>
+        </div>
         <div class="container projects">
             <div class="row">
                 <div class="col-sm-12 col-md-6 col-lg-4 ">
