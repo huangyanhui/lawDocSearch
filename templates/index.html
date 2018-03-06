@@ -35,6 +35,16 @@
                 <div class="main-index-logo-left"></div><span style="font-size:18px; color:white">一键查询你想要的法律案例</span><div class="main-index-logo-right"></div>
 
 
+
+                        <form action="/indexsearch" method="post">
+                            <!--搜索框-->
+                            <input type="text" name="keyword" id="searchBox" class="form-control jufa-main-search"  autoFocus maxlength="255" autocomplete="off"  placeholder="在此填入搜索关键词">
+                            <!--<ul class="drop-option" id="searchTipsObj" style="display: none;"></ul>-->
+                            <!--搜索按钮-->
+                            <span class="input-group-btn">
+                        <button class="btn main-btn-lg jufa-main-search-46px" id="searchbtn" action="/indexsearch"><span class="fa fa-search"></span></button>
+                    </span>
+
                 <form action="/indexsearch" method="post">
                     {% csrf_token %}
                     <div class="jufa-container" align="center">
@@ -42,6 +52,7 @@
                             <!-- 案例搜索 -->
                             <div class="tab-pane active" id="activity">
                                 <div class="main-input-group" align="center">
+
 
                                     <form action="/indexsearch" method="post">
                                         {% csrf_token %}
