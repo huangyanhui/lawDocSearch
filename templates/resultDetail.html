@@ -9,16 +9,16 @@
         <script type="text/javascript" src="{% static '/js/sendjs.js' %}"></script>
     </head>
     <body>
-
-        <!-- <div class="row">
-             <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-             hello world
-             </div>
-             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-             hello world
-             </div>
-
-             </div>-->
+    <!--下载按钮-->
+    {% csrf_token %}
+     <div class="detail-main" id="content">
+    <form style="float:right;width:20%;margin-right:10%" action="download" method="post">
+        <input type="hidden" name="legalDocuments_id" value="{{legalDocuments_id }}" />
+        <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
+        <button class="detail-download"  >&nbsp;下载  </button>
+            </div>
+    </form>
+     </div>
 
         <div class="detail-main" id="content">
             <div style="float:right;width:20%;margin-right:10%">
