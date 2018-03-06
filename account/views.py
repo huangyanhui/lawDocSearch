@@ -5,17 +5,16 @@ from django.contrib.auth.hashers import make_password, check_password
 from .models import User
 
 import re
+import json
 
 
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
+        response = {'operation': 'login'}
         # 已经登录
         if 'allowed_count' in request.session:
-            return render(request, 'account/status.html', {
-                'operation': 'login',
-                'status': 'logined'
-            })
+            response['status'] = 'logined'
         # 未登录
         else:
             username = request.POST['username']
@@ -26,24 +25,20 @@ def login(request):
             if len(filter_result) > 0:
                 # 密码匹配
                 if check_password(password, filter_result[0].password):
-                    request.session['allowed_count'] = filter_result[
-                        0].allowed_count
-                    return render(request, 'account/status.html', {
-                        'operation': 'login',
-                        'status': 'True'
-                    })
+                    allowed_count = filter_result[0].allowed_count
+                    request.session['allowed_count'] = allowed_count
+                    request.session['username'] = username
+                    # response
+                    response['status'] = 'success'
+                    response['username'] = username
+                    response['allowed_count'] = allowed_count
                 # 密码不匹配
                 else:
-                    return render(request, 'account/status.html', {
-                        'operation': 'login',
-                        'status': 'Wrong password'
-                    })
+                    response['status'] = 'wrong password'
             # 用户不存在
             else:
-                return render(request, 'account/status.html', {
-                    'operation': 'login',
-                    'status': 'False'
-                })
+                response['status'] = 'user did not existed'
+        return HttpResponse(json.dumps(response, ensure_ascii=False))
     # 跳转到登录页面
     else:
         return render(request, 'account/login.html')
@@ -53,6 +48,7 @@ def logout(request):
     # 已经登录
     if 'allowed_count' in request.session:
         del request.session['allowed_count']
+        del request.session['username']
         # 跳转到主页面
         return render(request, 'index.html')
     # 未登录

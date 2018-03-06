@@ -33,6 +33,53 @@ body {
     font-weight: 400;
     color: white;
 }*/
+header {
+    width: 100%;
+    height: 60px;
+    background: #3A5EC9;
+}
+header nav {
+    height: 60px;
+    display: inline-block;
+    vertical-align: middle;
+    float: right;
+    margin-right: 30px;
+}
+header nav ul {
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+    box-sizing: border-box;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+header nav ul li {
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 20px;
+}
+header nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    text-decoration-color: #fff;
+}
+header nav ul li a:hover {
+    color: #fff;
+    text-decoration: none;
+    text-decoration-color: #fff;
+}
+header nav ul li span {
+    color: #fff;
+}
+header nav ul li span.glyphicon {
+    margin-right: 5px;
+}
+
+
 .main-index-logo {
     width:100%;
     padding: 45px 0 40px;
@@ -49,10 +96,16 @@ body {
 
 }
 .bg-main {
-    background: #FAFBFC;
-    background: url(../img/firstback.jpg)  no-repeat;
-    height: 500px;
+    height: 600px;
+    background: #3A5EC9;
 }
+
+.main-index-logo {
+    background: url(../img/firstback.jpg) no-repeat fixed;
+    background-size: contain;
+    height: 530px;
+}
+
 .main-index-logo-left, .main-index-logo-right {
     width: 65px;
     display: inline-block;

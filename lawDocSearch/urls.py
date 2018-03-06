@@ -23,6 +23,9 @@ from django.views.generic import RedirectView
 
 from lawDoc.views import index, indexSearch, getDetail, groupBySearch, getMore
 
+from lawDoc.views import index, indexSearch, getDetail, download, groupBySearch
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', index, name="index"),
@@ -30,5 +33,8 @@ urlpatterns = [
     url(r'^searchresult$', getDetail, name="getDetail"),
     url(r'^addsearchandterm$', groupBySearch, name="addsearchandterm"),
     url(r'^getmore$',getMore, name="getmore"),
+
+    url(r'^download$', download, name="download"),
+
     path('account/', include('account.urls')),
 ]
