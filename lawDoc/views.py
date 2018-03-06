@@ -1,8 +1,10 @@
 import json
 
 import time
+
+import os
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 from elasticsearch import Elasticsearch
 import pdfkit
 
@@ -65,6 +67,15 @@ def getDetail(request):
         return render(request, "resultDetail.html")
 
 
+def readFile(filename,chunk_size=512):
+    with open(filename,'rb') as f:
+        while True:
+            c=f.read(chunk_size)
+            if c:
+                yield c
+            else:
+                break
+
 @csrf_exempt
 def download(request):
     if request.method == "POST":
@@ -109,8 +120,14 @@ def download(request):
                  .replace('shujiyuan', legalDocument.sjy)
                  .replace('xiangguanfatiao', legalDocument.xgft))  # replace是替换，write是写入
     fp.close()  # 关闭文件
-
-    pdfkit.from_file('pdf.html', options=options, css=css, output_path='out%s.pdf' % (curr_date), configuration=config)
+    outpath = 'out%s.pdf' % (curr_date)
+    pdfkit.from_file('pdf.html', options=options, css=css, output_path=outpath, configuration=config)
+    # 文件下载
+    file =open( '%s'%(outpath),'rb')
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="%s"'%(outpath)
+    return response
 
 
 # 进入推荐页面，java版本对应路径为recommondDetail
