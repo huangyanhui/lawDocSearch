@@ -4,7 +4,9 @@ import time
 
 import os
 from django.shortcuts import render
+
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
+
 from elasticsearch import Elasticsearch
 import pdfkit
 
@@ -19,6 +21,12 @@ from lawDoc.models import SearchStruct, LegalDocument
 
 
 def index(request):
+    if 'allowed_count' in request.session:
+        return render(
+            request, 'index.html', {
+                'username': request.session['username'],
+                'allowed_count': request.session['allowed_count']
+            })
     return render(request, 'index.html')
 
 

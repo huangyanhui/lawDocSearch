@@ -1,101 +1,115 @@
 {% load static %}
-<!DOCTYPE html>
-<link href="http://cdn.bootcss.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-<link href="{% static 'css/bootstrap.css' %}" rel="stylesheet" type="text/css" />
-<link href="{% static 'css/index.css' %}" rel="stylesheet" type="text/css" />
-<link href="{% static 'css/bootstrap.css/bootstrap.min.css' %}" rel="stylesheet" type="text/css" />
-<link href="{% static 'css/bootstrap-theme.css' %}" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="{% static 'js/jquery-3.2.1.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+<!doctype html>
 <html lang="en">
-<meta>
-<meta charset="UTF-8"/>
-<title>文书案例网</title>
-</head>
-<body >
-  <div class="bg-main">
-    <!--<h1 class="title">Intelligent Law</h1>-->
+    <head>
+        <meta charset="UTF-8"/>
+        <title>文书案例网</title>
+        <link href="http://cdn.bootcss.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+        <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'css/index.css' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'css/bootstrap.css/bootstrap.min.css' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'css/bootstrap-theme.css' %}" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="{% static 'js/jquery-3.2.1.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+    </head>
 
-      <div class="main-index-logo">
-          <p class="main-index-logo-title">Intelligent Law</p>
-          <div class="main-index-logo-left"></div><span style="font-size:18px; color:white">一键查询你想要的法律案例</span><div class="main-index-logo-right"></div>
-      </div>
+    <body>
+        <header>
+            <nav>
+                <ul>
+                    {% if allowed_count %}
+                    <li><a href="#"><span class="glyphicon glyphicon-user"></span>{{ username }}</a></li>
+                    <li><a href="/account/logout"><span class="glyphicon glyphicon-log-out"></span>登出</a></li>
+                    {% else %}
+                    <li><a href="/account/register"><span class="glyphicon glyphicon-user"></span>注册</a></li>
+                    <li><a href="/account/login"><span class="glyphicon glyphicon-log-in"></span>登录</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </header>
+
+        <div class="bg-main">
+            <!--<h1 class="title">Intelligent Law</h1>-->
+            <div class="main-index-logo">
+                <p class="main-index-logo-title">Intelligent Law</p>
+                <div class="main-index-logo-left"></div><span style="font-size:18px; color:white">一键查询你想要的法律案例</span><div class="main-index-logo-right"></div>
 
 
-    <form action="/indexsearch" method="post">
-        {% csrf_token %}
-        <div class="jufa-container" align="center">
-            <div class="tab-content">
-                <!-- 案例搜索 -->
-                <div class="tab-pane active" id="activity">
-                    <div class="main-input-group" align="center">
+                <form action="/indexsearch" method="post">
+                    {% csrf_token %}
+                    <div class="jufa-container" align="center">
+                        <div class="tab-content">
+                            <!-- 案例搜索 -->
+                            <div class="tab-pane active" id="activity">
+                                <div class="main-input-group" align="center">
 
-                        <form action="/indexsearch" method="post">
-                            {% csrf_token %}
-                            <!--搜索框-->
-                            <input type="text" name="keyword" id="searchBox" class="form-control jufa-main-search"  autoFocus maxlength="255" autocomplete="off"  placeholder="在此填入搜索关键词">
-                            <!--<ul class="drop-option" id="searchTipsObj" style="display: none;"></ul>-->
-                            <!--搜索按钮-->
-                            <span class="input-group-btn">
-                        <button class="btn main-btn-lg jufa-main-search-46px" id="searchbtn" action="/indexsearch"><span class="fa fa-search"></span></button>
-                    </span>
+                                    <form action="/indexsearch" method="post">
+                                        {% csrf_token %}
+                                        <!--搜索框-->
+                                        <input type="text" name="keyword" id="searchBox" class="form-control jufa-main-search"  autoFocus maxlength="255" autocomplete="off"  placeholder="在此填入搜索关键词">
+                                        <!--<ul class="drop-option" id="searchTipsObj" style="display: none;"></ul>-->
+                                        <!--搜索按钮-->
+                                        <span class="input-group-btn">
+                                            <button class="btn main-btn-lg jufa-main-search-46px" id="searchbtn" action="/indexsearch"><span class="fa fa-search"></span></button>
+                                        </span>
 
 
-                        </form>
+                                    </form>
 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--<input  name="name" style="display:inline" type="text"  class="search-field" autoFocus />
+                     <button  id="searchbtn" class="searchbtn" style="display:inline" th:action="@{/indexsearch}">搜索</button>-->
+            </form>
+            <ul id="searchResults" class="term-list hidden"></ul>
+        </div>
+        <br><br><br>
+        <div class="container projects">
+            <div class="row">
+                <div class="col-sm-12 col-md-6 col-lg-4 ">
+                    <div class="thumbnail">
+                        <img class="lazy" src="{% static 'img/pic1.jpg' %}" style="width:400px; height:300px" alt="食材">
+                        <div class="caption">
+                            <h3 style="color:#436EEE">
+                                更丰富的法律案例资源<br>
+                            </h3>
+                            <p>本系统搜集了上百万的法律案例，覆盖范围十分广泛。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-4 ">
+                    <div class="thumbnail">
+                        <img class="lazy" src="{% static 'img/pic2.png' %}" style="width:400px; height:300px" alt="大闸蟹">
+                        <div class="caption">
+
+                            <h3 style="color:#436EEE">
+                                更便捷的搜索体验<br>
+                            </h3>
+                            <p>
+                                只需在搜索框内填入你想搜素的关键词，系统便能立即呈现给你想要的结果。
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-4 ">
+                    <div class="thumbnail">
+                        <img class="lazy" src="{% static 'img/pic3.jpg' %}"  style="width:400px; height:300px" alt="龙虾">
+                        <div class="caption">
+                            <h3 style="color:#436EEE">
+                                更精准的搜索结果<br>
+                            </h3>
+                            <p>本系统引入了先进的搜索算法，能够快速精准地按照关键词搜索出结果</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!--<input  name="name" style="display:inline" type="text"  class="search-field" autoFocus />
-        <button  id="searchbtn" class="searchbtn" style="display:inline" th:action="@{/indexsearch}">搜索</button>-->
-    </form>
-    <ul id="searchResults" class="term-list hidden"></ul>
-  </div>
-  <br><br><br>
-  <div class="container projects">
-      <div class="row">
-          <div class="col-sm-12 col-md-6 col-lg-4 ">
-              <div class="thumbnail">
-                  <img class="lazy" src="{% static 'img/pic1.jpg' %}" style="width:400px; height:300px" alt="食材">
-                  <div class="caption">
-                      <h3 style="color:#436EEE">
-                          更丰富的法律案例资源<br>
-                      </h3>
-                      <p>本系统搜集了上百万的法律案例，覆盖范围十分广泛。
-                      </p>
-                  </div>
-              </div>
-          </div>
-          <div class="col-sm-12 col-md-6 col-lg-4 ">
-              <div class="thumbnail">
-                  <img class="lazy" src="{% static 'img/pic2.png' %}" style="width:400px; height:300px" alt="大闸蟹">
-                  <div class="caption">
-
-                      <h3 style="color:#436EEE">
-                          更便捷的搜索体验<br>
-                      </h3>
-                      <p>
-                          只需在搜索框内填入你想搜素的关键词，系统便能立即呈现给你想要的结果。
-                      </p>
-
-                  </div>
-              </div>
-          </div>
-          <div class="col-sm-12 col-md-6 col-lg-4 ">
-              <div class="thumbnail">
-                  <img class="lazy" src="{% static 'img/pic3.jpg' %}"  style="width:400px; height:300px" alt="龙虾">
-                  <div class="caption">
-                      <h3 style="color:#436EEE">
-                          更精准的搜索结果<br>
-                      </h3>
-                      <p>本系统引入了先进的搜索算法，能够快速精准地按照关键词搜索出结果</p>
-                  </div>
-              </div>
-          </div>
-      </div>
-  </div>
-
-</body>
+    </body>
 </html>
