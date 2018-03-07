@@ -3,16 +3,17 @@ import json
 import time
 
 import os
+
 from django.shortcuts import render
 
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 
 from elasticsearch import Elasticsearch
-import pdfkit
 
 from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList, countResults
 
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
 
@@ -29,30 +30,94 @@ def index(request):
             })
     return render(request, 'index.html')
 
+#搜索结构体的构造
+def buildSearchStruct(queryString):
+    keyword = queryString.split('@')[0]
+    if '@' in queryString:
+        field = allSearchFieldList[queryString.split('@')[1]]
+    else:
+        field = 'all'
+    if '!' in keyword:
+        if keyword.split('!')[0] != '':
+            keywords = keyword.split('!')[0].split(' ')
+            notkeywords = keyword.split('!')[1].split(' ')
+            if field == 'all':
+                searchStruct.allFieldKeyWord = keywords
+                searchStruct.allFieldNotKeyWord = notkeywords
+            else:
+                searchStruct.oneFieldKeyWord = {field:keywords}
+                searchStruct.oneFieldNotKeyWord = {field:notkeywords}
+        else:
+            notkeywords = keyword.split('!')[1].split(' ')
+            if field == 'all':
+                searchStruct.allFieldNotKeyWord = notkeywords
+            else:
+                searchStruct.oneFieldNotKeyWord = notkeywords
+    elif '~' in keyword:
+        keywords = keyword.replace('~', ' ').split(' ')
+        searchStruct.FieldKeyWord = keywords
+    elif '>' in keyword:
+        keywords = keyword.replace('>', ' ').split(' ')
+        searchStruct.OrderFieldKey = keywords
+    else:
+        keywords = keyword.split(' ')
+        if field == 'all':
+            searchStruct.allFieldKeyWord = keywords
+        else:
+            searchStruct.oneFieldKeyWord = {field:keywords}
+    return searchStruct
+
+
 
 # 首页的搜索，java版本对应路径为“indexsearch”
 def indexSearch(request):
     keyWord = request.POST.get('keyword')
-    searchStruct.allFieldKeyWord = keyWord.split(" ")
+    searchStruct = buildSearchStruct(keyWord)
+    #searchStruct.allFieldKeyWord = keyWord.split(" ")
     legalDocuments.clear()
     searchByStrcut(searchStruct)
+    length = 10 if len(legalDocuments)>10 else len(legalDocuments)
     return render(request, "searchresult.html",
-                  {"LegalDocList": legalDocuments,"countResults":countResults})
+                {"LegalDocList": legalDocuments[0:length:],"countResults":countResults, "resultCount":len(legalDocuments)})
 
-
+@csrf_exempt
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
 def newSearch(request):
-    pass
+    countResults = {}
+    keyWord = request.POST.get('name')
+    searchStruct = buildSearchStruct(keyWord)
+    legalDocuments.clear()
+    searchByStrcut(searchStruct)
+    length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    return render(request, "searchresult.html",
+                 {"LegalDocList": legalDocuments[0:length:], "countResults": countResults,"resultCount": len(legalDocuments)})
 
 
+@csrf_exempt
 # 搜索结果页的结果内搜索，java版本对应路径为“addsearch”
 def addSearch(request):
-    pass
+    queryString = request.POST.get('name')
+    countResults.clear()
+    legalDocuments.clear()
+    searchStruct = buildSearchStruct(queryString)
+    searchByStrcut(searchStruct)
+    length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    return render(request, "searchresult.html",
+                 {"LegalDocList": legalDocuments[0:length:], "countResults": countResults,"resultCount": len(legalDocuments)})
 
-
+@csrf_exempt
 # 加载更多，java版本对应路径为getMore
 def getMore(request):
-    pass
+    pageId = request.POST.get('name')
+    paginator = Paginator(legalDocuments, 10)
+    try:
+        files = paginator.page(pageId)
+    except PageNotAnInteger:
+        files = paginator.page(1)
+    except EmptyPage:
+        files = paginator.page(paginator.num_pages)
+    return render(request, "searchresult.html",
+                  {"LegalDocList": files, "countResults": countResults, "resultCount": len(legalDocuments)})
 
 @csrf_exempt
 # 聚类搜索，java版本对应路径为addsearchandterm
@@ -238,7 +303,7 @@ def fieldSearch(searchStruct):
 
         # json 封装打包
         # fieldKeyWordQueryCopy: 对 fieldKeyWordQuery 深复制
-        fieldKeyWordQueryCopy = fieldKeyWordQuery[:]
+        fieldKeyWordQueryCopy = fieldKeyWordQuery
         fieldKeyWordQuery = {"bool": {"should": fieldKeyWordQueryCopy}}
     return fieldKeyWordQuery
 
@@ -335,6 +400,7 @@ def searchByStrcut(searchStruct):
     oneFieldKeyNotWordQuery = oneFieldNotSearch(searchStruct)
 
     query = {
+        "size":12,
         "query": {
             "bool": {
                 "must": [

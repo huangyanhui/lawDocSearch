@@ -21,8 +21,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 
-
-from lawDoc.views import index, indexSearch, getDetail, download, groupBySearch
+from lawDoc.views import index, indexSearch, getDetail, download, groupBySearch, addSearch, getMore, newSearch
 
 
 urlpatterns = [
@@ -30,10 +29,10 @@ urlpatterns = [
     url(r'^$', index, name="index"),
     url(r'^indexsearch$', indexSearch),
     url(r'^searchresult$', getDetail, name="getDetail"),
-
     url(r'^addsearchandterm$', groupBySearch, name="addsearchandterm"),
-
+    url(r'^getmore$',getMore, name="getmore"),
+    url(r'^addsearch$', addSearch, name="addSearch"),
     url(r'^download$', download, name="download"),
-
+    url(r'^newsearch$', newSearch, name="newSearch"),
     path('account/', include('account.urls')),
 ]
