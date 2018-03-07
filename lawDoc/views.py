@@ -265,7 +265,7 @@ def searchByStrcut(searchStruct):
 
     print(json.dumps(query))
     results = es.search(
-        index='legal_index', doc_type='lagelDocument',
+        index='legal_index', doc_type='legalDocument',
         body=json.dumps(query))['hits']['hits']
 
     for result in results:
