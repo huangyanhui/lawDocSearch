@@ -75,11 +75,9 @@ def register(request):
             # 邮箱不合法
             if not validate_email(email):
                 response['status'] = 'Email invalidate'
-                return HttpResponse(json.dumps(response, ensure_ascii=False))
             # 用户名重复
             elif len(filter_result) != 0:
                 response['status'] = 'Username exists.'
-                return HttpResponse(json.dumps(response, ensure_ascii=False))
             else:
                 new_user = User.objects.create(
                     username=username,
@@ -88,10 +86,9 @@ def register(request):
                     allowed_count=allowed_count)
                 new_user.save()
                 response['status'] = 'Success'
-                return HttpResponse(json.dumps(response, ensure_ascii=False))
         else:
             response['status'] = 'You are LOGINED.'
-            return HttpResponse(json.dumps(response, ensure_ascii=False))
+        return HttpResponse(json.dumps(response, ensure_ascii=False))
     else:
         return render(request, 'account/register.html')
 
