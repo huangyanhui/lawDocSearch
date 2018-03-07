@@ -3,12 +3,12 @@ import json
 import time
 
 import os
+
 from django.shortcuts import render
 
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 
 from elasticsearch import Elasticsearch
-import pdfkit
 
 from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList, countResults
 
@@ -78,17 +78,32 @@ def indexSearch(request):
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments)>10 else len(legalDocuments)
     return render(request, "searchresult.html",
-                  {"LegalDocList": legalDocuments[0:length:],"countResults":countResults, "resultCount":len(legalDocuments)})
+                {"LegalDocList": legalDocuments[0:length:],"countResults":countResults, "resultCount":len(legalDocuments)})
 
-
+@csrf_exempt
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
 def newSearch(request):
-    pass
+    countResults = {}
+    keyWord = request.POST.get('name')
+    searchStruct = buildSearchStruct(keyWord)
+    legalDocuments.clear()
+    searchByStrcut(searchStruct)
+    length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    return render(request, "searchresult.html",
+                 {"LegalDocList": legalDocuments[0:length:], "countResults": countResults,"resultCount": len(legalDocuments)})
 
 
+@csrf_exempt
 # 搜索结果页的结果内搜索，java版本对应路径为“addsearch”
 def addSearch(request):
-    pass
+    queryString = request.POST.get('name')
+    countResults.clear()
+    legalDocuments.clear()
+    searchStruct = buildSearchStruct(queryString)
+    searchByStrcut(searchStruct)
+    length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    return render(request, "searchresult.html",
+                 {"LegalDocList": legalDocuments[0:length:], "countResults": countResults,"resultCount": len(legalDocuments)})
 
 @csrf_exempt
 # 加载更多，java版本对应路径为getMore
@@ -207,12 +222,12 @@ def getRecommondDetail(request):
 # 全领域搜索的解决思路是对每个域进行搜索，之间用should连接
 def allFieldSearch(searchStruct):
     allFieldKeyWord = searchStruct.allFieldKeyWord
-    allFieldKeyWordQuery = {}
-    allFieldKeyWordMiniQuery = {}
+    allFieldKeyWordQuery = []
+    allFieldKeyWordMiniQuery = []
     for i in allFieldKeyWord:
         for j in allSearchField:
-            allFieldKeyWordMiniQuery.update({"match_phrase": {j: i}})
-        allFieldKeyWordQuery.update({
+            allFieldKeyWordMiniQuery.append({"match_phrase": {j: i}})
+        allFieldKeyWordQuery.append({
             "bool": {
                 "should": allFieldKeyWordMiniQuery
             }
@@ -224,38 +239,38 @@ def allFieldSearch(searchStruct):
 # 全域非搜索
 def allFieldNotSearch(searchStruct):
     allFieldNotKeyWord = searchStruct.allFieldNotKeyWord
-    allFieldNotKeyWordQuery = {}
-    allFieldNotKeyWordMiniQuery = {}
+    allFieldNotKeyWordQuery = []
+    allFieldNotKeyWordMiniQuery = []
     for i in allFieldNotKeyWord:
         for j in allSearchField:
-            allFieldNotKeyWordMiniQuery.update({"match_phrase": {j: i}})
-        allFieldNotKeyWordQuery.update({
+            allFieldNotKeyWordMiniQuery.append({"match_phrase": {j: i}})
+        allFieldNotKeyWordQuery.append({
             "bool": {
                 "must_not": allFieldNotKeyWordMiniQuery
             }
         })
-        allFieldNotKeyWordMiniQuery = {}
+        allFieldNotKeyWordMiniQuery = []
 
     return allFieldNotKeyWordQuery
 
 
 # 单领域搜索
 def oneFieldSearch(searchStruct):
-    oneFieldKeyWordQuery = {}
-    oneFieldKeyWordMiniQuery = {}
+    oneFieldKeyWordQuery = []
+    oneFieldKeyWordMiniQuery = []
     if len(searchStruct.oneFieldKeyWord) != 0:
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
         # oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
         fieldSet = oneFieldKeyWord.keys()
         for field in fieldSet:
             for keyWord in oneFieldKeyWord[field]:
-                oneFieldKeyWordMiniQuery.update({"match_phrase": {field: keyWord}})
-            oneFieldKeyWordQuery.update({
+                oneFieldKeyWordMiniQuery.append({"match_phrase": {field: keyWord}})
+            oneFieldKeyWordQuery.append({
                 "bool": {
                     "must": oneFieldKeyWordMiniQuery
                 }
             })
-            oneFieldKeyWordMiniQuery = {}
+            oneFieldKeyWordMiniQuery = []
         return oneFieldKeyWordQuery
 
 
@@ -271,20 +286,20 @@ def fieldSearch(searchStruct):
     #     fieldKeyWordQuery: 同域搜索 json 列表 （对应 json 层: bool -> should）
 
     fieldKeyWord = searchStruct.FieldKeyWord
-    fieldKeyWordQuery = {}
+    fieldKeyWordQuery = []
     # 如果 fieldKeyWord 列表不为空
     if len(fieldKeyWord) > 0:
 
         # 依次添加每个域
         for field in allSearchField:
-            fieldKeyWordMiniQuery = {}
+            fieldKeyWordMiniQuery = []
 
             # 把每个关键字都加入域中
             for key in fieldKeyWord:
-                fieldKeyWordMiniQuery.update({"match_phrase": {field: key}})
+                fieldKeyWordMiniQuery.append({"match_phrase": {field: key}})
 
             # 把已经处理好的域进行 json 封装打包
-            fieldKeyWordQuery.update({"bool": {"must": fieldKeyWordMiniQuery}})
+            fieldKeyWordQuery.append({"bool": {"must": fieldKeyWordMiniQuery}})
 
         # json 封装打包
         # fieldKeyWordQueryCopy: 对 fieldKeyWordQuery 深复制
@@ -306,18 +321,18 @@ def orderFieldSearch(searchStruct):
     #     orderFieldKeyWordQuery: 顺序搜索 json 列表（对应 json 层: bool -> should）
 
     orderFieldKeyWord = searchStruct.OrderFieldKey
-    orderFieldKeyWordQuery = {}
+    orderFieldKeyWordQuery = []
     # 如果 orderFieldKeyWord 列表不为空
     if len(orderFieldKeyWord) > 0:
 
         # 依次添加每个域
         for field in allSearchField:
-            orderFieldKeyWordMiniQuery = {}
+            orderFieldKeyWordMiniQuery = []
             wildcard_str = ''
 
             # 把每个关键字加入域中
             for key in orderFieldKeyWord:
-                orderFieldKeyWordMiniQuery.update({
+                orderFieldKeyWordMiniQuery.append({
                     "match_phrase": {
                         field: key
                     }
@@ -328,14 +343,14 @@ def orderFieldSearch(searchStruct):
             # 在正则表达式最后加入 '*'
             wildcard_str += '*'
             # 把正则表达式放入 "wildcard" 层中
-            orderFieldKeyWordMiniQuery.update({
+            orderFieldKeyWordMiniQuery.append({
                 "wildcard": {
                     field + 'copy': wildcard_str
                 }
             })
 
             # 把已经处理好的域进行 json 封装打包
-            orderFieldKeyWordQuery.update({
+            orderFieldKeyWordQuery.append({
                 "bool": {
                     "must": orderFieldKeyWordMiniQuery
                 }
@@ -355,15 +370,15 @@ def orderFieldSearch(searchStruct):
 
 # 单领域否定搜索:输出：oneFieldKeyNotWordQuery
 def oneFieldNotSearch(searchStruct):
-    oneFieldKeyNotWordQuery = {}
+    oneFieldKeyNotWordQuery = []
     if len(searchStruct.oneFieldNotKeyWord) != 0:
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
         oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord
         field = allSearchFieldList[oneFieldNotKeyWord["field"]]
-        oneFieldKeyNotWordMiniQuery = {}
+        oneFieldKeyNotWordMiniQuery = []
 
         for i in oneFieldNotKeyWord["notkeywords"]:
-            oneFieldKeyNotWordMiniQuery.update({"match_phrase": {field: i}})
+            oneFieldKeyNotWordMiniQuery.append({"match_phrase": {field: i}})
         oneFieldKeyNotWordQuery = {
             "bool": {
                 "must_not": oneFieldKeyNotWordMiniQuery
@@ -385,7 +400,7 @@ def searchByStrcut(searchStruct):
     oneFieldKeyNotWordQuery = oneFieldNotSearch(searchStruct)
 
     query = {
-        "size":102,
+        "size":12,
         "query": {
             "bool": {
                 "must": [
