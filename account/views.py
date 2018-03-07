@@ -63,6 +63,7 @@ def logout(request):
 def register(request):
     if request.method == 'POST':
         # 未登录
+        response = {'operation':'register'}
         if 'allowed_count' not in request.session:
             username = request.POST['username']
             password = make_password(request.POST['password'])
@@ -73,16 +74,12 @@ def register(request):
             filter_result = User.objects.filter(username=username)
             # 邮箱不合法
             if not validate_email(email):
-                return render(request, 'account/status.html', {
-                    'operation': 'register',
-                    'status': 'Email invalidate'
-                })
+                response['status'] = 'Email invalidate'
+                return HttpResponse(json.dumps(response, ensure_ascii=False))
             # 用户名重复
             elif len(filter_result) != 0:
-                return render(request, 'account/status.html', {
-                    'operation': 'register',
-                    'status': 'Username exists.'
-                })
+                response['status'] = 'Username exists.'
+                return HttpResponse(json.dumps(response, ensure_ascii=False))
             else:
                 new_user = User.objects.create(
                     username=username,
@@ -90,15 +87,11 @@ def register(request):
                     email=email,
                     allowed_count=allowed_count)
                 new_user.save()
-                return render(request, 'account/status.html', {
-                    'operation': 'register',
-                    'status': 'Success'
-                })
+                response['status'] = 'Success'
+                return HttpResponse(json.dumps(response, ensure_ascii=False))
         else:
-            return render(request, 'account/status.html', {
-                'operation': 'register',
-                'status': 'You are LOGINED.'
-            })
+            response['status'] = 'You are LOGINED.'
+            return HttpResponse(json.dumps(response, ensure_ascii=False))
     else:
         return render(request, 'account/register.html')
 
