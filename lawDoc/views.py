@@ -117,8 +117,8 @@ def download(request):
     path_wk = r'C:\Users\jeafi\Desktop\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
     config = pdfkit.configuration(wkhtmltopdf=path_wk)
     # 读文件并且替换动态内容
-    fp = open("pdf.html", 'w', encoding='utf-8')  # 打开你要写得文件test2.txt
-    lines = open('demo.html', 'r', encoding='utf-8').readlines()  # 打开文件，读入每一行
+    fp = open(r"static\download\pdf.html", 'w', encoding='utf-8')  # 打开你要写得文件test2.txt
+    lines = open(r'static\download\demo.html', 'r', encoding='utf-8').readlines()  # 打开文件，读入每一行
     for s in lines:
         fp.write(s.replace("标题", legalDocument.bt)
                  .replace('diyu', legalDocument.dy)
@@ -139,10 +139,10 @@ def download(request):
                  .replace('shujiyuan', legalDocument.sjy)
                  .replace('xiangguanfatiao', legalDocument.xgft))  # replace是替换，write是写入
     fp.close()  # 关闭文件
-    outpath = 'out%s.pdf' % (curr_date)
-    pdfkit.from_file('pdf.html', options=options, css=css, output_path=outpath, configuration=config)
+    outpath = r'static\download\out%s.pdf' % (curr_date)
+    pdfkit.from_file(r'static\download\pdf.html', options=options, css=css, output_path=outpath, configuration=config)
     # 文件下载
-    file =open( '%s'%(outpath),'rb')
+    file =open( r'%s'%(outpath),'rb')
     response = FileResponse(file)
     response['Content-Type'] = 'application/octet-stream'
     response['Content-Disposition'] = 'attachment;filename="%s"'%(outpath)
