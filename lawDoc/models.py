@@ -129,5 +129,10 @@ class SearchStruct():
         self._allFieldKeyWord = allFieldKeyWord
 
     def clear(self):
-        pass
+        self.allFieldKeyWord=[]
+        self.oneFieldKeyWord={}
+        self.allFieldNotKeyWord=[]
+        self.oneFieldNotKeyWord={}
+        self.FieldKeyWord=[]
+        self.OrderFieldKey=[]
 
