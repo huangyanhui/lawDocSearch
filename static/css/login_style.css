@@ -91,7 +91,7 @@ body {
 /* Text fields' focus effect */
 .login input[type="text"]:focus,
 .login input[type="password"]:focus,
-.login input[type="email"], {
+.login input[type="email"] {
   border-color: #888;
 }
 

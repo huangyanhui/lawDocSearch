@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
         <link href="{% static 'css/login_style.css' %}" rel='stylesheet' type='text/css' />
+        <script type="text/javascript" src="{% static 'js/jquery-3.2.1.js' %}"></script>
     </head>
     <body>
         <div class="login">
@@ -25,7 +26,7 @@
                 <p><input id="submit" type="submit" value="注册"></p>
             </form>
         </div>
-
+    </body>
         <script>
          function validate() {
              var password = document.getElementById("password").value;
@@ -41,6 +42,80 @@
                  document.getElementById("tips").innerText="两次密码不相同";
              }
          }
+{#         逻辑处理#}
+            var request;
+
+     // Bind to the submit event of our form
+     $(".login-container").submit(function(event){
+
+         // Prevent default posting of form - put here to work in case of errors
+         event.preventDefault();
+
+         // Abort any pending request
+         if (request) {
+             request.abort();
+         }
+         // setup some local variables
+         var $form = $(this);
+
+         // Let's select and cache all the fields
+         var $inputs = $form.find("input, select, button, textarea");
+
+         // Serialize the data in the form
+         var serializedData = $form.serialize();
+
+         // Let's disable the inputs for the duration of the Ajax request.
+         // Note: we disable elements AFTER the form data has been serialized.
+         // Disabled form elements will not be serialized.
+         $inputs.prop("disabled", true);
+
+         // Fire off the request to /form.php
+         request = $.ajax({
+             url: "/account/register",
+             type: "post",
+             data: serializedData,
+         });
+
+         // Callback handler that will be called on success
+         request.done(function (response, textStatus, jqXHR){
+             // Log a message to the console
+             var response_json = JSON.parse(response);
+             var status = response_json.status
+             // if logined
+             if (status === "Email invalidate") {
+                 $("#tips").text("邮箱不合法");
+             // if wrong password
+             } else if (status === "Success") {
+                 $("#tips").text("");
+                 window.location.href = "/";
+             // if user did not existed
+             } else if (status === "You are LOGINED.") {
+                 $("#tips").text("你已经登录！");
+             // success
+             } else if (status === "Username exists.") {
+                 $("#tips").text("用户已存在！");
+
+             }
+
+         });
+
+         // Callback handler that will be called on failure
+         request.fail(function (jqXHR, textStatus, errorThrown){
+             // Log the error to the console
+             console.error(
+                 "The following error occurred: "+
+                 textStatus, errorThrown
+             );
+         });
+
+         // Callback handler that will be called regardless
+         // if the request failed or succeeded
+         request.always(function () {
+             // Reenable the inputs
+             $inputs.prop("disabled", false);
+         });
+
+     });
         </script>
-    </body>
+
 </html>
