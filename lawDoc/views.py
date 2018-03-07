@@ -3,6 +3,7 @@ import json
 import time
 
 import os
+import pdfkit
 
 from django.shortcuts import render
 
@@ -42,29 +43,30 @@ def buildSearchStruct(queryString):
             keywords = keyword.split('!')[0].split(' ')
             notkeywords = keyword.split('!')[1].split(' ')
             if field == 'all':
-                searchStruct.allFieldKeyWord = keywords
-                searchStruct.allFieldNotKeyWord = notkeywords
+                searchStruct.allFieldKeyWord = searchStruct.allFieldKeyWord + keywords
+                searchStruct.allFieldNotKeyWord = searchStruct.allFieldNotKeyWord + notkeywords
             else:
-                searchStruct.oneFieldKeyWord = {field:keywords}
-                searchStruct.oneFieldNotKeyWord = {field:notkeywords}
+                searchStruct.oneFieldKeyWord = searchStruct.allFieldKeyWord.update({field:keywords})
+                searchStruct.oneFieldNotKeyWord = searchStruct.allFieldNotKeyWord.update({field:notkeywords})
         else:
             notkeywords = keyword.split('!')[1].split(' ')
             if field == 'all':
-                searchStruct.allFieldNotKeyWord = notkeywords
+                searchStruct.allFieldNotKeyWord = searchStruct.allFieldNotKeyWord + notkeywords
             else:
-                searchStruct.oneFieldNotKeyWord = notkeywords
+                searchStruct.oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord.update({field:notkeywords})
     elif '~' in keyword:
         keywords = keyword.replace('~', ' ').split(' ')
-        searchStruct.FieldKeyWord = keywords
+        searchStruct.FieldKeyWord = searchStruct.FieldKeyWord + keywords
     elif '>' in keyword:
         keywords = keyword.replace('>', ' ').split(' ')
-        searchStruct.OrderFieldKey = keywords
+        searchStruct.OrderFieldKey = searchStruct.OrderFieldKey + keywords
     else:
         keywords = keyword.split(' ')
         if field == 'all':
-            searchStruct.allFieldKeyWord = keywords
+            searchStruct.allFieldKeyWord = searchStruct.allFieldKeyWord + keywords
+
         else:
-            searchStruct.oneFieldKeyWord = {field:keywords}
+            searchStruct.oneFieldKeyWord = searchStruct.oneFieldKeyWord.update({field:keywords})
     return searchStruct
 
 
@@ -72,6 +74,8 @@ def buildSearchStruct(queryString):
 # 首页的搜索，java版本对应路径为“indexsearch”
 def indexSearch(request):
     keyWord = request.POST.get('keyword')
+    global searchStruct
+    searchStruct.clear()
     searchStruct = buildSearchStruct(keyWord)
     #searchStruct.allFieldKeyWord = keyWord.split(" ")
     legalDocuments.clear()
@@ -84,6 +88,8 @@ def indexSearch(request):
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
 def newSearch(request):
     countResults = {}
+    global searchStruct
+    searchStruct.clear()
     keyWord = request.POST.get('name')
     searchStruct = buildSearchStruct(keyWord)
     legalDocuments.clear()
@@ -233,6 +239,12 @@ def allFieldSearch(searchStruct):
             }
         })
         allFieldKeyWordMiniQuery = []
+    allFieldKeyWordQuery = {
+        "bool":{
+            "must":allFieldKeyWordQuery
+        }
+    }
+    print(allFieldKeyWordQuery)
     return allFieldKeyWordQuery
 
 
@@ -250,7 +262,12 @@ def allFieldNotSearch(searchStruct):
             }
         })
         allFieldNotKeyWordMiniQuery = []
-
+    allFieldNotKeyWordQuery = {
+        "bool":{
+            "must":allFieldNotKeyWordQuery
+        }
+    }
+    print(allFieldNotKeyWordQuery)
     return allFieldNotKeyWordQuery
 
 
@@ -271,7 +288,13 @@ def oneFieldSearch(searchStruct):
                 }
             })
             oneFieldKeyWordMiniQuery = []
-        return oneFieldKeyWordQuery
+    oneFieldKeyWordQuery = {
+        "bool":{
+            "must":oneFieldKeyWordQuery
+        }
+    }
+    print(oneFieldKeyWordQuery)
+    return oneFieldKeyWordQuery
 
 
 # 同域搜索
@@ -305,6 +328,12 @@ def fieldSearch(searchStruct):
         # fieldKeyWordQueryCopy: 对 fieldKeyWordQuery 深复制
         fieldKeyWordQueryCopy = fieldKeyWordQuery
         fieldKeyWordQuery = {"bool": {"should": fieldKeyWordQueryCopy}}
+    fieldKeyWordQuery = {
+        "bool":{
+            "must":fieldKeyWordQuery
+        }
+    }
+    print(fieldKeyWordQuery)
     return fieldKeyWordQuery
 
 
@@ -364,7 +393,12 @@ def orderFieldSearch(searchStruct):
                 "should": orderFieldKeyWordQueryCopy
             }
         }
-
+    orderFieldKeyWordQuery = {
+        "bool":{
+            "must":orderFieldKeyWordQuery
+        }
+    }
+    print(orderFieldKeyWordQuery)
     return orderFieldKeyWordQuery
 
 
@@ -384,6 +418,12 @@ def oneFieldNotSearch(searchStruct):
                 "must_not": oneFieldKeyNotWordMiniQuery
             }
         }
+    oneFieldKeyNotWordQuery = {
+        "bool":{
+            "must":oneFieldKeyNotWordQuery
+        }
+    }
+    print(oneFieldKeyNotWordQuery)
     return oneFieldKeyNotWordQuery
 
 
