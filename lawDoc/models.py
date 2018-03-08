@@ -1,9 +1,8 @@
 from django.db import models
 
 
-# Create your models here.
 class LegalDocument():
-    #构造函数,id,法院，当事人信息，案号，审判人员，一审法院查明
+    # 构造函数,id,法院，当事人信息，案号，审判人员，一审法院查明
     def __init__(self):
         self.id = 0
         self.fy = ""
@@ -60,6 +59,67 @@ class LegalDocument():
         self.ft = ""
         self.tz = ""
 
+    def to_dict(self):
+        '''
+        将 LegalDocument 内的所有内容用字典打包
+        '''
+        return {
+            'id': self.id,
+            'fy': self.fy,
+            'dsrxx': self.dsrxx,
+            'dsrxxcopy': self.dsrxxcopy,
+            'ah': self.ah,
+            'ahcopy': self.ahcopy,
+            'spry': self.spry,
+            'sprycopy': self.sprycopy,
+            'ysfycm': self.ysfycm,
+            'ysfycmcopy': self.ysfycmcopy,
+            'ysfycmcopy2': self.ysfycmcopy2,
+            'ysqqqk': self.ysqqqk,
+            'ysqqqkcopy': self.ysqqqkcopy,
+            'ysqqqkcopy2': self.ysqqqkcopy2,
+            'byrw': self.byrw,
+            'byrwcopy': self.byrwcopy,
+            'byrwcopy2': self.byrwcopy2,
+            'spjg': self.spjg,
+            'spjgcopy': self.spjgcopy,
+            'spjgcopy2': self.spjgcopy2,
+            'ysdbqk': self.ysdbqk,
+            'ysdbqkcopy': self.ysdbqkcopy,
+            'ysdbqkcopy2': self.ysdbqkcopy2,
+            'esqqqk': self.esqqqk,
+            'esqqqkcopy': self.esqqqkcopy,
+            'esqqqkcopy2': self.esqqqkcopy2,
+            'ysfyrw': self.ysfyrw,
+            'ysfyrwcopy': self.ysfyrwcopy,
+            'ysfyrwcopy2': self.ysfyrwcopy2,
+            'wslx': self.wslx,
+            'ajms': self.ajms,
+            'ajmscopy': self.ajmscopy,
+            'ajmscopy2': self.ajmscopy2,
+            'xgft': self.xgft,
+            'xgftcopy': self.xgftcopy,
+            'sprq': self.sprq,
+            'sprqcopy': self.sprqcopy,
+            'sljg': self.sljg,
+            'sljgcopy': self.sljgcopy,
+            'sljgcopy2': self.sljgcopy2,
+            'bycm': self.bycm,
+            'bycmcopy': self.bycmcopy,
+            'bycmcopy2': self.bycmcopy2,
+            'sjy': self.sjy,
+            'sjycopy2': self.sjycopy2,
+            'bt': self.bt,
+            'btcopy': self.btcopy,
+            'fycj': self.fycj,
+            'dy': self.dy,
+            'nf': self.nf,
+            'slcx': self.slcx,
+            'ay': self.ay,
+            'ft': self.ft,
+            'tz': self.tz,
+        }
+
     @property
     def id(self):
         return self._id
@@ -78,7 +138,7 @@ class SearchStruct():
         self.FieldKeyWord = []
         self.OrderFieldKey = []
 
-    #数据格式为列表
+    # 数据格式为列表
     @property
     def allFieldKeyWord(self):
         return self._allFieldKeyWord
@@ -87,7 +147,7 @@ class SearchStruct():
     def allFieldKeyWord(self, allFieldKeyWord):
         self._allFieldKeyWord = allFieldKeyWord
 
-    #数据格式为字典
+    # 数据格式为字典
     @property
     def oneFieldKeyWord(self):
         return self._oneFieldKeyWord

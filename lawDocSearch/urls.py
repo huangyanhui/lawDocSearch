@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^indexsearch$', indexSearch),
     url(r'^searchresult$', getDetail, name="getDetail"),
     path('account/', include('account.urls')),
+    path('upload/', include('upload.urls')),
 ]
