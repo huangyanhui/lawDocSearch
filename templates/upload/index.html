@@ -1,0 +1,92 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-Hans">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>上传</title>
+        <script type="text/javascript" src="{% static 'js/jquery-3.2.1.js' %}"></script>
+        <link href="{% static 'css/upload.css' %}" rel='stylesheet' type='text/css' />
+    </head>
+    <body>
+        <form method="post" class="upload-container">
+            分隔符： <textarea cols="30" id="split-sing-textarea" name="split-sign" rows="1"></textarea>
+            <br/>
+            文书内容：
+            <br/>
+            <textarea cols="100" id="upload-textarea" name="orignal-text" rows="20"></textarea>
+            <br/>
+            <button>确定上传</button>
+        </form>
+            <span id="tips"></span>
+        <script>
+         // https://stackoverflow.com/questions/5004233/jquery-ajax-post-example-with-php
+         // Variable to hold request
+         var request;
+
+         // Bind to the submit event of our form
+         $(".upload-container").submit(function(event){
+
+             // Prevent default posting of form - put here to work in case of errors
+             event.preventDefault();
+
+             // Abort any pending request
+             if (request) {
+                 request.abort();
+             }
+             // setup some local variables
+             var $form = $(this);
+
+             // Let's select and cache all the fields
+             var $inputs = $form.find("input, select, button, textarea");
+
+             // Serialize the data in the form
+             var serializedData = $form.serialize();
+
+             // Let's disable the inputs for the duration of the Ajax request.
+             // Note: we disable elements AFTER the form data has been serialized.
+             // Disabled form elements will not be serialized.
+             $inputs.prop("disabled", true);
+
+             // Fire off the request to /form.php
+             request = $.ajax({
+                 url: "/upload",
+                 type: "post",
+                 data: serializedData,
+             });
+
+             // Callback handler that will be called on success
+             request.done(function (response, textStatus, jqXHR){
+                 // Log a message to the console
+                 var response_json = JSON.parse(response);
+                 var status = response_json.status;
+                 var message = response_json.message;
+                 if (status === "failed") {
+                     if (message == "exists") {
+                         $("#tips").text("该法案已经存在数据库中");
+                     }
+                 else {
+                     $("#tips").text("上传成功, 即将跳转到首页");
+                     window.location.href = "/";
+                 }
+             });
+
+             // Callback handler that will be called on failure
+             request.fail(function (jqXHR, textStatus, errorThrown){
+                 // Log the error to the console
+                 console.error(
+                     "The following error occurred: "+
+                     textStatus, errorThrown
+                 );
+             });
+
+             // Callback handler that will be called regardless
+             // if the request failed or succeeded
+             request.always(function () {
+                 // Reenable the inputs
+                 $inputs.prop("disabled", false);
+             });
+
+         });
+        </script>
+    </body>
+</html>
