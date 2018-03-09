@@ -46,9 +46,24 @@
     font-size:16px;
     padding-top:10px;
     padding-bottom:10px;
-    background-color:white;
+    background-color: white;
     cursor:pointer;
-    color:#333333;
+    color: #fafafa;
+    font-family: '微软雅黑';
+    text-align:left;
+}
+
+
+
+
+.detail-download{
+    border:none;
+    font-size:16px;
+    padding-top:10px;
+    padding-bottom:10px;
+    background-color: #fafafa;
+    cursor:pointer;
+    color: #3270a5;
     font-family: '微软雅黑';
     text-align:left;
 }
@@ -77,6 +92,7 @@
     height: auto;
     background-color: #fff;
 }
+
 .detail-middle-item {
     font-size: 16px;
     color: #3270a5;
@@ -125,8 +141,7 @@
 .info-item {
     color: #3270a5;
 }
-	height: 75px;
-}
+
 .left-nav-top-title{
 	height: 40px;
 	font-size: 18px;
