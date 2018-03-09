@@ -6,5 +6,6 @@ from lawDoc.views import indexSearch, searchByStrcut
 
 from lawDoc.views import indexSearch,searchByStrcut
 
-indexSearch()
+a={"1":2}
+print(a.__contains__('1'))
 

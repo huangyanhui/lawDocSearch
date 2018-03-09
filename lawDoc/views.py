@@ -11,7 +11,7 @@ from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 
 from elasticsearch import Elasticsearch
 
-from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList, countResults
+from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList, countResults, resultCount
 
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -91,9 +91,9 @@ def indexSearch(request):
     global searchStruct
     searchStruct.clear()
     searchStruct = buildSearchStruct(keyWord)
-    #searchStruct.allFieldKeyWord = keyWord.split(" ")
     legalDocuments.clear()
     searchByStrcut(searchStruct)
+
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
     return render(
         request, "searchresult.html", {
@@ -101,6 +101,7 @@ def indexSearch(request):
             "countResults": countResults,
             "resultCount": len(legalDocuments)
         })
+
 
 
 @csrf_exempt
@@ -114,6 +115,7 @@ def newSearch(request):
     legalDocuments.clear()
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+
     return render(
         request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
@@ -126,11 +128,12 @@ def newSearch(request):
 # 搜索结果页的结果内搜索，java版本对应路径为“addsearch”
 def addSearch(request):
     queryString = request.POST.get('name')
-    countResults.clear()
+    countResults=0
     legalDocuments.clear()
     searchStruct = buildSearchStruct(queryString)
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+
     return render(
         request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
@@ -139,28 +142,37 @@ def addSearch(request):
         })
 
 
+
 @csrf_exempt
 # 加载更多，java版本对应路径为getMore
 def getMore(request):
-    pageId = request.POST.get('name')
-    paginator = Paginator(legalDocuments, 10)
-    try:
-        files = paginator.page(pageId)
-    except PageNotAnInteger:
-        files = paginator.page(1)
-    except EmptyPage:
-        files = paginator.page(paginator.num_pages)
-    return render(
-        request, "searchresult.html", {
-            "LegalDocList": files,
-            "countResults": countResults,
-            "resultCount": len(legalDocuments)
-        })
+
+    pageId = int(request.POST.get('name'))
+    if pageId*20<len(legalDocuments):
+        return render(request, "result.html",{"LegalDocList": legalDocuments[0:pageId*20], "countResults": countResults, "resultCount": resultCount})
+    else:
+        return render(request, "result.html",
+                      {"LegalDocList": legalDocuments.index(0, len(legalDocuments)), "countResults": countResults,
+                       "resultCount": resultCount})
+
+        # paginator = Paginator(legalDocuments, 10)
+        # try:
+        #     files = paginator.page(pageId)
+        # except PageNotAnInteger:
+        #     files = paginator.page(1)
+        # except EmptyPage:
+        #     files = paginator.page(paginator.num_pages)
+        # return render(request, "result.html",
+        #               {"LegalDocList": files, "countResults": countResults, "resultCount": resultCount})
+
+
+
 
 
 @csrf_exempt
 # 聚类搜索，java版本对应路径为addsearchandterm
 def groupBySearch(request):
+    legalDocuments.clear()
     countResults.clear()
     username = request.POST.get('name')
     keyword = username.split('@')[0].split(' ')
@@ -173,10 +185,12 @@ def groupBySearch(request):
     else:
         searchStruct.oneFieldKeyWord.update({field: keyword})
     searchByStrcut(searchStruct)
+
     return render(request, "searchresult.html", {
         "LegalDocList": legalDocuments,
         "countResults": countResults
     })
+
 
 
 @csrf_exempt
@@ -184,7 +198,6 @@ def groupBySearch(request):
 def getDetail(request):
     if request.method == "POST":
         legalDocuments_pos = int(request.POST["legalDocuments_id"])
-        print(legalDocuments_pos)
         legalDocument = legalDocuments[legalDocuments_pos]
         return render(request, "resultDetail.html", {
             "legaldoc": legalDocument,
@@ -192,6 +205,7 @@ def getDetail(request):
         })
     else:
         return render(request, "resultDetail.html")
+
 
 
 def readFile(filename, chunk_size=512):
@@ -202,6 +216,7 @@ def readFile(filename, chunk_size=512):
                 yield c
             else:
                 break
+
 
 
 @csrf_exempt
@@ -223,7 +238,7 @@ def download(request):
         'encoding': "UTF-8",
         'no-outline': None
     }
-    path_wk = r'C:\Users\jeafi\Desktop\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
+    path_wk = r'D:\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
     config = pdfkit.configuration(wkhtmltopdf=path_wk)
     # 读文件并且替换动态内容
     fp = open(
@@ -233,6 +248,7 @@ def download(request):
         r'static\download\demo.html', 'r',
         encoding='utf-8').readlines()  # 打开文件，读入每一行
     for s in lines:
+
         fp.write(
             s.replace("标题", legalDocument.bt).replace('diyu', legalDocument.dy)
             .replace('anhao', legalDocument.ah).replace(
@@ -252,6 +268,7 @@ def download(request):
                                 'shujiyuan', legalDocument.sjy).replace(
                                     'xiangguanfatiao',
                                     legalDocument.xgft))  # replace是替换，write是写入
+
     fp.close()  # 关闭文件
     outpath = r'static\download\out%s.pdf' % (curr_date)
     pdfkit.from_file(
@@ -268,9 +285,12 @@ def download(request):
     return response
 
 
+
+
 # 进入推荐页面，java版本对应路径为recommondDetail
 def getRecommondDetail(request):
     pass
+
 
 
 # 全领域搜索的解决思路是对每个域进行搜索，之间用should连接
@@ -287,6 +307,7 @@ def allFieldSearch(searchStruct):
             }
         })
         allFieldKeyWordMiniQuery = []
+
     allFieldKeyWordQuery = {"bool": {"must": allFieldKeyWordQuery}}
     print(allFieldKeyWordQuery)
     return allFieldKeyWordQuery
@@ -306,8 +327,10 @@ def allFieldNotSearch(searchStruct):
             }
         })
         allFieldNotKeyWordMiniQuery = []
+
     allFieldNotKeyWordQuery = {"bool": {"must": allFieldNotKeyWordQuery}}
     print(allFieldNotKeyWordQuery)
+
     return allFieldNotKeyWordQuery
 
 
@@ -332,8 +355,10 @@ def oneFieldSearch(searchStruct):
                 }
             })
             oneFieldKeyWordMiniQuery = []
+
     oneFieldKeyWordQuery = {"bool": {"must": oneFieldKeyWordQuery}}
     print(oneFieldKeyWordQuery)
+
     return oneFieldKeyWordQuery
 
 
@@ -368,8 +393,10 @@ def fieldSearch(searchStruct):
         # fieldKeyWordQueryCopy: 对 fieldKeyWordQuery 深复制
         fieldKeyWordQueryCopy = fieldKeyWordQuery
         fieldKeyWordQuery = {"bool": {"should": fieldKeyWordQueryCopy}}
+
     fieldKeyWordQuery = {"bool": {"must": fieldKeyWordQuery}}
     print(fieldKeyWordQuery)
+
     return fieldKeyWordQuery
 
 
@@ -429,8 +456,10 @@ def orderFieldSearch(searchStruct):
                 "should": orderFieldKeyWordQueryCopy
             }
         }
+
     orderFieldKeyWordQuery = {"bool": {"must": orderFieldKeyWordQuery}}
     print(orderFieldKeyWordQuery)
+
     return orderFieldKeyWordQuery
 
 
@@ -450,9 +479,26 @@ def oneFieldNotSearch(searchStruct):
                 "must_not": oneFieldKeyNotWordMiniQuery
             }
         }
+
     oneFieldKeyNotWordQuery = {"bool": {"must": oneFieldKeyNotWordQuery}}
     print(oneFieldKeyNotWordQuery)
+
+
     return oneFieldKeyNotWordQuery
+
+
+
+#对于聚合结果进行排序
+def sortGroupByResults(countResult):
+    temp={}
+    for i in countResult:
+        temp[i['key']]=i['doc_count']
+    sortKeys=sorted(temp.keys())
+    result=[]
+    for i in sortKeys:
+        result.append({'key':i,'doc_count':temp[i]})
+    return result
+
 
 
 # searchStruct 为搜索结构体，包含搜索搜索条件
@@ -468,7 +514,9 @@ def searchByStrcut(searchStruct):
     oneFieldKeyNotWordQuery = oneFieldNotSearch(searchStruct)
 
     query = {
-        "size": 12,
+
+        "size":1000,
+
         "query": {
             "bool": {
                 "must": [
@@ -509,17 +557,129 @@ def searchByStrcut(searchStruct):
                     "field": "slcx"
                 }
             }
+
+
+        },
+        "highlight":
+            {
+            "require_field_match":False,
+            "fields": {
+                "fy": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "dsrxx": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ah": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "spry": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ysfycm": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ysqqqk": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "byrw": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "spjg": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ysdbqk": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "esqqqk": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ysfyrw": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "wslx": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ajms": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "xgft": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "sprq": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "sljg": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "bycm": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "sjy": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "bt": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                }
+            }
+
         }
+
     }
 
+
+
     print(json.dumps(query))
+    searchResults=es.search(
+        index='legal_index', doc_type='legalDocument',request_timeout=300,
+        body=json.dumps(query))
 
-    searchResults = es.search(
-        index='legal_index', doc_type='lagelDocument', body=json.dumps(query))
 
+    global resultCount
+    resultCount=searchResults['hits']['total']
     results = searchResults['hits']['hits']
-    countResults['dy'] = searchResults['aggregations']['dy']['buckets']
-    countResults['nf'] = searchResults['aggregations']['nf']['buckets']
+
+    countResults['dy']=searchResults['aggregations']['dy']['buckets']
+    countResults['nf'] = sortGroupByResults(searchResults['aggregations']['nf']['buckets'])
+
     countResults['ay'] = searchResults['aggregations']['ay']['buckets']
     countResults['fycj'] = searchResults['aggregations']['fycj']['buckets']
     countResults['slcx'] = searchResults['aggregations']['slcx']['buckets']
@@ -527,25 +687,98 @@ def searchByStrcut(searchStruct):
 
     for result in results:
         legalDoc = LegalDocument()
-        legalDoc.fy = result['_source']['fy']
-        legalDoc.dsrxx = result['_source']['dsrxx']
-        legalDoc.ah = result['_source']['ah']
-        legalDoc.spry = result['_source']['spry']
-        legalDoc.ysfycm = result['_source']['ysfycm']
-        legalDoc.ysqqqk = result['_source']['ysqqqk']
-        legalDoc.byrw = result['_source']['byrw']
-        legalDoc.spjg = result['_source']['spjg']
-        legalDoc.ysdbqk = result['_source']['ysdbqk']
-        legalDoc.esqqqk = result['_source']['esqqqk']
-        legalDoc.ysfyrw = result['_source']['ysfyrw']
+        if(result['highlight'].__contains__('fy')):
+            legalDoc.fy = result['highlight']['fy'][0]
+        else:
+            legalDoc.fy = result['_source']['fy']
+
+        if (result['highlight'].__contains__('dsrxx')):
+            legalDoc.dsrxx = result['highlight']['dsrxx'][0]
+        else:
+            legalDoc.dsrxx = result['_source']['dsrxx']
+
+        if (result['highlight'].__contains__('ah')):
+            legalDoc.ah = result['highlight']['ah'][0]
+        else:
+            legalDoc.ah = result['_source']['ah']
+
+        if (result['highlight'].__contains__('spry')):
+            legalDoc.spry = result['highlight']['spry'][0]
+        else:
+            legalDoc.spry = result['_source']['spry']
+
+        if (result['highlight'].__contains__('ysfycm')):
+            legalDoc.ysfycm = result['highlight']['ysfycm'][0]
+        else:
+            legalDoc.ysfycm = result['_source']['ysfycm']
+
+        if (result['highlight'].__contains__('ysqqqk')):
+            legalDoc.ysqqqk = result['highlight']['ysqqqk'][0]
+        else:
+            legalDoc.ysqqqk = result['_source']['ysqqqk']
+
+        if (result['highlight'].__contains__('byrw')):
+            legalDoc.byrw = result['highlight']['byrw'][0]
+        else:
+            legalDoc.byrw = result['_source']['byrw']
+
+        if (result['highlight'].__contains__('spjg')):
+            legalDoc.spjg = result['highlight']['spjg'][0]
+        else:
+            legalDoc.spjg = result['_source']['spjg']
+
+        if (result['highlight'].__contains__('ysdbqk')):
+            legalDoc.ysdbqk = result['highlight']['ysdbqk'][0]
+        else:
+            legalDoc.ysdbqk = result['_source']['ysdbqk']
+
+        if (result['highlight'].__contains__('esqqqk')):
+            legalDoc.esqqqk = result['highlight']['esqqqk'][0]
+        else:
+            legalDoc.esqqqk = result['_source']['esqqqk']
+
+        if (result['highlight'].__contains__('ysfyrw')):
+            legalDoc.ysfyrw = result['highlight']['ysfyrw'][0]
+        else:
+            legalDoc.ysfyrw = result['_source']['ysfyrw']
+
+        if (result['highlight'].__contains__('ajms')):
+            legalDoc.ajms = result['highlight']['ajms'][0]
+        else:
+            legalDoc.ajms = result['_source']['ajms']
+
+        if (result['highlight'].__contains__('xgft')):
+            legalDoc.xgft = result['highlight']['xgft'][0]
+        else:
+            legalDoc.xgft = result['_source']['xgft']
+
+        if (result['highlight'].__contains__('sprq')):
+            legalDoc.sprq = result['highlight']['sprq'][0]
+        else:
+            legalDoc.sprq = result['_source']['sprq']
+
+        if (result['highlight'].__contains__('sljg')):
+            legalDoc.sljg = result['highlight']['sljg'][0]
+        else:
+            legalDoc.sljg = result['_source']['sljg']
+
+        if (result['highlight'].__contains__('bycm')):
+            legalDoc.bycm = result['highlight']['bycm'][0]
+        else:
+            legalDoc.bycm = result['_source']['bycm']
+
+        if (result['highlight'].__contains__('sjy')):
+            legalDoc.sjy = result['highlight']['sjy'][0]
+        else:
+            legalDoc.sjy = result['_source']['sjy']
+
+        if (result['highlight'].__contains__('bt')):
+            legalDoc.bt = result['highlight']['bt'][0]
+        else:
+            legalDoc.bt = result['_source']['bt']
+
         legalDoc.wslx = result['_source']['wslx']
-        legalDoc.ajms = result['_source']['ajms']
-        legalDoc.xgft = result['_source']['xgft']
-        legalDoc.sprq = result['_source']['sprq']
-        legalDoc.sljg = result['_source']['sljg']
-        legalDoc.bycm = result['_source']['bycm']
-        legalDoc.sjy = result['_source']['sjy']
-        legalDoc.bt = result['_source']['bt']
+
         legalDoc.dy = result['_source']['dy']
         legalDoc.nf = result['_source']['nf']
         legalDoc.slcx = result['_source']['slcx']
@@ -554,6 +787,6 @@ def searchByStrcut(searchStruct):
         legalDoc.tz = result['_source']['tz']
         legalDoc.fycj = result['_source']['fycj']
         legalDocuments.append(legalDoc)
-    print(results)
+
 
     return legalDocuments, countResults
