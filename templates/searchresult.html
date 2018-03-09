@@ -7,7 +7,6 @@
         <title>搜索结果</title>
         <link href="{% static '/css/bootstrap.css' %}" rel="stylesheet" type="text/css"/>
         <link href="{% static '/css/bootstrap-theme.css' %}" rel="stylesheet" type="text/css"/>
-        <link href="{% static '/css/style.css' %}'" rel="stylesheet" type="text/css"/>
         <link href="{% static '/css/result.css' %}" rel="stylesheet" type="text/css"/>
         <link href="{% static '/css/treestyle.css' %}" rel="stylesheet" type="text/css"/>
         <link href="{% static '/css/mystyle.css' %}" rel="stylesheet" type="text/css"/>
@@ -133,7 +132,7 @@
                                                     <span class="badge badge-success" title="Collapse this branch">
                                                         <i class="icon-minus-sign"></i>
                                                         <button class="name" name="nf" value="{{ nf.key }}" onclick="searchgroupby(this)">{{ nf.key }}</button>
-                                                        <span class="unit">{{ nf.odc_count }}</span>
+                                                        <span class="unit">{{ nf.doc_count }}</span>
                                                     </span>
                                                 </li>
                                                 {% endfor %}
@@ -247,7 +246,7 @@
                                     {% endfor %}
                                 </div>
                                 <!--加载更多按钮-->
-                                <button id="getmore" type="button" class="morebtn"onclick="sendpageid()"><i class="fa fa-chevron-down"></i>&nbsp;加载更多</button>
+                                <button id="getmore" type="button" class="morebtn" onclick="sendpageid()"><i class="fa fa-chevron-down"></i>&nbsp;加载更多</button>
                                 <!-- 分页 -->
                                 <div class="pagination ue-clear"></div>
                                 <!-- 相关搜索 -->
@@ -269,19 +268,42 @@
         </div>
 
 
+
+    </body>
+
+<script type="text/javascript">
+    var btarray=new Array();
+    var byrwarray=new Array();
+    {% for legaldoc in LegalDocList %}
+        btarray.push('{% autoescape off  %}{{ legaldoc.bt }}{%  endautoescape %}');
+        byrwarray.push('{% autoescape off  %}{{ legaldoc.byrw }}{%  endautoescape %}');
+    {% endfor %}
+    var i=0;
+    var j=0;
+    $(".title").each(function () {
+
+        $(this).html("<button>"+btarray[i]+"</button>");
+        i=i+1;
+    });
+    $(".itemBody").each(function () {
+
+        $(this).html(byrwarray[j]);
+        j=j+1;
+    })
+</script>
+
         <script type="text/javascript">
             $(document).ready(function() {
                 //限制字符个数
                 $(".wordControl").each(function() {
-                    var maxwidth = 130;
-                    if ($(this).text().length > maxwidth) {
-                        $(this).text($(this).text().substring(0, maxwidth));
+                    var maxwidth = 300;
+                    if ($(this).html().length > maxwidth) {
+                        console.log($(this).html());
+                        $(this).html($(this).html().substring(0, maxwidth));
                         $(this).html($(this).html() + '...');
                     }
                 });
             });
 
          <!-- </script> -->
-    </body>
-
 </html>
