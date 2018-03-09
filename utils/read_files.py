@@ -4,7 +4,8 @@ import re
 import shutil
 from elastic_search_utils import LegalDocument, ElasticSearchUtils
 
-root_path = '/home/cowlog/Project/刑事/刑事文书分段结果/刑事文书分段结果'
+# 设置根目录
+root_path = ''
 basic_info_path = '刑事案件/文书基本信息'
 info_path = '刑事案件/法律文书'
 
@@ -188,7 +189,8 @@ def main():
     legal_docs = []
 
     keywords = []
-    keywords_file = open('/home/cowlog/Project/刑事/刑事文书分段结果/关键词.txt', 'r')
+    # 设置关键词文本路径
+    keywords_file = open('刑事/刑事文书分段结果/关键词.txt', 'r')
     for line in keywords_file.readlines():
         s = re.sub('\s', '', line)
         keywords.append(s)
