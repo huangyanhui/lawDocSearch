@@ -35,4 +35,5 @@ urlpatterns = [
     url(r'^download$', download, name="download"),
     url(r'^newsearch$', newSearch, name="newSearch"),
     path('account/', include('account.urls')),
+    path('upload/', include('upload.urls')),
 ]
