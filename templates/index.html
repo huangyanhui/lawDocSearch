@@ -17,7 +17,7 @@
         <header>
             <nav>
                 <ul>
-                    {% if allowed_count %}
+                    {% if username != '' %}
                     <li><a href="#"><span class="glyphicon glyphicon-user"></span>{{ username }}</a></li>
                     <li><a href="/account/logout"><span class="glyphicon glyphicon-log-out"></span>登出</a></li>
                     {% else %}

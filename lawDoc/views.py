@@ -1,6 +1,7 @@
 import json
 
 from django.shortcuts import render
+from django.http import HttpResponse
 from elasticsearch import Elasticsearch
 from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList
 
@@ -13,17 +14,35 @@ from lawDoc.models import SearchStruct, LegalDocument
 
 
 def index(request):
+    # 已经登录或已经访问过
     if 'allowed_count' in request.session:
-        return render(
-            request, 'index.html', {
-                'username': request.session['username'],
-                'allowed_count': request.session['allowed_count']
-            })
-    return render(request, 'index.html')
+        allowed_count = request.session['allowed_count']
+        username = request.session['username']
+    # 未登录
+    else:
+        allowed_count = 3
+        username = ''
+
+    request.session['allowed_count'] = allowed_count
+    request.session['username'] = username
+
+    return render(request, 'index.html', {
+        'username': username,
+        'allowed_count': allowed_count,
+    })
 
 
 # 首页的搜索，java版本对应路径为“indexsearch”
 def indexSearch(request):
+    # 每次搜索减 1 次可用次数
+    request.session['allowed_count'] -= 1
+    if request.session['allowed_count'] < 0:
+        if request.session['username'] == '':
+            return render(request, 'account/login.html')
+        else:
+            # TODO: 画个提示页
+            return HttpResponse('该用户查询次数已经超过当天允许次数')
+
     keyWord = request.POST.get('keyword')
     searchStruct = SearchStruct()
     searchStruct.allFieldKeyWord = keyWord.split(" ")

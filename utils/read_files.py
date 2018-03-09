@@ -2,7 +2,8 @@ import time
 import os
 import re
 import shutil
-from elastic_search_utils import LegalDocument, ElasticSearchUtils
+from elastic_search import ElasticSearchUtils
+from lawDoc.models import LegalDocument
 
 root_path = '/home/cowlog/Project/刑事/刑事文书分段结果/刑事文书分段结果'
 basic_info_path = '刑事案件/文书基本信息'
