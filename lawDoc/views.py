@@ -1,18 +1,13 @@
 import json
-
 import time
-
 import os
 import pdfkit
 
 from django.shortcuts import render
-
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
-
 from elasticsearch import Elasticsearch
-
-from lawDoc.Variable import legalDocuments, allSearchField, allSearchFieldList, countResults, resultCount
-
+from lawDoc.Variable import legalDocuments, allSearchField, \
+    allSearchFieldList, countResults, resultCount
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -25,13 +20,22 @@ searchStruct = SearchStruct()
 
 
 def index(request):
+    # 已经登录或已经访问过
     if 'allowed_count' in request.session:
-        return render(
-            request, 'index.html', {
-                'username': request.session['username'],
-                'allowed_count': request.session['allowed_count']
-            })
-    return render(request, 'index.html')
+        allowed_count = request.session['allowed_count']
+        username = request.session['username']
+    # 未登录
+    else:
+        allowed_count = 3
+        username = ''
+
+    request.session['allowed_count'] = allowed_count
+    request.session['username'] = username
+
+    return render(request, 'index.html', {
+        'username': username,
+        'allowed_count': allowed_count,
+    })
 
 
 #搜索结构体的构造
@@ -87,6 +91,15 @@ def buildSearchStruct(queryString):
 
 # 首页的搜索，java版本对应路径为“indexsearch”
 def indexSearch(request):
+    # 每次搜索减 1 次可用次数
+    request.session['allowed_count'] -= 1
+    if request.session['allowed_count'] < 0:
+        if request.session['username'] == '':
+            return render(request, 'account/login.html')
+        else:
+            # TODO: 画个提示页
+            return HttpResponse('该用户查询次数已经超过当天允许次数')
+
     keyWord = request.POST.get('keyword')
     global searchStruct
     searchStruct.clear()
@@ -101,7 +114,6 @@ def indexSearch(request):
             "countResults": countResults,
             "resultCount": len(legalDocuments)
         })
-
 
 
 @csrf_exempt
@@ -128,7 +140,7 @@ def newSearch(request):
 # 搜索结果页的结果内搜索，java版本对应路径为“addsearch”
 def addSearch(request):
     queryString = request.POST.get('name')
-    countResults=0
+    countResults = 0
     legalDocuments.clear()
     searchStruct = buildSearchStruct(queryString)
     searchByStrcut(searchStruct)
@@ -142,18 +154,25 @@ def addSearch(request):
         })
 
 
-
 @csrf_exempt
 # 加载更多，java版本对应路径为getMore
 def getMore(request):
 
     pageId = int(request.POST.get('name'))
-    if pageId*20<len(legalDocuments):
-        return render(request, "result.html",{"LegalDocList": legalDocuments[0:pageId*20], "countResults": countResults, "resultCount": resultCount})
+    if pageId * 20 < len(legalDocuments):
+        return render(
+            request, "result.html", {
+                "LegalDocList": legalDocuments[0:pageId * 20],
+                "countResults": countResults,
+                "resultCount": resultCount
+            })
     else:
-        return render(request, "result.html",
-                      {"LegalDocList": legalDocuments.index(0, len(legalDocuments)), "countResults": countResults,
-                       "resultCount": resultCount})
+        return render(
+            request, "result.html", {
+                "LegalDocList": legalDocuments.index(0, len(legalDocuments)),
+                "countResults": countResults,
+                "resultCount": resultCount
+            })
 
         # paginator = Paginator(legalDocuments, 10)
         # try:
@@ -164,9 +183,6 @@ def getMore(request):
         #     files = paginator.page(paginator.num_pages)
         # return render(request, "result.html",
         #               {"LegalDocList": files, "countResults": countResults, "resultCount": resultCount})
-
-
-
 
 
 @csrf_exempt
@@ -192,7 +208,6 @@ def groupBySearch(request):
     })
 
 
-
 @csrf_exempt
 # 进入详细页面，java版本对应路径为searchresult
 def getDetail(request):
@@ -207,7 +222,6 @@ def getDetail(request):
         return render(request, "resultDetail.html")
 
 
-
 def readFile(filename, chunk_size=512):
     with open(filename, 'rb') as f:
         while True:
@@ -216,7 +230,6 @@ def readFile(filename, chunk_size=512):
                 yield c
             else:
                 break
-
 
 
 @csrf_exempt
@@ -285,12 +298,9 @@ def download(request):
     return response
 
 
-
-
 # 进入推荐页面，java版本对应路径为recommondDetail
 def getRecommondDetail(request):
     pass
-
 
 
 # 全领域搜索的解决思路是对每个域进行搜索，之间用should连接
@@ -483,22 +493,19 @@ def oneFieldNotSearch(searchStruct):
     oneFieldKeyNotWordQuery = {"bool": {"must": oneFieldKeyNotWordQuery}}
     print(oneFieldKeyNotWordQuery)
 
-
     return oneFieldKeyNotWordQuery
-
 
 
 #对于聚合结果进行排序
 def sortGroupByResults(countResult):
-    temp={}
+    temp = {}
     for i in countResult:
-        temp[i['key']]=i['doc_count']
-    sortKeys=sorted(temp.keys())
-    result=[]
+        temp[i['key']] = i['doc_count']
+    sortKeys = sorted(temp.keys())
+    result = []
     for i in sortKeys:
-        result.append({'key':i,'doc_count':temp[i]})
+        result.append({'key': i, 'doc_count': temp[i]})
     return result
-
 
 
 # searchStruct 为搜索结构体，包含搜索搜索条件
@@ -514,9 +521,7 @@ def searchByStrcut(searchStruct):
     oneFieldKeyNotWordQuery = oneFieldNotSearch(searchStruct)
 
     query = {
-
-        "size":1000,
-
+        "size": 1000,
         "query": {
             "bool": {
                 "must": [
@@ -557,12 +562,9 @@ def searchByStrcut(searchStruct):
                     "field": "slcx"
                 }
             }
-
-
         },
-        "highlight":
-            {
-            "require_field_match":False,
+        "highlight": {
+            "require_field_match": False,
             "fields": {
                 "fy": {
                     "pre_tags": "<span style=\"color:red\">",
@@ -660,25 +662,23 @@ def searchByStrcut(searchStruct):
                     "number_of_fragments": 0
                 }
             }
-
         }
-
     }
 
-
-
     print(json.dumps(query))
-    searchResults=es.search(
-        index='legal_index', doc_type='legalDocument',request_timeout=300,
+    searchResults = es.search(
+        index='legal_index',
+        doc_type='legalDocument',
+        request_timeout=300,
         body=json.dumps(query))
 
-
     global resultCount
-    resultCount=searchResults['hits']['total']
+    resultCount = searchResults['hits']['total']
     results = searchResults['hits']['hits']
 
-    countResults['dy']=searchResults['aggregations']['dy']['buckets']
-    countResults['nf'] = sortGroupByResults(searchResults['aggregations']['nf']['buckets'])
+    countResults['dy'] = searchResults['aggregations']['dy']['buckets']
+    countResults['nf'] = sortGroupByResults(
+        searchResults['aggregations']['nf']['buckets'])
 
     countResults['ay'] = searchResults['aggregations']['ay']['buckets']
     countResults['fycj'] = searchResults['aggregations']['fycj']['buckets']
@@ -687,7 +687,7 @@ def searchByStrcut(searchStruct):
 
     for result in results:
         legalDoc = LegalDocument()
-        if(result['highlight'].__contains__('fy')):
+        if (result['highlight'].__contains__('fy')):
             legalDoc.fy = result['highlight']['fy'][0]
         else:
             legalDoc.fy = result['_source']['fy']
@@ -787,6 +787,5 @@ def searchByStrcut(searchStruct):
         legalDoc.tz = result['_source']['tz']
         legalDoc.fycj = result['_source']['fycj']
         legalDocuments.append(legalDoc)
-
 
     return legalDocuments, countResults

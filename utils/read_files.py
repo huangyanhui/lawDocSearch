@@ -2,7 +2,8 @@ import time
 import os
 import re
 import shutil
-from elastic_search_utils import LegalDocument, ElasticSearchUtils
+from elastic_search import ElasticSearchUtils
+from lawDoc.models import LegalDocument
 
 # 设置根目录
 root_path = ''
