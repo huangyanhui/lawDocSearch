@@ -46,13 +46,19 @@ def buildSearchStruct(queryString):
                 searchStruct.allFieldKeyWord = searchStruct.allFieldKeyWord + keywords
                 searchStruct.allFieldNotKeyWord = searchStruct.allFieldNotKeyWord + notkeywords
             else:
+                if (field in searchStruct.oneFieldKeyWord) and len(searchStruct.oneFieldKeyWord[field]) != 0:
+                    keywords += searchStruct.oneFieldKeyWord[field]
                 searchStruct.oneFieldKeyWord = {field:keywords}
+                if (field in searchStruct.oneFieldNotKeyWord) and len(searchStruct.oneFieldNotKeyWord[field]) != 0:
+                    notkeywords += searchStruct.oneFieldNotKeyWord[field]
                 searchStruct.oneFieldNotKeyWord = {field:notkeywords}
         else:
             notkeywords = keyword.split('!')[1].split(' ')
             if field == 'all':
                 searchStruct.allFieldNotKeyWord = searchStruct.allFieldNotKeyWord + notkeywords
             else:
+                if (field in searchStruct.oneFieldNotKeyWord) and len(searchStruct.oneFieldNotKeyWord[field]) != 0:
+                    notkeywords += searchStruct.oneFieldNotKeyWord[field]
                 searchStruct.oneFieldNotKeyWord = {field:notkeywords}
     elif '~' in keyword:
         keywords = keyword.replace('~', ' ').split(' ')
@@ -66,6 +72,8 @@ def buildSearchStruct(queryString):
             searchStruct.allFieldKeyWord = searchStruct.allFieldKeyWord + keywords
 
         else:
+            if (field in searchStruct.oneFieldKeyWord) and len(searchStruct.oneFieldKeyWord[field]) != 0:
+                keywords += searchStruct.oneFieldKeyWord[field]
             searchStruct.oneFieldKeyWord = {field:keywords}
     return searchStruct
 
