@@ -46,14 +46,20 @@ def buildSearchStruct(queryString):
                 searchStruct.allFieldKeyWord = searchStruct.allFieldKeyWord + keywords
                 searchStruct.allFieldNotKeyWord = searchStruct.allFieldNotKeyWord + notkeywords
             else:
-                searchStruct.oneFieldKeyWord = searchStruct.allFieldKeyWord.update({field:keywords})
-                searchStruct.oneFieldNotKeyWord = searchStruct.allFieldNotKeyWord.update({field:notkeywords})
+                if (field in searchStruct.oneFieldKeyWord) and len(searchStruct.oneFieldKeyWord[field]) != 0:
+                    keywords += searchStruct.oneFieldKeyWord[field]
+                searchStruct.oneFieldKeyWord = {field: keywords}
+                if (field in searchStruct.oneFieldNotKeyWord) and len(searchStruct.oneFieldNotKeyWord[field]) != 0:
+                    notkeywords += searchStruct.oneFieldNotKeyWord[field]
+                searchStruct.oneFieldNotKeyWord = {field: notkeywords}
         else:
             notkeywords = keyword.split('!')[1].split(' ')
             if field == 'all':
                 searchStruct.allFieldNotKeyWord = searchStruct.allFieldNotKeyWord + notkeywords
             else:
-                searchStruct.oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord.update({field:notkeywords})
+                if (field in searchStruct.oneFieldNotKeyWord) and len(searchStruct.oneFieldNotKeyWord[field]) != 0:
+                    notkeywords += searchStruct.oneFieldNotKeyWord[field]
+                searchStruct.oneFieldNotKeyWord = {field: notkeywords}
     elif '~' in keyword:
         keywords = keyword.replace('~', ' ').split(' ')
         searchStruct.FieldKeyWord = searchStruct.FieldKeyWord + keywords
@@ -66,7 +72,9 @@ def buildSearchStruct(queryString):
             searchStruct.allFieldKeyWord = searchStruct.allFieldKeyWord + keywords
 
         else:
-            searchStruct.oneFieldKeyWord = searchStruct.oneFieldKeyWord.update({field:keywords})
+            if (field in searchStruct.oneFieldKeyWord) and len(searchStruct.oneFieldKeyWord[field]) != 0:
+                keywords += searchStruct.oneFieldKeyWord[field]
+            searchStruct.oneFieldKeyWord = {field: keywords}
     return searchStruct
 
 
@@ -320,7 +328,28 @@ def oneFieldSearch(searchStruct):
         }
     }
     return oneFieldKeyWordQuery
-
+# 单领域否定搜索:输出：oneFieldKeyNotWordQuery
+def oneFieldNotSearch(searchStruct):
+    oneFieldKeyNotWordQuery = []
+    oneFieldKeyNotWordMiniQuery = []
+    if len(searchStruct.oneFieldNotKeyWord) != 0:
+        oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord
+        fieldSet = oneFieldNotKeyWord.keys()
+        for field in fieldSet:
+            for keyWord in oneFieldNotKeyWord[field]:
+                oneFieldKeyNotWordMiniQuery.append({"match_phrase": {field: keyWord}})
+            oneFieldKeyNotWordQuery = ({
+                "bool": {
+                    "must_not": oneFieldKeyNotWordMiniQuery
+                }
+            })
+            oneFieldKeyNotWordMiniQuery = []
+    oneFieldKeyNotWordQuery = {
+        "bool":{
+            "must":oneFieldKeyNotWordQuery
+        }
+    }
+    return oneFieldKeyNotWordQuery
 
 # 同域搜索
 def fieldSearch(searchStruct):
@@ -423,32 +452,6 @@ def orderFieldSearch(searchStruct):
         }
     }
     return orderFieldKeyWordQuery
-
-
-# 单领域否定搜索:输出：oneFieldKeyNotWordQuery
-def oneFieldNotSearch(searchStruct):
-    oneFieldKeyNotWordQuery = []
-    if len(searchStruct.oneFieldNotKeyWord) != 0:
-        oneFieldKeyWord = searchStruct.oneFieldKeyWord
-        oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord
-        field = allSearchFieldList[oneFieldNotKeyWord["field"]]
-        oneFieldKeyNotWordMiniQuery = []
-
-        for i in oneFieldNotKeyWord["notkeywords"]:
-            oneFieldKeyNotWordMiniQuery.append({"match_phrase": {field: i}})
-        oneFieldKeyNotWordQuery = {
-            "bool": {
-                "must_not": oneFieldKeyNotWordMiniQuery
-            }
-        }
-    oneFieldKeyNotWordQuery = {
-        "bool":{
-            "must":oneFieldKeyNotWordQuery
-        }
-    }
-    return oneFieldKeyNotWordQuery
-
-
 
 #对于聚合结果进行排序
 def sortGroupByResults(countResult):
