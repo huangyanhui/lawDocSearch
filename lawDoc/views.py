@@ -217,6 +217,10 @@ def download(request):
     lines = open(r'static\download\demo.html', 'r', encoding='utf-8').readlines()  # 打开文件，读入每一行
     for s in lines:
         fp.write(s.replace("标题", legalDocument.bt)
+                 .replace("wenshuleixing", legalDocument.wslx)
+                 .replace("nianfen", legalDocument.nf)
+                 .replace("shenlichengxu", legalDocument.slcx)
+                 .replace("fayuancengji", legalDocument.fycj)
                  .replace('diyu', legalDocument.dy)
                  .replace('anhao',legalDocument.ah)
                  .replace('dangshirenxingxi', legalDocument.dsrxx)
@@ -301,7 +305,7 @@ def allFieldNotSearch(searchStruct):
 def oneFieldSearch(searchStruct):
     oneFieldKeyWordQuery = []
     oneFieldKeyWordMiniQuery = []
-    if len(searchStruct.oneFieldKeyWord) != 0:
+    if searchStruct.oneFieldKeyWord :
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
         # oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
         fieldSet = oneFieldKeyWord.keys()
