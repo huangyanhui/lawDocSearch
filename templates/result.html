@@ -1,9 +1,45 @@
+
 {% load static %}
 
 <!doctype html>
 <html lang="zh-Hans">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>搜索结果</title>
+        <link href="{% static '/css/bootstrap.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="{% static '/css/bootstrap-theme.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="{% static '/css/result.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="{% static '/css/treestyle.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="{% static '/css/mystyle.css' %}" rel="stylesheet" type="text/css"/>
+        <link href="http://cdn.bootcss.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+        <script type="text/javascript" src="{% static '/js/jquery-3.2.1.js' %}"></script>
+        <script type="text/javascript" src="{% static '/js/bootstrap.js' %}"></script>
+        <script type="text/javascript" src="{% static '/js/sendjs.js' %}"></script>
+        <script type="text/javascript">
+         $(function () {
+             $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
+             $('.tree li.parent_li > span').on('click', function (e) {
+                 var children = $(this).parent('li.parent_li').find(' > ul > li');
+                 if (children.is(":visible")) {
+                     children.hide('fast');
+                     $(this).attr('title', 'Expand this branch').find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
+                 } else {
+                     children.show('fast');
+                     $(this).attr('title', 'Collapse this branch').find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
+                 }
+                 e.stopPropagation();
+             });
+         });
+        </script>
+    </head>
 
     <body>
+
+
+
+
+
+        <div id="content" >
             <div id="bd" class="ue-clear">
                 <div id="main">
                     <div class="row">
@@ -194,21 +230,49 @@
             </div><!--End of bd-->
 
 
+        </div>
 
+
+
+    </body>
+
+<script type="text/javascript">
+    var btarray=new Array();
+    var byrwarray=new Array();
+    {% for legaldoc in LegalDocList %}
+        btarray.push('{% autoescape off  %}{{ legaldoc.bt }}{%  endautoescape %}');
+        byrwarray.push('{% autoescape off  %}{{ legaldoc.byrw }}{%  endautoescape %}');
+    {% endfor %}
+    var i=0;
+    var j=0;
+    $(".title").each(function () {
+
+        $(this).html("<button>"+btarray[i]+"</button>");
+        i=i+1;
+    });
+    $(".itemBody").each(function () {
+
+        $(this).html(byrwarray[j]);
+        j=j+1;
+    })
+</script>
 
         <script type="text/javascript">
             $(document).ready(function() {
                 //限制字符个数
                 $(".wordControl").each(function() {
-                    var maxwidth = 130;
-                    if ($(this).text().length > maxwidth) {
-                        $(this).text($(this).text().substring(0, maxwidth));
+                    var maxwidth = 300;
+                    if ($(this).html().length > maxwidth) {
+                        console.log($(this).html());
+                        $(this).html($(this).html().substring(0, maxwidth));
                         $(this).html($(this).html() + '...');
                     }
                 });
             });
 
          <!-- </script> -->
-    </body>
-
 </html>
+
+
+
+

@@ -264,25 +264,28 @@ def download(request):
         encoding='utf-8').readlines()  # 打开文件，读入每一行
     for s in lines:
 
-        fp.write(
-            s.replace("标题", legalDocument.bt).replace('diyu', legalDocument.dy)
-            .replace('anhao', legalDocument.ah).replace(
-                'dangshirenxingxi', legalDocument.dsrxx).replace(
-                    'anjianmiaoshu', legalDocument.ajms).replace(
-                        'shenlijingguo', legalDocument.sljg)
-            .replace('yishenqingqiuqingkuang', legalDocument.ysqqqk).replace(
-                'yishendabianqingkuang', legalDocument.ysdbqk).replace(
-                    'yishenfayuanchaming', legalDocument.ysfycm).replace(
-                        'yishenfayuanrenwei', legalDocument.ysfyrw).replace(
-                            'ershenqingqiuqingkuang', legalDocument.esqqqk)
-            .replace('benyuanchaming', legalDocument.bycm).replace(
-                'benyuanrenwei', legalDocument.byrw).replace(
-                    'shenpanjieguo', legalDocument.spjg).replace(
-                        'shenpanrenyuan', legalDocument.spry).replace(
-                            'shenpanriqi', legalDocument.sprq).replace(
-                                'shujiyuan', legalDocument.sjy).replace(
-                                    'xiangguanfatiao',
-                                    legalDocument.xgft))  # replace是替换，write是写入
+        fp.write(s.replace("标题", legalDocument.bt)
+                 .replace("wenshuleixing", legalDocument.wslx)
+                 .replace("nianfen", legalDocument.nf)
+                 .replace("shenlichengxu", legalDocument.slcx)
+                 .replace("fayuancengji", legalDocument.fycj)
+                 .replace('diyu', legalDocument.dy)
+                 .replace('anhao',legalDocument.ah)
+                 .replace('dangshirenxingxi', legalDocument.dsrxx)
+                 .replace('anjianmiaoshu', legalDocument.ajms)
+                 .replace('shenlijingguo', legalDocument.sljg)
+                 .replace('yishenqingqiuqingkuang', legalDocument.ysqqqk)
+                 .replace('yishendabianqingkuang', legalDocument.ysdbqk)
+                 .replace('yishenfayuanchaming', legalDocument.ysfycm)
+                 .replace('yishenfayuanrenwei', legalDocument.ysfyrw)
+                 .replace('ershenqingqiuqingkuang', legalDocument.esqqqk)
+                 .replace('benyuanchaming', legalDocument.bycm)
+                 .replace('benyuanrenwei', legalDocument.byrw)
+                 .replace('shenpanjieguo', legalDocument.spjg)
+                 .replace('shenpanrenyuan', legalDocument.spry)
+                 .replace('shenpanriqi', legalDocument.sprq)
+                 .replace('shujiyuan', legalDocument.sjy)
+                 .replace('xiangguanfatiao', legalDocument.xgft))  # replace是替换，write是写入
 
     fp.close()  # 关闭文件
     outpath = r'static\download\out%s.pdf' % (curr_date)
@@ -350,7 +353,7 @@ def allFieldNotSearch(searchStruct):
 def oneFieldSearch(searchStruct):
     oneFieldKeyWordQuery = []
     oneFieldKeyWordMiniQuery = []
-    if len(searchStruct.oneFieldKeyWord) != 0:
+    if searchStruct.oneFieldKeyWord :
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
         # oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
         fieldSet = oneFieldKeyWord.keys()
