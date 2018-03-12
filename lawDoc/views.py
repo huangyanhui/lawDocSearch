@@ -26,7 +26,7 @@ def index(request):
         username = request.session['username']
     # 未登录
     else:
-        allowed_count = 3
+        allowed_count = 99999999999999999999
         username = ''
 
     request.session['allowed_count'] = allowed_count
@@ -34,7 +34,7 @@ def index(request):
 
     return render(request, 'index.html', {
         'username': username,
-        'allowed_count': allowed_count,
+        'allowed_count': 999999999999999999,
     })
 
 
@@ -114,9 +114,58 @@ def indexSearch(request):
         request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": len(legalDocuments)
+            "resultCount": len(legalDocuments),
+            "searchStruct":searchStruct,
+            "field":searchStruct.oneFieldKeyWord.keys(),
+            "notfield":searchStruct.oneFieldNotKeyWord.keys(),
         })
 
+# 点击搜索框下的小标签
+def searchlabel(request):
+    # 每次搜索减 1 次可用次数
+    request.session['allowed_count'] -= 1
+    if request.session['allowed_count'] < 0:
+        if request.session['username'] == '':
+            return render(request, 'account/login.html')
+        else:
+            # TODO: 画个提示页
+            return HttpResponse('该用户查询次数已经超过当天允许次数')
+    # 遍历检查，点击哪个标签就会在搜索体中删除该标签
+    label = request.POST.get('allFieldKeyWord')
+    if(label):
+        print("1")
+        print(label[0])
+        searchStruct.allFieldKeyWord.remove(label)
+    label = request.POST.get('allFieldNotKeyWord')
+    if(label):
+        print("2")
+        searchStruct.allFieldNotKeyWord.remove(label)
+    label = request.POST.get('FieldKeyWord')
+    if(label):
+        print("3")
+        searchStruct.FieldKeyWord.remove(label)
+    label = request.POST.get('OrderFieldKey')
+    if (label):
+        print("4")
+        searchStruct.OrderFieldKey.remove(label)
+    label = request.POST.get('field')
+    if (label):
+        print("5")
+        searchStruct.oneFieldKeyWord.pop(label)
+    label = request.POST.get('fieldnot')
+    if (label):
+        print("6")
+        searchStruct.oneFieldNotKeyWord.pop(label)
+    legalDocuments.clear()
+    searchByStrcut(searchStruct)
+    length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    return render(
+        request, "searchresult.html", {
+            "LegalDocList": legalDocuments[0:length:],
+            "countResults": countResults,
+            "resultCount": len(legalDocuments),
+            "searchStruct": searchStruct
+        })
 
 @csrf_exempt
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
