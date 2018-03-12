@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password, check_password
+from django.utils import timezone
 from .models import User
 
 import re
@@ -13,7 +14,7 @@ def login(request):
     if request.method == 'POST':
         response = {'operation': 'login'}
         # 已经登录
-        if 'allowed_count' in request.session:
+        if request.session['username'] != '':
             response['status'] = 'logined'
         # 未登录
         else:
@@ -25,7 +26,13 @@ def login(request):
             if len(filter_result) > 0:
                 # 密码匹配
                 if check_password(password, filter_result[0].password):
-                    allowed_count = filter_result[0].allowed_count
+                    last_login_time = filter_result[0].last_login_time
+                    now = timezone.now()
+                    # 如果大于 1 天，则刷新可查询次数
+                    if (now - last_login_time).days >= 1:
+                        allowed_count = 5
+                    else:
+                        allowed_count = filter_result[0].allowed_count
                     request.session['allowed_count'] = allowed_count
                     request.session['username'] = username
                     # response
@@ -46,11 +53,18 @@ def login(request):
 
 def logout(request):
     # 已经登录
-    if 'allowed_count' in request.session:
-        del request.session['allowed_count']
-        del request.session['username']
+    if request.session['username'] != '':
+        user = User.objects.get(username=request.session['username'])
+        user.allowed_count = request.session['allowed_count']
+        user.last_login_time = timezone.now()
+        user.save()
+        request.session['username'] = ''
         # 跳转到主页面
-        return render(request, 'index.html')
+        return render(
+            request, 'index.html', {
+                'username': request.session['username'],
+                'allowed_count': request.session['allowed_count'],
+            })
     # 未登录
     else:
         return render(request, 'account/status.html', {
@@ -63,11 +77,10 @@ def logout(request):
 def register(request):
     if request.method == 'POST':
         # 未登录
-        response = {'operation':'register'}
-        if 'allowed_count' not in request.session:
+        response = {'operation': 'register'}
+        if request.session['username'] == '':
             username = request.POST['username']
             password = make_password(request.POST['password'])
-            print(password)
             email = request.POST['email']
             # 默认查询次数
             allowed_count = 5
@@ -83,7 +96,8 @@ def register(request):
                     username=username,
                     password=password,
                     email=email,
-                    allowed_count=allowed_count)
+                    allowed_count=allowed_count,
+                    last_login_time=timezone.now())
                 new_user.save()
                 response['status'] = 'Success'
         else:
@@ -97,6 +111,6 @@ def validate_email(email):
     if len(email) > 7:
         if re.match(
                 "^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$",
-                email) != None:
+                email):
             return True
     return False
