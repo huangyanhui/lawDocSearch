@@ -74,8 +74,12 @@
 
         </div>
 {#            搜索框下面的标签#}
-{#        allfield#}
-            <div class="searchlabelmain">
+
+        {#        allfield#}
+
+        <div id="content" >
+        <section class="serach-field-button">
+          <div class="searchlabelmain">
                 {%  for allFieldKeyWord in searchStruct.allFieldKeyWord %}
                     <form action="searchlabel" method="post">
                         {% csrf_token %}
@@ -88,7 +92,8 @@
                         </div>
                     </form>
                 {% endfor %}
-        </div>
+            </div>
+
 {#        allFieldNotKeyWord #}
             <div class="searchlabelmain">
                 {%  for allFieldNotKeyWord in searchStruct.allFieldNotKeyWord %}
@@ -106,55 +111,78 @@
         </div>
         {#        FieldKeyWord #}
             <div class="searchlabelmain">
-                {%  for FieldKeyWord in searchStruct.FieldKeyWord %}
+                    {% if searchStruct.FieldKeyWord %}
+
+
                     <form action="searchlabel" method="post">
                         {% csrf_token %}
                         <div class="searchlable">
-                            <input type="hidden" name="FieldKeyWord" value="{{ FieldKeyWord }}">
+                            <input type="hidden" name="FieldKeyWord" value="fieldSearch">
                             <button target="_blank"  action="searchlabel">
                                 <span></span>
-                                {{ FieldKeyWord }}
+                                {%  for FieldKeyWord in searchStruct.FieldKeyWord %}
+                                {{ FieldKeyWord }}~
+                                {% endfor %}
+                            （同域搜索）
                             </button>
                         </div>
                     </form>
-                {% endfor %}
-        </div>
+                {% endif %}
+            </div>
         {#        OrderFieldKey #}
             <div class="searchlabelmain">
-                {%  for OrderFieldKey in searchStruct.OrderFieldKey %}
+                    {% if searchStruct.FieldKeyWord %}
                     <form action="searchlabel" method="post">
                         {% csrf_token %}
                         <div class="searchlable">
-                            <input type="hidden" name="OrderFieldKey" value="{{ OrderFieldKey }}">
+                            <input type="hidden" name="OrderFieldKey" value="{{ orderField }}">
                             <button target="_blank"  action="searchlabel">
                                 <span></span>
-                                {{ OrderFieldKey }}
+                                {%  for OrderFieldKey in searchStruct.OrderFieldKey %}
+                                {{ OrderFieldKey }}>
+                                 {% endfor %}
+                                (顺序搜索)
+                            </button>
+                        </div>
+                    </form>
+
+
+            {% endif %}
+            </div>
+{#          oneFieldKeyWord #}
+            <div class="searchlabelmain">
+                {%  for str in onefield %}
+                    <form action="searchlabel" method="post">
+                        {% csrf_token %}
+                        <div class="searchlable">
+                            <input type="hidden" name="oneFieldKeyWord" value="{{ str }}">
+                            <button target="_blank"  action="searchlabel">
+                                <span></span>
+                                {{ str }}
                             </button>
                         </div>
                     </form>
                 {% endfor %}
         </div>
 
-    {#        oneFieldNotKeyWord #}
-{#            <div class="searchlabelmain">#}
-{#                {%   oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord %}#}
-{#                    {%  fields = oneFieldNotKeyWord.keys() %}#}
-{#                {% for fieldnot in fields %}#}
-{#                    <form action="searchlabel" method="post">#}
-{#                        {% csrf_token %}#}
-{#                        <div class="searchlable">#}
-{#                            <input type="hidden" name="oneFieldNotKeyWord" value="{{ fieldnot }}">#}
-{#                            <button target="_blank" class="title" action="searchlabel">#}
-{#                                <span></span>#}
-{#                                {% key = oneFieldNotKeyWord[field] %}#}
-{#                                {{  key }}@{{ field }}#}
-{#                            </button>#}
-{#                        </div>#}
-{#                    </form>#}
-{#                {% endfor %}#}
-{#        </div>#}
+{#            oneFieldNotKeyWord #}
+            <div class="searchlabelmain">
+                {%   for str in onefieldnot %}
+                    <form action="searchlabel" method="post">
+                        {% csrf_token %}
+                        <div class="searchlable">
+                            <input type="hidden" name="oneFieldNotKeyWord" value="{{ str }}">
+                            <button target="_blank" action="searchlabel">
+                                <span></span>
+                                {{str}}
+                            </button>
+                        </div>
+                    </form>
+                {% endfor %}
+        </div>
+        </section>
 
-        <div id="content" >
+
             <div id="bd" class="ue-clear">
                 <div id="main">
                     <div class="row">

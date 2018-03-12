@@ -1,45 +1,109 @@
 
-{% load static %}
+<section class="serach-field-button">
+          <div class="searchlabelmain">
+                {%  for allFieldKeyWord in searchStruct.allFieldKeyWord %}
+                    <form action="searchlabel" method="post">
+                        {% csrf_token %}
+                        <div class="searchlable">
+                            <input type="hidden" name="allFieldKeyWord" value="{{ allFieldKeyWord }}">
+                            <button target="_blank" action="searchlabel">
+                                <span></span>
+                                {{ allFieldKeyWord }}
+                            </button>
+                        </div>
+                    </form>
+                {% endfor %}
+            </div>
 
-<!doctype html>
-<html lang="zh-Hans">
-    <head>
-        <meta charset="UTF-8"/>
-        <title>搜索结果</title>
-        <link href="{% static '/css/bootstrap.css' %}" rel="stylesheet" type="text/css"/>
-        <link href="{% static '/css/bootstrap-theme.css' %}" rel="stylesheet" type="text/css"/>
-        <link href="{% static '/css/result.css' %}" rel="stylesheet" type="text/css"/>
-        <link href="{% static '/css/treestyle.css' %}" rel="stylesheet" type="text/css"/>
-        <link href="{% static '/css/mystyle.css' %}" rel="stylesheet" type="text/css"/>
-        <link href="http://cdn.bootcss.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-        <script type="text/javascript" src="{% static '/js/jquery-3.2.1.js' %}"></script>
-        <script type="text/javascript" src="{% static '/js/bootstrap.js' %}"></script>
-        <script type="text/javascript" src="{% static '/js/sendjs.js' %}"></script>
-        <script type="text/javascript">
-         $(function () {
-             $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
-             $('.tree li.parent_li > span').on('click', function (e) {
-                 var children = $(this).parent('li.parent_li').find(' > ul > li');
-                 if (children.is(":visible")) {
-                     children.hide('fast');
-                     $(this).attr('title', 'Expand this branch').find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
-                 } else {
-                     children.show('fast');
-                     $(this).attr('title', 'Collapse this branch').find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
-                 }
-                 e.stopPropagation();
-             });
-         });
-        </script>
-    </head>
-
-    <body>
-
+{#        allFieldNotKeyWord #}
+            <div class="searchlabelmain">
+                {%  for allFieldNotKeyWord in searchStruct.allFieldNotKeyWord %}
+                    <form action="searchlabel" method="post">
+                        {% csrf_token %}
+                        <div class="searchlable">
+                            <input type="hidden" name="allFieldNotKeyWord" value="{{ allFieldNotKeyWord }}">
+                            <button target="_blank"  action="searchlabel">
+                                <span></span>
+                                !{{ allFieldNotKeyWord }}
+                            </button>
+                        </div>
+                    </form>
+                {% endfor %}
+        </div>
+        {#        FieldKeyWord #}
+            <div class="searchlabelmain">
+                    {% if searchStruct.FieldKeyWord %}
 
 
+                    <form action="searchlabel" method="post">
+                        {% csrf_token %}
+                        <div class="searchlable">
+                            <input type="hidden" name="FieldKeyWord" value="fieldSearch">
+                            <button target="_blank"  action="searchlabel">
+                                <span></span>
+                                {%  for FieldKeyWord in searchStruct.FieldKeyWord %}
+                                {{ FieldKeyWord }}~
+                                {% endfor %}
+                            （同域搜索）
+                            </button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        {#        OrderFieldKey #}
+            <div class="searchlabelmain">
+                    {% if searchStruct.FieldKeyWord %}
+                    <form action="searchlabel" method="post">
+                        {% csrf_token %}
+                        <div class="searchlable">
+                            <input type="hidden" name="OrderFieldKey" value="{{ orderField }}">
+                            <button target="_blank"  action="searchlabel">
+                                <span></span>
+                                {%  for OrderFieldKey in searchStruct.OrderFieldKey %}
+                                {{ OrderFieldKey }}>
+                                 {% endfor %}
+                                (顺序搜索)
+                            </button>
+                        </div>
+                    </form>
 
 
-        <div id="content" >
+            {% endif %}
+            </div>
+{#          oneFieldKeyWord #}
+            <div class="searchlabelmain">
+                {%  for str in onefield %}
+                    <form action="searchlabel" method="post">
+                        {% csrf_token %}
+                        <div class="searchlable">
+                            <input type="hidden" name="oneFieldKeyWord" value="{{ str }}">
+                            <button target="_blank"  action="searchlabel">
+                                <span></span>
+                                {{ str }}
+                            </button>
+                        </div>
+                    </form>
+                {% endfor %}
+        </div>
+
+{#            oneFieldNotKeyWord #}
+            <div class="searchlabelmain">
+                {%   for str in onefieldnot %}
+                    <form action="searchlabel" method="post">
+                        {% csrf_token %}
+                        <div class="searchlable">
+                            <input type="hidden" name="oneFieldNotKeyWord" value="{{ str }}">
+                            <button target="_blank" action="searchlabel">
+                                <span></span>
+                                {{str}}
+                            </button>
+                        </div>
+                    </form>
+                {% endfor %}
+        </div>
+</section>
+
+
             <div id="bd" class="ue-clear">
                 <div id="main">
                     <div class="row">
@@ -176,6 +240,7 @@
                                     <span class="orderOpt">
                                     </span>
                                 </p>
+                            </div>
 
                                 <div class="searchitem resultList">
                                     {% for legaldoc in LegalDocList %}
@@ -230,11 +295,7 @@
             </div><!--End of bd-->
 
 
-        </div>
 
-
-
-    </body>
 
 <script type="text/javascript">
     var btarray=new Array();
@@ -255,9 +316,7 @@
         $(this).html(byrwarray[j]);
         j=j+1;
     })
-</script>
 
-        <script type="text/javascript">
             $(document).ready(function() {
                 //限制字符个数
                 $(".wordControl").each(function() {
@@ -269,10 +328,4 @@
                     }
                 });
             });
-
-         <!-- </script> -->
-</html>
-
-
-
-
+</script>

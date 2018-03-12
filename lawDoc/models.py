@@ -138,6 +138,16 @@ class SearchStruct():
         self.FieldKeyWord = []
         self.OrderFieldKey = []
 
+    def print(self):
+        return {
+            '全域搜索': self.allFieldKeyWord,
+            '单领域搜索': self.oneFieldKeyWord,
+            '全域否定搜索': self.allFieldNotKeyWord,
+            '单域否定搜索': self.oneFieldNotKeyWord,
+            '同域搜索': self.FieldKeyWord,
+            '顺序搜索': self.OrderFieldKey
+        }
+
     # 数据格式为列表
     @property
     def allFieldKeyWord(self):
