@@ -146,6 +146,7 @@ class SearchStruct():
             '单域否定搜索': self.oneFieldNotKeyWord,
             '同域搜索': self.FieldKeyWord,
             '顺序搜索': self.OrderFieldKey
+
         }
 
     # 数据格式为列表

@@ -1,10 +1,10 @@
 
-<section class="serach-field-button">
+       <section class="serach-field-button">
           <div class="searchlabelmain">
                 {%  for allFieldKeyWord in searchStruct.allFieldKeyWord %}
-                    <form action="searchlabel" method="post">
+                    <form class="searchlable" action="searchlabel" method="post">
                         {% csrf_token %}
-                        <div class="searchlable">
+                        <div >
                             <input type="hidden" name="allFieldKeyWord" value="{{ allFieldKeyWord }}">
                             <button target="_blank" action="searchlabel">
                                 <span></span>
@@ -18,9 +18,9 @@
 {#        allFieldNotKeyWord #}
             <div class="searchlabelmain">
                 {%  for allFieldNotKeyWord in searchStruct.allFieldNotKeyWord %}
-                    <form action="searchlabel" method="post">
+                    <form action="searchlabel" class="searchlable" method="post">
                         {% csrf_token %}
-                        <div class="searchlable">
+                        <div >
                             <input type="hidden" name="allFieldNotKeyWord" value="{{ allFieldNotKeyWord }}">
                             <button target="_blank"  action="searchlabel">
                                 <span></span>
@@ -29,15 +29,15 @@
                         </div>
                     </form>
                 {% endfor %}
-        </div>
+            </div>
         {#        FieldKeyWord #}
             <div class="searchlabelmain">
                     {% if searchStruct.FieldKeyWord %}
 
 
-                    <form action="searchlabel" method="post">
+                    <form action="searchlabel"  class="searchlable" method="post">
                         {% csrf_token %}
-                        <div class="searchlable">
+                        <div >
                             <input type="hidden" name="FieldKeyWord" value="fieldSearch">
                             <button target="_blank"  action="searchlabel">
                                 <span></span>
@@ -52,11 +52,11 @@
             </div>
         {#        OrderFieldKey #}
             <div class="searchlabelmain">
-                    {% if searchStruct.FieldKeyWord %}
-                    <form action="searchlabel" method="post">
+                    {% if searchStruct.OrderFieldKey %}
+                    <form action="searchlabel" class="searchlable" method="post">
                         {% csrf_token %}
-                        <div class="searchlable">
-                            <input type="hidden" name="OrderFieldKey" value="{{ orderField }}">
+                        <div >
+                            <input type="hidden" name="OrderFieldKey" value="orderField">
                             <button target="_blank"  action="searchlabel">
                                 <span></span>
                                 {%  for OrderFieldKey in searchStruct.OrderFieldKey %}
@@ -73,9 +73,9 @@
 {#          oneFieldKeyWord #}
             <div class="searchlabelmain">
                 {%  for str in onefield %}
-                    <form action="searchlabel" method="post">
+                    <form action="searchlabel" class="searchlable" method="post">
                         {% csrf_token %}
-                        <div class="searchlable">
+                        <div >
                             <input type="hidden" name="oneFieldKeyWord" value="{{ str }}">
                             <button target="_blank"  action="searchlabel">
                                 <span></span>
@@ -84,14 +84,14 @@
                         </div>
                     </form>
                 {% endfor %}
-        </div>
+            </div>
 
 {#            oneFieldNotKeyWord #}
             <div class="searchlabelmain">
                 {%   for str in onefieldnot %}
-                    <form action="searchlabel" method="post">
+                    <form action="searchlabel" class="searchlable" method="post">
                         {% csrf_token %}
-                        <div class="searchlable">
+                        <div >
                             <input type="hidden" name="oneFieldNotKeyWord" value="{{ str }}">
                             <button target="_blank" action="searchlabel">
                                 <span></span>
@@ -100,9 +100,8 @@
                         </div>
                     </form>
                 {% endfor %}
-        </div>
-</section>
-
+            </div>
+        </section>
 
             <div id="bd" class="ue-clear">
                 <div id="main">
@@ -240,7 +239,6 @@
                                     <span class="orderOpt">
                                     </span>
                                 </p>
-                            </div>
 
                                 <div class="searchitem resultList">
                                     {% for legaldoc in LegalDocList %}
@@ -293,6 +291,7 @@
 
                 </div><!-- End of main -->
             </div><!--End of bd-->
+
 
 
 

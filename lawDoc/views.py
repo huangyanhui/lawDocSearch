@@ -154,16 +154,16 @@ def searchlabel(request):
         print("1")
         print(label[0])
         searchStruct.allFieldKeyWord.remove(label)
-    label = request.POST.get('allFieldNotKeyWord')
-    if(label):
+    label1 = request.POST.get('allFieldNotKeyWord')
+    if(label1):
         print("2")
         searchStruct.allFieldNotKeyWord.remove(label)
-    label = request.POST.get('FieldKeyWord')
-    if(label == "fieldSearch"):
+    label2 = request.POST.get('FieldKeyWord')
+    if(label2 == "fieldSearch"):
         print("3")
         searchStruct.FieldKeyWord = []
-    label = request.POST.get('OrderFieldKey')
-    if (label == "orderField"):
+    label3 = request.POST.get('OrderFieldKey')
+    if (label3 == "orderField"):
         print("4")
         searchStruct.OrderFieldKey = []
     label = request.POST.get('oneFieldKeyWord')
@@ -171,14 +171,22 @@ def searchlabel(request):
         print("5")
         field = label.split('@')[1]
         searchStruct.oneFieldKeyWord.pop(allSearchFieldList[field])
-    label = request.POST.get('fieldnot')
+    label = request.POST.get('oneFieldnNotKeyWord')
     if (label):
         print("6")
         field = label.split('@')[1]
         searchStruct.oneFieldNotKeyWord.pop(allSearchFieldList[field])
-    else:
-        return render(request,"index.html")
     legalDocuments.clear()
+    print(searchStruct.print())
+    if len(searchStruct.OrderFieldKey) \
+            or len(searchStruct.FieldKeyWord)\
+            or len(searchStruct.oneFieldNotKeyWord)\
+            or len(searchStruct.allFieldNotKeyWord)\
+            or len(searchStruct.oneFieldKeyWord)\
+            or len(searchStruct.allFieldKeyWord):
+            print()
+    else:
+            return render(request, "index.html")
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
     # 生成用于产生标签的语句
@@ -197,7 +205,7 @@ def searchlabel(request):
         str = str + "@" + allSearchFieldListR[field]
         oneFieldnot.append(str)
     return render(
-        request, "result.html", {
+        request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
             "resultCount": len(legalDocuments),
@@ -218,7 +226,7 @@ def newSearch(request):
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
 
-    print(searchStruct.print())
+
 
     return render(
         request, "searchresult.html", {

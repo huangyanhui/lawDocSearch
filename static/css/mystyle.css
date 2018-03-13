@@ -86,7 +86,7 @@
 
 .searchlabelmain{
 	float:left;
-	width: 100%;
+    width: auto;
 }
 
 
@@ -94,4 +94,8 @@
 	float: left;
 	border:1px solid #939593;
 	margin-right: 5px;
+}
+
+#bd {
+    clear: both;
 }
