@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 from elasticsearch import Elasticsearch
 from lawDoc.Variable import legalDocuments, allSearchField, \
-    allSearchFieldList, countResults, resultCount
+    allSearchFieldList, countResults, resultCount, allSearchFieldListR
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -26,7 +26,7 @@ def index(request):
         username = request.session['username']
     # 未登录
     else:
-        allowed_count = 3
+        allowed_count = 99999999999999999999
         username = ''
 
     request.session['allowed_count'] = allowed_count
@@ -34,7 +34,7 @@ def index(request):
 
     return render(request, 'index.html', {
         'username': username,
-        'allowed_count': allowed_count,
+        'allowed_count': 999999999999999999,
     })
 
 
@@ -110,13 +110,109 @@ def indexSearch(request):
     searchByStrcut(searchStruct)
 
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    # 生成用于产生标签的语句
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str +" "+ key
+        str = str + "@" +allSearchFieldListR[field]
+        oneField.append(str)
+    oneFieldnot =[]
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str +" "+ key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
+
+    print(searchStruct.print())
+
     return render(
         request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": len(legalDocuments)
+            "resultCount": len(legalDocuments),
+            "searchStruct":searchStruct,
+            "onefield":oneField,
+            "onefieldnot":oneFieldnot,
         })
 
+# 点击搜索框下的小标签
+def searchlabel(request):
+    # 每次搜索减 1 次可用次数
+    request.session['allowed_count'] -= 1
+    if request.session['allowed_count'] < 0:
+        if request.session['username'] == '':
+            return render(request, 'account/login.html')
+        else:
+            # TODO: 画个提示页
+            return HttpResponse('该用户查询次数已经超过当天允许次数')
+    # 遍历检查，点击哪个标签就会在搜索体中删除该标签
+    label = request.POST.get('allFieldKeyWord')
+    if(label):
+        print("1")
+        print(label[0])
+        searchStruct.allFieldKeyWord.remove(label)
+    label1 = request.POST.get('allFieldNotKeyWord')
+    if(label1):
+        print("2")
+        searchStruct.allFieldNotKeyWord.remove(label)
+    label2 = request.POST.get('FieldKeyWord')
+    if(label2 == "fieldSearch"):
+        print("3")
+        searchStruct.FieldKeyWord = []
+    label3 = request.POST.get('OrderFieldKey')
+    if (label3 == "orderField"):
+        print("4")
+        searchStruct.OrderFieldKey = []
+    label = request.POST.get('oneFieldKeyWord')
+    if (label):
+        print("5")
+        field = label.split('@')[1]
+        searchStruct.oneFieldKeyWord.pop(allSearchFieldList[field])
+    label = request.POST.get('oneFieldnNotKeyWord')
+    if (label):
+        print("6")
+        field = label.split('@')[1]
+        searchStruct.oneFieldNotKeyWord.pop(allSearchFieldList[field])
+    legalDocuments.clear()
+    print(searchStruct.print())
+    if len(searchStruct.OrderFieldKey) \
+            or len(searchStruct.FieldKeyWord)\
+            or len(searchStruct.oneFieldNotKeyWord)\
+            or len(searchStruct.allFieldNotKeyWord)\
+            or len(searchStruct.oneFieldKeyWord)\
+            or len(searchStruct.allFieldKeyWord):
+            print()
+    else:
+            return render(request, "index.html")
+    searchByStrcut(searchStruct)
+    length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    # 生成用于产生标签的语句
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
+    return render(
+        request, "searchresult.html", {
+            "LegalDocList": legalDocuments[0:length:],
+            "countResults": countResults,
+            "resultCount": len(legalDocuments),
+            "searchStruct": searchStruct,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
+        })
 
 @csrf_exempt
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
@@ -129,6 +225,8 @@ def newSearch(request):
     legalDocuments.clear()
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+
+
 
     return render(
         request, "searchresult.html", {
@@ -144,15 +242,36 @@ def addSearch(request):
     queryString = request.POST.get('name')
     countResults = 0
     legalDocuments.clear()
-    searchStruct = buildSearchStruct(queryString)
+    buildSearchStruct(queryString)
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    # 生成用于产生标签的语句
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
+
+    print(searchStruct.print())
+    print(countResults)
 
     return render(
-        request, "searchresult.html", {
+        request, "result.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": len(legalDocuments)
+            "resultCount": len(legalDocuments),
+            "searchStruct": searchStruct,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
         })
 
 
@@ -264,25 +383,28 @@ def download(request):
         encoding='utf-8').readlines()  # 打开文件，读入每一行
     for s in lines:
 
-        fp.write(
-            s.replace("标题", legalDocument.bt).replace('diyu', legalDocument.dy)
-            .replace('anhao', legalDocument.ah).replace(
-                'dangshirenxingxi', legalDocument.dsrxx).replace(
-                    'anjianmiaoshu', legalDocument.ajms).replace(
-                        'shenlijingguo', legalDocument.sljg)
-            .replace('yishenqingqiuqingkuang', legalDocument.ysqqqk).replace(
-                'yishendabianqingkuang', legalDocument.ysdbqk).replace(
-                    'yishenfayuanchaming', legalDocument.ysfycm).replace(
-                        'yishenfayuanrenwei', legalDocument.ysfyrw).replace(
-                            'ershenqingqiuqingkuang', legalDocument.esqqqk)
-            .replace('benyuanchaming', legalDocument.bycm).replace(
-                'benyuanrenwei', legalDocument.byrw).replace(
-                    'shenpanjieguo', legalDocument.spjg).replace(
-                        'shenpanrenyuan', legalDocument.spry).replace(
-                            'shenpanriqi', legalDocument.sprq).replace(
-                                'shujiyuan', legalDocument.sjy).replace(
-                                    'xiangguanfatiao',
-                                    legalDocument.xgft))  # replace是替换，write是写入
+        fp.write(s.replace("标题", legalDocument.bt)
+                 .replace("wenshuleixing", legalDocument.wslx)
+                 .replace("nianfen", legalDocument.nf)
+                 .replace("shenlichengxu", legalDocument.slcx)
+                 .replace("fayuancengji", legalDocument.fycj)
+                 .replace('diyu', legalDocument.dy)
+                 .replace('anhao',legalDocument.ah)
+                 .replace('dangshirenxingxi', legalDocument.dsrxx)
+                 .replace('anjianmiaoshu', legalDocument.ajms)
+                 .replace('shenlijingguo', legalDocument.sljg)
+                 .replace('yishenqingqiuqingkuang', legalDocument.ysqqqk)
+                 .replace('yishendabianqingkuang', legalDocument.ysdbqk)
+                 .replace('yishenfayuanchaming', legalDocument.ysfycm)
+                 .replace('yishenfayuanrenwei', legalDocument.ysfyrw)
+                 .replace('ershenqingqiuqingkuang', legalDocument.esqqqk)
+                 .replace('benyuanchaming', legalDocument.bycm)
+                 .replace('benyuanrenwei', legalDocument.byrw)
+                 .replace('shenpanjieguo', legalDocument.spjg)
+                 .replace('shenpanrenyuan', legalDocument.spry)
+                 .replace('shenpanriqi', legalDocument.sprq)
+                 .replace('shujiyuan', legalDocument.sjy)
+                 .replace('xiangguanfatiao', legalDocument.xgft))  # replace是替换，write是写入
 
     fp.close()  # 关闭文件
     outpath = r'static\download\out%s.pdf' % (curr_date)
@@ -350,7 +472,7 @@ def allFieldNotSearch(searchStruct):
 def oneFieldSearch(searchStruct):
     oneFieldKeyWordQuery = []
     oneFieldKeyWordMiniQuery = []
-    if len(searchStruct.oneFieldKeyWord) != 0:
+    if searchStruct.oneFieldKeyWord :
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
         # oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
         fieldSet = oneFieldKeyWord.keys()
@@ -376,7 +498,7 @@ def oneFieldSearch(searchStruct):
 def oneFieldNotSearch(searchStruct):
     oneFieldKeyNotWordQuery = []
     oneFieldKeyNotWordMiniQuery = []
-    if len(searchStruct.oneFieldNotKeyWord) != 0:
+    if searchStruct.oneFieldNotKeyWord:
         oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord
         fieldSet = oneFieldNotKeyWord.keys()
         for field in fieldSet:
@@ -495,28 +617,6 @@ def orderFieldSearch(searchStruct):
 
     return orderFieldKeyWordQuery
 
-
-# 单领域否定搜索:输出：oneFieldKeyNotWordQuery
-def oneFieldNotSearch(searchStruct):
-    oneFieldKeyNotWordQuery = []
-    if len(searchStruct.oneFieldNotKeyWord) != 0:
-        oneFieldKeyWord = searchStruct.oneFieldKeyWord
-        oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord
-        field = allSearchFieldList[oneFieldNotKeyWord["field"]]
-        oneFieldKeyNotWordMiniQuery = []
-
-        for i in oneFieldNotKeyWord["notkeywords"]:
-            oneFieldKeyNotWordMiniQuery.append({"match_phrase": {field: i}})
-        oneFieldKeyNotWordQuery = {
-            "bool": {
-                "must_not": oneFieldKeyNotWordMiniQuery
-            }
-        }
-
-    oneFieldKeyNotWordQuery = {"bool": {"must": oneFieldKeyNotWordQuery}}
-    print(oneFieldKeyNotWordQuery)
-
-    return oneFieldKeyNotWordQuery
 
 
 #对于聚合结果进行排序
