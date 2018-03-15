@@ -116,3 +116,11 @@ body {
     padding: 0;
     color: red;
 }
+
+.login .login-container p.register{
+    text-align: center;
+}
+
+.login .login-container p.register a {
+    text-decoration: none;
+}
