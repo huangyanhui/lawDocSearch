@@ -29,7 +29,7 @@ def index(request):
         allowed_count = 99999999999999999999
         username = ''
 
-    request.session['allowed_count'] = allowed_count
+    request.session['allowed_count'] = 99999999999999999999999
     request.session['username'] = username
 
     return render(request, 'index.html', {
@@ -126,13 +126,13 @@ def indexSearch(request):
         str = str + "@" + allSearchFieldListR[field]
         oneFieldnot.append(str)
 
-    print(searchStruct.print())
+
 
     return render(
         request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": len(legalDocuments),
+            "resultCount": resultCount,
             "searchStruct":searchStruct,
             "onefield":oneField,
             "onefieldnot":oneFieldnot,
@@ -208,7 +208,7 @@ def searchlabel(request):
         request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": len(legalDocuments),
+            "resultCount": resultCount,
             "searchStruct": searchStruct,
             "onefield": oneField,
             "onefieldnot": oneFieldnot,
@@ -232,7 +232,7 @@ def newSearch(request):
         request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": len(legalDocuments)
+            "resultCount": resultCount
         })
 
 
@@ -240,12 +240,13 @@ def newSearch(request):
 # 搜索结果页的结果内搜索，java版本对应路径为“addsearch”
 def addSearch(request):
     queryString = request.POST.get('name')
-    countResults = 0
+    countResults.clear()
     legalDocuments.clear()
     buildSearchStruct(queryString)
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
     # 生成用于产生标签的语句
+    print(searchStruct)
     oneField = []
     for field in searchStruct.oneFieldKeyWord.keys():
         str = ""
@@ -261,18 +262,20 @@ def addSearch(request):
         str = str + "@" + allSearchFieldListR[field]
         oneFieldnot.append(str)
 
-    print(searchStruct.print())
-    print(countResults)
 
     return render(
         request, "result.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": len(legalDocuments),
+            "resultCount": resultCount,
             "searchStruct": searchStruct,
             "onefield": oneField,
             "onefieldnot": oneFieldnot,
         })
+
+
+
+
 
 
 @csrf_exempt
@@ -322,10 +325,29 @@ def groupBySearch(request):
     else:
         searchStruct.oneFieldKeyWord.update({field: keyword})
     searchByStrcut(searchStruct)
+    print(searchStruct.oneFieldKeyWord.keys())
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
 
-    return render(request, "searchresult.html", {
+    return render(request, "result.html", {
         "LegalDocList": legalDocuments,
-        "countResults": countResults
+        "countResults": countResults,
+        "resultCount": resultCount,
+        "searchStruct": searchStruct,
+        "onefield": oneField,
+        "onefieldnot": oneFieldnot,
     })
 
 
@@ -356,9 +378,7 @@ def readFile(filename, chunk_size=512):
 @csrf_exempt
 def download(request):
     if request.method == "POST":
-        print("abcabc" + request.POST["legalDocuments_id"])
         legalDocuments_pos = int(request.POST["legalDocuments_id"])
-        print("abc" + str(legalDocuments_pos))
         legalDocument = legalDocuments[legalDocuments_pos]
     # 临时文件名
     curr_date = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
@@ -443,7 +463,7 @@ def allFieldSearch(searchStruct):
         allFieldKeyWordMiniQuery = []
 
     allFieldKeyWordQuery = {"bool": {"must": allFieldKeyWordQuery}}
-    print(allFieldKeyWordQuery)
+
     return allFieldKeyWordQuery
 
 
@@ -463,7 +483,7 @@ def allFieldNotSearch(searchStruct):
         allFieldNotKeyWordMiniQuery = []
 
     allFieldNotKeyWordQuery = {"bool": {"must": allFieldNotKeyWordQuery}}
-    print(allFieldNotKeyWordQuery)
+
 
     return allFieldNotKeyWordQuery
 
@@ -491,9 +511,11 @@ def oneFieldSearch(searchStruct):
             oneFieldKeyWordMiniQuery = []
 
     oneFieldKeyWordQuery = {"bool": {"must": oneFieldKeyWordQuery}}
-    print(oneFieldKeyWordQuery)
+
 
     return oneFieldKeyWordQuery
+
+
 # 单领域否定搜索:输出：oneFieldKeyNotWordQuery
 def oneFieldNotSearch(searchStruct):
     oneFieldKeyNotWordQuery = []
@@ -550,7 +572,7 @@ def fieldSearch(searchStruct):
         fieldKeyWordQuery = {"bool": {"should": fieldKeyWordQueryCopy}}
 
     fieldKeyWordQuery = {"bool": {"must": fieldKeyWordQuery}}
-    print(fieldKeyWordQuery)
+
 
     return fieldKeyWordQuery
 
@@ -613,7 +635,7 @@ def orderFieldSearch(searchStruct):
         }
 
     orderFieldKeyWordQuery = {"bool": {"must": orderFieldKeyWordQuery}}
-    print(orderFieldKeyWordQuery)
+
 
     return orderFieldKeyWordQuery
 
