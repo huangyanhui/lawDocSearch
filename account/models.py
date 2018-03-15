@@ -11,12 +11,15 @@ class User(models.Model):
     email = models.EmailField()
     allowed_count = models.IntegerField()
     last_login_time = models.DateTimeField()
+    # 识别身份， 1为普通用户，其它为管理员
+    identity = models.IntegerField(default=1)
 
 
 class UserAdmin(admin.ModelAdmin):
 
     list_display = [
-        'username', 'password', 'email', 'allowed_count', 'last_login_time'
+        'username', 'password', 'email', 'allowed_count', 'last_login_time',
+        'identity'
     ]
 
 
