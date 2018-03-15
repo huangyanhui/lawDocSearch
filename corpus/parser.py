@@ -1,5 +1,6 @@
 import urllib
 import urllib.request
+import time
 
 
 class Parser(object):
@@ -32,9 +33,9 @@ class Parser(object):
         for _ in f.readlines():
             key, content = _.split(self._sign)
             if key in self._ignored_list:
-                self.pack[key] = content
+                self._pack[key] = content
             else:
-                self.pack[key] = self._lpt_helper(content)
+                self._pack[key] = self._lpt_helper(content)
 
     def _lpt_helper(self, content):
         url_base = 'https://api.ltp-cloud.com/analysis/?'
@@ -48,7 +49,17 @@ class Parser(object):
         response = urllib.request.urlopen(url_base, args)
         content = str(response.read(),
                       'utf-8').replace('\t', ' ').strip().split('\n')
-        return content
+        sub_list = []
+        res = []
+        for _ in content:
+            if _:
+                sub_list.append(_)
+            else:
+                res.append(sub_list)
+                sub_list = []
+
+        time.sleep(1)
+        return res
 
     @property
     def pack(self):
@@ -71,4 +82,16 @@ if __name__ == '__main__':
     p = Parser(path=path)  # api_key='v1L7l1D825BCVgHyLC5nyzafeHYVtDmD9eUbsTKR'
     p.analyze()
     res = p.pack
-    print(res)
+    f = open('/home/cowlog/Project/刑事/分词.txt', 'w')
+    for key, value in res.items():
+        if isinstance(value, list):
+            f.write(key + '##')
+            for _ in value:
+                if not _:
+                    f.write('$$$')
+                else:
+                    f.write(_ + '#')
+            f.write('\n')
+        else:
+            f.write(key + '##' + value)
+    f.close()
