@@ -22,7 +22,7 @@ searchStruct = SearchStruct()
 def index(request):
     # 已经登录或已经访问过
     # if 'allowed_count' in request.session:
-    if request.session['username'] != '':
+    if 'username' in request.session and request.session['username'] != '':
         allowed_count = request.session['allowed_count']
         username = request.session['username']
         identity = request.session['identity']
