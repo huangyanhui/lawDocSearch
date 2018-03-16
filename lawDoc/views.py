@@ -21,8 +21,8 @@ searchStruct = SearchStruct()
 
 def index(request):
     # 已经登录或已经访问过
-    # if 'allowed_count' in request.session:
-    if 'username' in request.session and request.session['username'] != '':
+    # if 'username' in request.session and request.session['username'] != '':
+    if 'allowed_count' in request.session:
         allowed_count = request.session['allowed_count']
         username = request.session['username']
         identity = request.session['identity']
@@ -434,7 +434,7 @@ def download(request):
         legalDocument = legalDocuments[legalDocuments_pos]
     # 临时文件名
     curr_date = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-    css = r'static\css\showDetail.css'
+    css = 'static/css/showDetail.css'
     options = {
         'page-size': 'Letter',
         'margin-top': '0.75in',
@@ -444,14 +444,14 @@ def download(request):
         'encoding': "UTF-8",
         'no-outline': None
     }
-    path_wk = r'D:\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
-    config = pdfkit.configuration(wkhtmltopdf=path_wk)
+    # path_wk = r'D:\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
+    # config = pdfkit.configuration(wkhtmltopdf=path_wk)
     # 读文件并且替换动态内容
+    print(os.getcwd())
     fp = open(
-        r"static\download\pdf.html", 'w',
-        encoding='utf-8')  # 打开你要写得文件test2.txt
+        'static/download/pdf.html', 'w', encoding='utf-8')  # 打开你要写得文件test2.txt
     lines = open(
-        r'static\download\demo.html', 'r',
+        'static/download/demo.html', 'r',
         encoding='utf-8').readlines()  # 打开文件，读入每一行
     for s in lines:
 
@@ -481,13 +481,13 @@ def download(request):
         # replace是替换，write是写入
 
     fp.close()  # 关闭文件
-    outpath = r'static\download\out%s.pdf' % (curr_date)
+    outpath = 'static/download/out%s.pdf' % (curr_date)
     pdfkit.from_file(
-        r'static\download\pdf.html',
+        'static/download/pdf.html',
         options=options,
         css=css,
-        output_path=outpath,
-        configuration=config)
+        output_path=outpath)
+    # configuration=config)
     # 文件下载
     file = open(r'%s' % (outpath), 'rb')
     response = FileResponse(file)
