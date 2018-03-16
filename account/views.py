@@ -35,6 +35,8 @@ def login(request):
                         allowed_count = filter_result[0].allowed_count
                     request.session['allowed_count'] = allowed_count
                     request.session['username'] = username
+                    # 识别身份（1为普通用户，2为管理员）
+                    request.session['identity'] = filter_result[0].identity
                     # response
                     response['status'] = 'success'
                     response['username'] = username
@@ -59,11 +61,19 @@ def logout(request):
         user.last_login_time = timezone.now()
         user.save()
         request.session['username'] = ''
+        # 登出后默认没有搜索次数
+        # request.session['allowed_count'] = -1
+        # DEBUG 语句
+        request.session['allowed_count'] = 99999999999999
+        # DEBUG 语句
+        # 删除识别身份
+        del request.session['identity']
         # 跳转到主页面
         return render(
             request, 'index.html', {
                 'username': request.session['username'],
                 'allowed_count': request.session['allowed_count'],
+                'identity': 1,
             })
     # 未登录
     else:
@@ -97,7 +107,8 @@ def register(request):
                     password=password,
                     email=email,
                     allowed_count=allowed_count,
-                    last_login_time=timezone.now())
+                    last_login_time=timezone.now(),
+                    identity=1)
                 new_user.save()
                 response['status'] = 'Success'
         else:
