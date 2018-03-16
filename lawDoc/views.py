@@ -292,20 +292,43 @@ def addSearch(request):
 # 加载更多，java版本对应路径为getMore
 def getMore(request):
 
+    # 生成用于产生标签的语句
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
+
     pageId = int(request.POST.get('name'))
     if pageId * 20 < len(legalDocuments):
         return render(
             request, "result.html", {
                 "LegalDocList": legalDocuments[0:pageId * 20],
                 "countResults": countResults,
-                "resultCount": resultCount
+                "resultCount": resultCount,
+                "searchStruct": searchStruct,
+                "onefield": oneField,
+                "onefieldnot": oneFieldnot,
             })
     else:
         return render(
             request, "result.html", {
                 "LegalDocList": legalDocuments.index(0, len(legalDocuments)),
                 "countResults": countResults,
-                "resultCount": resultCount
+                "resultCount": resultCount,
+                "searchStruct": searchStruct,
+                "onefield": oneField,
+                "onefieldnot": oneFieldnot,
             })
 
         # paginator = Paginator(legalDocuments, 10)
