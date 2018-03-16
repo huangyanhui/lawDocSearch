@@ -234,7 +234,7 @@ def searchlabel(request):
 @csrf_exempt
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
 def newSearch(request):
-    countResults = {}
+    countResults.clear()
     global searchStruct
     searchStruct.clear()
     keyWord = request.POST.get('name')
@@ -243,11 +243,29 @@ def newSearch(request):
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
 
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
+
     return render(
-        request, "searchresult.html", {
+        request, "result.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": resultCount
+            "resultCount": resultCount,
+            "searchStruct": searchStruct,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
         })
 
 
@@ -323,7 +341,7 @@ def getMore(request):
     else:
         return render(
             request, "result.html", {
-                "LegalDocList": legalDocuments.index(0, len(legalDocuments)),
+                "LegalDocList": legalDocuments[0:len(legalDocuments)],
                 "countResults": countResults,
                 "resultCount": resultCount,
                 "searchStruct": searchStruct,
