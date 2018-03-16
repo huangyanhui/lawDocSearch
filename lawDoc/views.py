@@ -37,7 +37,7 @@ def index(request):
     allowed_count = 9999999999999
     # DEBUG 语句
 
-    request.session['allowed_count'] = 99999999999999999999999
+    request.session['allowed_count'] = allowed_count
     request.session['username'] = username
     request.session['identity'] = identity
 
@@ -48,7 +48,7 @@ def index(request):
     })
 
 
-#搜索结构体的构造
+# 搜索结构体的构造
 def buildSearchStruct(queryString):
     keyword = queryString.split('@')[0]
     if '@' in queryString:
@@ -139,16 +139,14 @@ def indexSearch(request):
         str = str + "@" + allSearchFieldListR[field]
         oneFieldnot.append(str)
 
-
-
     return render(
         request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
             "resultCount": resultCount,
             "searchStruct": searchStruct,
-            "onefield":oneField,
-            "onefieldnot":oneFieldnot,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
         })
 
 
@@ -279,7 +277,6 @@ def addSearch(request):
         str = str + "@" + allSearchFieldListR[field]
         oneFieldnot.append(str)
 
-
     return render(
         request, "result.html", {
             "LegalDocList": legalDocuments[0:length:],
@@ -291,13 +288,26 @@ def addSearch(request):
         })
 
 
-
-
-
-
 @csrf_exempt
 # 加载更多，java版本对应路径为getMore
 def getMore(request):
+
+    # 生成用于产生标签的语句
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
 
     pageId = int(request.POST.get('name'))
     if pageId * 20 < len(legalDocuments):
@@ -305,14 +315,20 @@ def getMore(request):
             request, "result.html", {
                 "LegalDocList": legalDocuments[0:pageId * 20],
                 "countResults": countResults,
-                "resultCount": resultCount
+                "resultCount": resultCount,
+                "searchStruct": searchStruct,
+                "onefield": oneField,
+                "onefieldnot": oneFieldnot,
             })
     else:
         return render(
             request, "result.html", {
                 "LegalDocList": legalDocuments.index(0, len(legalDocuments)),
                 "countResults": countResults,
-                "resultCount": resultCount
+                "resultCount": resultCount,
+                "searchStruct": searchStruct,
+                "onefield": oneField,
+                "onefieldnot": oneFieldnot,
             })
 
         # paginator = Paginator(legalDocuments, 10)
@@ -358,14 +374,15 @@ def groupBySearch(request):
         str = str + "@" + allSearchFieldListR[field]
         oneFieldnot.append(str)
 
-    return render(request, "result.html", {
-        "LegalDocList": legalDocuments,
-        "countResults": countResults,
-        "resultCount": resultCount,
-        "searchStruct": searchStruct,
-        "onefield": oneField,
-        "onefieldnot": oneFieldnot,
-    })
+    return render(
+        request, "result.html", {
+            "LegalDocList": legalDocuments,
+            "countResults": countResults,
+            "resultCount": resultCount,
+            "searchStruct": searchStruct,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
+        })
 
 
 @csrf_exempt
@@ -503,7 +520,6 @@ def allFieldNotSearch(searchStruct):
 
     allFieldNotKeyWordQuery = {"bool": {"must": allFieldNotKeyWordQuery}}
 
-
     return allFieldNotKeyWordQuery
 
 
@@ -530,7 +546,6 @@ def oneFieldSearch(searchStruct):
             oneFieldKeyWordMiniQuery = []
 
     oneFieldKeyWordQuery = {"bool": {"must": oneFieldKeyWordQuery}}
-
 
     return oneFieldKeyWordQuery
 
@@ -593,7 +608,6 @@ def fieldSearch(searchStruct):
 
     fieldKeyWordQuery = {"bool": {"must": fieldKeyWordQuery}}
 
-
     return fieldKeyWordQuery
 
 
@@ -655,7 +669,6 @@ def orderFieldSearch(searchStruct):
         }
 
     orderFieldKeyWordQuery = {"bool": {"must": orderFieldKeyWordQuery}}
-
 
     return orderFieldKeyWordQuery
 

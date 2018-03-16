@@ -42,7 +42,11 @@
                             <button target="_blank"  action="searchlabel">
                                 <span></span>
                                 {%  for FieldKeyWord in searchStruct.FieldKeyWord %}
+                                {% if forloop.last %}
+                                {{ FieldKeyWord }}
+                                {% else %}
                                 {{ FieldKeyWord }}~
+                                {% endif %}
                                 {% endfor %}
                             （同域搜索）
                             </button>
@@ -60,9 +64,13 @@
                             <button target="_blank"  action="searchlabel">
                                 <span></span>
                                 {%  for OrderFieldKey in searchStruct.OrderFieldKey %}
+                                {% if forloop.last %}
+                                {{ OrderFieldKey }}
+                                {% else %}
                                 {{ OrderFieldKey }}>
+                                {% endif %}
                                  {% endfor %}
-                                (顺序搜索)
+                                （顺序搜索）
                             </button>
                         </div>
                     </form>
