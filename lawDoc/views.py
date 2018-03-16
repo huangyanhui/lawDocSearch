@@ -37,7 +37,7 @@ def index(request):
     allowed_count = 9999999999999
     # DEBUG 语句
 
-    request.session['allowed_count'] = 99999999999999999999999
+    request.session['allowed_count'] = allowed_count
     request.session['username'] = username
     request.session['identity'] = identity
 
@@ -48,7 +48,7 @@ def index(request):
     })
 
 
-#搜索结构体的构造
+# 搜索结构体的构造
 def buildSearchStruct(queryString):
     keyword = queryString.split('@')[0]
     if '@' in queryString:
@@ -139,16 +139,14 @@ def indexSearch(request):
         str = str + "@" + allSearchFieldListR[field]
         oneFieldnot.append(str)
 
-
-
     return render(
         request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
             "resultCount": resultCount,
             "searchStruct": searchStruct,
-            "onefield":oneField,
-            "onefieldnot":oneFieldnot,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
         })
 
 
@@ -279,7 +277,6 @@ def addSearch(request):
         str = str + "@" + allSearchFieldListR[field]
         oneFieldnot.append(str)
 
-
     return render(
         request, "result.html", {
             "LegalDocList": legalDocuments[0:length:],
@@ -289,10 +286,6 @@ def addSearch(request):
             "onefield": oneField,
             "onefieldnot": oneFieldnot,
         })
-
-
-
-
 
 
 @csrf_exempt
@@ -358,14 +351,15 @@ def groupBySearch(request):
         str = str + "@" + allSearchFieldListR[field]
         oneFieldnot.append(str)
 
-    return render(request, "result.html", {
-        "LegalDocList": legalDocuments,
-        "countResults": countResults,
-        "resultCount": resultCount,
-        "searchStruct": searchStruct,
-        "onefield": oneField,
-        "onefieldnot": oneFieldnot,
-    })
+    return render(
+        request, "result.html", {
+            "LegalDocList": legalDocuments,
+            "countResults": countResults,
+            "resultCount": resultCount,
+            "searchStruct": searchStruct,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
+        })
 
 
 @csrf_exempt
@@ -503,7 +497,6 @@ def allFieldNotSearch(searchStruct):
 
     allFieldNotKeyWordQuery = {"bool": {"must": allFieldNotKeyWordQuery}}
 
-
     return allFieldNotKeyWordQuery
 
 
@@ -530,7 +523,6 @@ def oneFieldSearch(searchStruct):
             oneFieldKeyWordMiniQuery = []
 
     oneFieldKeyWordQuery = {"bool": {"must": oneFieldKeyWordQuery}}
-
 
     return oneFieldKeyWordQuery
 
@@ -593,7 +585,6 @@ def fieldSearch(searchStruct):
 
     fieldKeyWordQuery = {"bool": {"must": fieldKeyWordQuery}}
 
-
     return fieldKeyWordQuery
 
 
@@ -655,7 +646,6 @@ def orderFieldSearch(searchStruct):
         }
 
     orderFieldKeyWordQuery = {"bool": {"must": orderFieldKeyWordQuery}}
-
 
     return orderFieldKeyWordQuery
 
