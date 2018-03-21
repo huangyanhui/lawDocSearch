@@ -149,9 +149,12 @@ def forget_password(request):
             elif len(filter_result) == 0:
                 response['status'] = 'Username unexists.'
             else:
+
+                url = 'http://'+ request.get_host() +'/account/reset/'
+                print(url)
                 # 邮箱匹配
                 if email == filter_result[0].email:
-                    if send_your_email(email,username) == 1:
+                    if send_your_email(email,username,url) == 1:
                         response['status'] = 'Success'
                     else:
                         response['status'] = 'try again'
