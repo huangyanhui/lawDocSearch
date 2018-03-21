@@ -89,24 +89,3 @@ class AccountTest(TestCase):
         session.save()
         resp = self.client.post('/account/logout')
         self.assertEqual(resp.status_code, 200)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
