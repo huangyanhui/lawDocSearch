@@ -1,3 +1,5 @@
+import base64
+
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -149,7 +151,7 @@ def forget_password(request):
             else:
                 # 邮箱匹配
                 if email == filter_result[0].email:
-                    if send_your_email(email) == 1:
+                    if send_your_email(email,username) == 1:
                         response['status'] = 'Success'
                     else:
                         response['status'] = 'try again'
@@ -159,3 +161,40 @@ def forget_password(request):
         return HttpResponse(json.dumps(response, ensure_ascii=False))
     else:
         return render(request, 'account/forget_password.html')
+
+@csrf_exempt
+def reset(request,code):
+    if request.method == 'GET':
+        return render(request, 'account/reset.html')
+    if request.method == 'POST':
+        # url解密
+        code = code + '\n'
+        code = code.encode('utf-8')
+        code = base64.decodebytes(code).decode('utf-8')
+        name = code.split('##')[0]
+        print(name)
+        # 验证url是否合法
+        filter_result = User.objects.filter(username = name)
+        # 如果地址非法，返回主页
+        if  filter_result == 0:
+            return render(request, 'index.html')
+        # 地址合法，验证两次密码是否相同
+        else:
+            response = {'operation': 'reset'}
+            if request.POST['password'] == request.POST['re-password']:
+                try:
+                    # 修改密码
+                    password = request.POST['password']
+                    user = User.objects.get(username = name)
+                    user.password = make_password(password)
+                    user.save()
+                    response['status'] = 'Sucess'
+                except:
+                    # 查询错误
+                    print('查询错误')
+                    response['status'] = 'query error'
+            else:
+                # 两次输入密码不同
+                response['status'] = 'email error'
+        print(response['status'])
+        return HttpResponse(json.dumps(response, ensure_ascii=False))
