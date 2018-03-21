@@ -1,8 +1,12 @@
+import base64
+
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
+
+from utils.MyEmail import send_your_email
 from .models import User
 
 import re
@@ -125,3 +129,72 @@ def validate_email(email):
                 email):
             return True
     return False
+
+@csrf_exempt
+def forget_password(request):
+    if request.method == 'POST':
+        response = {'operation': 'forget_password'}
+        # 已经登录
+        if request.session['username'] != '':
+            response['status'] = 'logined'
+        # 未登录
+        else:
+            username = request.POST['username']
+            email = request.POST['email']
+            filter_result = User.objects.filter(username=username)
+            # 邮箱不合法
+            if not validate_email(email):
+                response['status'] = 'Email invalidate'
+            # 用户名重复
+            elif len(filter_result) == 0:
+                response['status'] = 'Username unexists.'
+            else:
+                # 邮箱匹配
+                if email == filter_result[0].email:
+                    if send_your_email(email,username) == 1:
+                        response['status'] = 'Success'
+                    else:
+                        response['status'] = 'try again'
+                else:
+                    response['status'] = 'Wrong email'
+        print(response['status'])
+        return HttpResponse(json.dumps(response, ensure_ascii=False))
+    else:
+        return render(request, 'account/forget_password.html')
+
+@csrf_exempt
+def reset(request,code):
+    if request.method == 'GET':
+        return render(request, 'account/reset.html')
+    if request.method == 'POST':
+        # url解密
+        code = code + '\n'
+        code = code.encode('utf-8')
+        code = base64.decodebytes(code).decode('utf-8')
+        name = code.split('##')[0]
+        print(name)
+        # 验证url是否合法
+        filter_result = User.objects.filter(username = name)
+        # 如果地址非法，返回主页
+        if  filter_result == 0:
+            return render(request, 'index.html')
+        # 地址合法，验证两次密码是否相同
+        else:
+            response = {'operation': 'reset'}
+            if request.POST['password'] == request.POST['re-password']:
+                try:
+                    # 修改密码
+                    password = request.POST['password']
+                    user = User.objects.get(username = name)
+                    user.password = make_password(password)
+                    user.save()
+                    response['status'] = 'Sucess'
+                except:
+                    # 查询错误
+                    print('查询错误')
+                    response['status'] = 'query error'
+            else:
+                # 两次输入密码不同
+                response['status'] = 'email error'
+        print(response['status'])
+        return HttpResponse(json.dumps(response, ensure_ascii=False))
