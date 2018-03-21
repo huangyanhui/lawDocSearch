@@ -129,3 +129,10 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
     'django.contrib.auth.hashers.BCryptPasswordHasher',
 ]
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'smtp.163.com'  #邮件服务器  在邮箱设置内可以找到
+EMAIL_PORT = 465                      #固定端口
+EMAIL_HOST_USER = 'flwssshuang@163.com'   #邮箱用户名
+EMAIL_HOST_PASSWORD = 'huang123'          #这个我们看一下官方文档         #默认False
+EMAIL_FROM = 'flwssshuang@163.com'      #与用户名保持一致
+
