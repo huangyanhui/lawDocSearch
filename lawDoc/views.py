@@ -22,15 +22,15 @@ searchStruct = SearchStruct()
 def index(request):
     # 已经登录或已经访问过
     # if 'username' in request.session and request.session['username'] != '':
-    if 'allowed_count' in request.session:
-        allowed_count = request.session['allowed_count']
-        username = request.session['username']
-        identity = request.session['identity']
+    # if 'username' in request.session:
+    allowed_count = request.session['allowed_count'] if 'allowed_count' in request.session else 3
+    username = request.session['username'] if 'username' in request.session else ''
+    identity = request.session['identity'] if 'identity' in request.session else 1
     # 未登录，默认为普通用户
-    else:
-        allowed_count = 3
-        username = ''
-        identity = 1
+    # else:
+    #     allowed_count = 3
+    #     username = ''
+    #     identity = 1
 
     # 测试设置 allowed_count 为 9999999999999
     # DEBUG 语句
@@ -43,7 +43,7 @@ def index(request):
 
     return render(request, 'index.html', {
         'username': username,
-        'allowed_count': 3,
+        'allowed_count': allowed_count,
         'identity': identity
     })
 
@@ -429,6 +429,9 @@ def readFile(filename, chunk_size=512):
 
 @csrf_exempt
 def download(request):
+    # 没有登录
+    if request.session['username'] == '':
+        return render(request, 'account/login.html')
     if request.method == "POST":
         legalDocuments_pos = int(request.POST["legalDocuments_id"])
         legalDocument = legalDocuments[legalDocuments_pos]
