@@ -429,6 +429,9 @@ def readFile(filename, chunk_size=512):
 
 @csrf_exempt
 def download(request):
+    # 没有登录
+    if request.session['username'] == '':
+        return render(request, 'account/login.html')
     if request.method == "POST":
         legalDocuments_pos = int(request.POST["legalDocuments_id"])
         legalDocument = legalDocuments[legalDocuments_pos]
