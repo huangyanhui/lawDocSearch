@@ -28,7 +28,6 @@ def send_your_email(email, name, url, send_type):
         email_body = '请点击下面的链接修改你的密码: ' + url + '{0}'.format(s2)
     elif send_type == 'register':
         email_title = '确定注册'
-        email_body = '确定注册'
         email_body = '请点击下面的链接确定注册: ' + url + '{0}'.format(s2)
 
     send_status = send_mail(email_title, email_body, EMAIL_FROM, [email])
