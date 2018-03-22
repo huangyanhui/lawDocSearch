@@ -23,9 +23,12 @@ def index(request):
     # 已经登录或已经访问过
     # if 'username' in request.session and request.session['username'] != '':
     # if 'username' in request.session:
-    allowed_count = request.session['allowed_count'] if 'allowed_count' in request.session else 3
-    username = request.session['username'] if 'username' in request.session else ''
-    identity = request.session['identity'] if 'identity' in request.session else 1
+    allowed_count = request.session[
+        'allowed_count'] if 'allowed_count' in request.session else 3
+    username = request.session[
+        'username'] if 'username' in request.session else ''
+    identity = request.session[
+        'identity'] if 'identity' in request.session else 1
     # 未登录，默认为普通用户
     # else:
     #     allowed_count = 3
@@ -34,7 +37,7 @@ def index(request):
 
     # 测试设置 allowed_count 为 9999999999999
     # DEBUG 语句
-    allowed_count = 9999999999999
+    # allowed_count = 9999999999999
     # DEBUG 语句
 
     request.session['allowed_count'] = allowed_count
@@ -392,9 +395,11 @@ def groupBySearch(request):
         str = str + "@" + allSearchFieldListR[field]
         oneFieldnot.append(str)
 
+    length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+
     return render(
         request, "result.html", {
-            "LegalDocList": legalDocuments,
+            "LegalDocList": legalDocuments[0:length],
             "countResults": countResults,
             "resultCount": resultCount,
             "searchStruct": searchStruct,
@@ -718,152 +723,150 @@ def searchByStrcut(searchStruct):
     orderFieldKeyWordQuery = orderFieldSearch(searchStruct)
     oneFieldKeyNotWordQuery = oneFieldNotSearch(searchStruct)
 
-
     query = {
-            "size": 1000,
-            "query": {
-                "bool": {
-                    "must": [
-                        allFieldKeyWordQuery, allFieldNotKeyWordQuery,
-                        oneFieldKeyWordQuery, fieldKeyWordQuery,
-                        orderFieldKeyWordQuery, oneFieldKeyNotWordQuery
-                    ]
+        "size": 1000,
+        "query": {
+            "bool": {
+                "must": [
+                    allFieldKeyWordQuery, allFieldNotKeyWordQuery,
+                    oneFieldKeyWordQuery, fieldKeyWordQuery,
+                    orderFieldKeyWordQuery, oneFieldKeyNotWordQuery
+                ]
+            }
+        },
+        "aggs": {
+            "fycj": {
+                "terms": {
+                    "field": "fycj"
                 }
             },
-            "aggs": {
-                "fycj": {
-                    "terms": {
-                        "field": "fycj"
-                    }
-                },
-                "wslx": {
-                    "terms": {
-                        "field": "wslx"
-                    }
-                },
-                "nf": {
-                    "terms": {
-                        "field": "nf"
-                    }
-                },
-                "ay": {
-                    "terms": {
-                        "field": "ay"
-                    }
-                },
-                "dy": {
-                    "terms": {
-                        "field": "dy"
-                    }
-                },
-                "slcx": {
-                    "terms": {
-                        "field": "slcx"
-                    }
+            "wslx": {
+                "terms": {
+                    "field": "wslx"
                 }
             },
-            "highlight": {
-                "require_field_match": True,
-                "fields": {
-                    "fy": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "dsrxx": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "ah": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "spry": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "ysfycm": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "ysqqqk": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "byrw": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "spjg": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "ysdbqk": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "esqqqk": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "ysfyrw": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "wslx": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "ajms": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "xgft": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "sprq": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "sljg": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "bycm": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "sjy": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    },
-                    "bt": {
-                        "pre_tags": "<span style=\"color:red\">",
-                        "post_tags": "</span>",
-                        "number_of_fragments": 0
-                    }
+            "nf": {
+                "terms": {
+                    "field": "nf"
+                }
+            },
+            "ay": {
+                "terms": {
+                    "field": "ay"
+                }
+            },
+            "dy": {
+                "terms": {
+                    "field": "dy"
+                }
+            },
+            "slcx": {
+                "terms": {
+                    "field": "slcx"
                 }
             }
+        },
+        "highlight": {
+            "require_field_match": True,
+            "fields": {
+                "fy": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "dsrxx": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ah": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "spry": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ysfycm": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ysqqqk": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "byrw": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "spjg": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ysdbqk": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "esqqqk": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ysfyrw": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "wslx": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "ajms": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "xgft": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "sprq": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "sljg": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "bycm": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "sjy": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                },
+                "bt": {
+                    "pre_tags": "<span style=\"color:red\">",
+                    "post_tags": "</span>",
+                    "number_of_fragments": 0
+                }
+            }
+        }
     }
-
 
     print(json.dumps(query))
     searchResults = es.search(
@@ -892,7 +895,8 @@ def searchByStrcut(searchStruct):
         else:
             legalDoc.fy = result['_source']['fy']
 
-        if ('highlight' in result and result['highlight'].__contains__('dsrxx')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('dsrxx')):
             legalDoc.dsrxx = result['highlight']['dsrxx'][0]
         else:
             legalDoc.dsrxx = result['_source']['dsrxx']
@@ -902,67 +906,80 @@ def searchByStrcut(searchStruct):
         else:
             legalDoc.ah = result['_source']['ah']
 
-        if ('highlight' in result and result['highlight'].__contains__('spry')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('spry')):
             legalDoc.spry = result['highlight']['spry'][0]
         else:
             legalDoc.spry = result['_source']['spry']
 
-        if ('highlight' in result and result['highlight'].__contains__('ysfycm')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('ysfycm')):
             legalDoc.ysfycm = result['highlight']['ysfycm'][0]
         else:
             legalDoc.ysfycm = result['_source']['ysfycm']
 
-        if ('highlight' in result and result['highlight'].__contains__('ysqqqk')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('ysqqqk')):
             legalDoc.ysqqqk = result['highlight']['ysqqqk'][0]
         else:
             legalDoc.ysqqqk = result['_source']['ysqqqk']
 
-        if ('highlight' in result and result['highlight'].__contains__('byrw')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('byrw')):
             legalDoc.byrw = result['highlight']['byrw'][0]
         else:
             legalDoc.byrw = result['_source']['byrw']
 
-        if ('highlight' in result and result['highlight'].__contains__('spjg')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('spjg')):
             legalDoc.spjg = result['highlight']['spjg'][0]
         else:
             legalDoc.spjg = result['_source']['spjg']
 
-        if ('highlight' in result and result['highlight'].__contains__('ysdbqk')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('ysdbqk')):
             legalDoc.ysdbqk = result['highlight']['ysdbqk'][0]
         else:
             legalDoc.ysdbqk = result['_source']['ysdbqk']
 
-        if ('highlight' in result and result['highlight'].__contains__('esqqqk')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('esqqqk')):
             legalDoc.esqqqk = result['highlight']['esqqqk'][0]
         else:
             legalDoc.esqqqk = result['_source']['esqqqk']
 
-        if ('highlight' in result and result['highlight'].__contains__('ysfyrw')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('ysfyrw')):
             legalDoc.ysfyrw = result['highlight']['ysfyrw'][0]
         else:
             legalDoc.ysfyrw = result['_source']['ysfyrw']
 
-        if ('highlight' in result and result['highlight'].__contains__('ajms')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('ajms')):
             legalDoc.ajms = result['highlight']['ajms'][0]
         else:
             legalDoc.ajms = result['_source']['ajms']
 
-        if ('highlight' in result and result['highlight'].__contains__('xgft')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('xgft')):
             legalDoc.xgft = result['highlight']['xgft'][0]
         else:
             legalDoc.xgft = result['_source']['xgft']
 
-        if ('highlight' in result and result['highlight'].__contains__('sprq')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('sprq')):
             legalDoc.sprq = result['highlight']['sprq'][0]
         else:
             legalDoc.sprq = result['_source']['sprq']
 
-        if ('highlight' in result and result['highlight'].__contains__('sljg')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('sljg')):
             legalDoc.sljg = result['highlight']['sljg'][0]
         else:
             legalDoc.sljg = result['_source']['sljg']
 
-        if ('highlight' in result and result['highlight'].__contains__('bycm')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('bycm')):
             legalDoc.bycm = result['highlight']['bycm'][0]
         else:
             legalDoc.bycm = result['_source']['bycm']

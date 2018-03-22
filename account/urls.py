@@ -8,4 +8,5 @@ urlpatterns = [
     path('register', views.register, name='register'),
     path('forget_password', views.forget_password, name='forget_password'),
     url('reset/(?P<code>.*)', views.reset, name='reset'),
+    url('active/(?P<code>.*)', views.active, name='active'),
 ]
