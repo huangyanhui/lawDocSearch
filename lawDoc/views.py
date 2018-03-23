@@ -309,7 +309,6 @@ def addSearch(request):
 @csrf_exempt
 # 加载更多，java版本对应路径为getMore
 def getMore(request):
-
     # 生成用于产生标签的语句
     oneField = []
     for field in searchStruct.oneFieldKeyWord.keys():
@@ -497,8 +496,16 @@ def download(request):
 
 
 # 进入推荐页面，java版本对应路径为recommondDetail
-def getRecommondDetail(request):
-    pass
+def getRecommondDetail(legalDocument):
+    id=legalDocument.id
+    es = Elasticsearch()
+    searchResults = es.search(
+        index='legal_index',
+        doc_type='legalDocument',
+        request_timeout=300,
+        id=id)
+
+
 
 
 # 全领域搜索的解决思路是对每个域进行搜索，之间用should连接
@@ -884,6 +891,7 @@ def searchByStrcut(searchStruct):
 
     for result in results:
         legalDoc = LegalDocument()
+        legalDoc.id=result['_source']['id']
         if ('highlight' in result and result['highlight'].__contains__('fy')):
             legalDoc.fy = result['highlight']['fy'][0]
         else:
