@@ -13,7 +13,7 @@ class ElasticSearchClient(object):
         else:
             host = 'localhost'
             port = 9200
-            es_servers = [{'host': host, 'port': port}]
+            es_servers = [{'host': 'http://yaexp.com/', 'port': 80}]
             es_client = Elasticsearch(hosts=es_servers, timeout=600)
         return es_client
 

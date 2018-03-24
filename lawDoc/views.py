@@ -10,11 +10,17 @@ from lawDoc.Variable import legalDocuments, allSearchField, \
     allSearchFieldList, countResults, resultCount, allSearchFieldListR
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import os
+
+from gensim import corpora,models,similarities,utils
+
 
 # Create your views here.
 
 # 展示首页,java版本对应路径为“/”
 from lawDoc.models import SearchStruct, LegalDocument
+from utils.elastic_search import ElasticSearchClient
+from gensim import corpora,models,similarities,utils
 
 searchStruct = SearchStruct()
 
@@ -405,12 +411,53 @@ def groupBySearch(request):
 @csrf_exempt
 # 进入详细页面，java版本对应路径为searchresult
 def getDetail(request):
+    es = Elasticsearch(hosts=[{'host': 'yaexp.com', 'port': 80}])
     if request.method == "POST":
         legalDocuments_pos = int(request.POST["legalDocuments_id"])
         legalDocument = legalDocuments[legalDocuments_pos]
+        recommendCounts=getRecommondDetail(legalDocument)
+        ids=recommendCounts.keys()
+        legaldoclist=[]
+        for id in ids:
+            result = es.get(
+                index='legal_index',
+                doc_type='legalDocument',
+                request_timeout=300,
+                id=id)
+            legalDoc=LegalDocument()
+            legalDoc.id=result['_source']['id']
+            legalDoc.fy = result['_source']['fy']
+            legalDoc.dsrxx = result['_source']['dsrxx']
+            legalDoc.ah = result['_source']['ah']
+            legalDoc.spry = result['_source']['spry']
+            legalDoc.ysfycm = result['_source']['ysfycm']
+            legalDoc.ysqqqk = result['_source']['ysqqqk']
+            legalDoc.byrw = result['_source']['byrw']
+            legalDoc.spjg = result['_source']['spjg']
+            legalDoc.ysdbqk = result['_source']['ysdbqk']
+            legalDoc.esqqqk = result['_source']['esqqqk']
+            legalDoc.ysfyrw = result['_source']['ysfyrw']
+            legalDoc.ajms = result['_source']['ajms']
+            legalDoc.xgft = result['_source']['xgft']
+            legalDoc.sprq = result['_source']['sprq']
+            legalDoc.sljg = result['_source']['sljg']
+            legalDoc.bycm = result['_source']['bycm']
+            legalDoc.sjy = result['_source']['sjy']
+            legalDoc.bt = result['_source']['bt']
+            legalDoc.wslx = result['_source']['wslx']
+            legalDoc.dy = result['_source']['dy']
+            legalDoc.nf = result['_source']['nf']
+            legalDoc.slcx = result['_source']['slcx']
+            legalDoc.ay = result['_source']['ay']
+            legalDoc.ft = result['_source']['ft']
+            legalDoc.tz = result['_source']['tz']
+            legalDoc.fycj = result['_source']['fycj']
+            legaldoclist.append(legalDoc)
+        print(legaldoclist)
         return render(request, "resultDetail.html", {
             "legaldoc": legalDocument,
-            "legalDocuments_id": legalDocuments_pos
+            "legalDocuments_id": legalDocuments_pos,
+            "legaldoclist":legaldoclist,
         })
     else:
         return render(request, "resultDetail.html")
@@ -497,15 +544,72 @@ def download(request):
 
 # 进入推荐页面，java版本对应路径为recommondDetail
 def getRecommondDetail(legalDocument):
+    fileResults = os.path.join(r'D:result','')
+
     id=legalDocument.id
-    es = Elasticsearch()
-    searchResults = es.search(
+    es = Elasticsearch(hosts=[{'host': 'yaexp.com', 'port': 80}])
+    searchResult = es.get(
         index='legal_index',
         doc_type='legalDocument',
         request_timeout=300,
         id=id)
+    ay=searchResult['_source']['ay'].split('\t')
+    ayLen=len(ay)
+    recommendResult={}
+    for i in range(len(ay)):
+        if(ay[i]==''):
+            continue
+        anyou=ay[i]
+        searchResult=es.get(index='legal_keywords',doc_type='keyword',request_timeout=300,id=id)
+        keywords=searchResult['_source']['keywords'].split('\t')
+        filepath = os.path.join(r'D:alltext2', anyou)
+        # 到该案由路径下载入获取已经训练好的模型
+        output = os.path.join(fileResults, anyou)
 
+        # 载入字典
+        dictionary = corpora.Dictionary.load(os.path.join(output, "all.dic"))
 
+        # # 载入LDA模型和索引
+        ldaModel = models.LdaModel.load(os.path.join(output, "allLDATopic.mdl"))
+        indexLDA = similarities.MatrixSimilarity.load(os.path.join(output, "allLDATopic.idx"))
+
+        # query就是测试数据，先切词
+        query_bow = dictionary.doc2bow(keywords)
+
+        # 载入TFIDF模型和索引
+        tfidfModel = models.TfidfModel.load(os.path.join(output, "allTFIDF.mdl"))
+        indexTfidf = similarities.MatrixSimilarity.load(os.path.join(output, "allTFIDF.idx"))
+
+        # 使用TFIDF模型向量化
+        tfidfvect = tfidfModel[query_bow]
+
+        # 然后LDA向量化，因为我们训练时的LDA是在TFIDF基础上做的，所以用itidfvect再向量化一次
+        ldavec = ldaModel[tfidfvect]
+
+        # TFIDF相似性，相似性列表记录与每份模型中的文书的相似度
+        simstfidf = indexTfidf[tfidfvect]
+
+        # LDA相似性，相似性列表记录与每份模型中的文书的相似度
+        simlda = indexLDA[ldavec]
+
+        sort_sims = sorted(enumerate(simlda), key=lambda item: -item[1])
+
+        ldaNumber = {}
+        for keys in sort_sims[0:11]:
+            key = keys[0]
+            key = str(key)
+            while len(key) < 8:
+                key = "0" + key
+            key = key + '.txt'
+            file = open(os.path.join(filepath, key), encoding='UTF-8')
+            lines = file.readlines()
+            for line in lines:  # 将文件中的编号装入列表
+                if len(line) != 1:
+                    if line.split('##')[0] == '编号':
+                        ldaNumber[line.split('##')[1].strip('\n')] = keys[1]
+        recommendResult.update(ldaNumber)
+
+    return recommendResult
 
 
 # 全领域搜索的解决思路是对每个域进行搜索，之间用should连接
@@ -713,7 +817,7 @@ def sortGroupByResults(countResult):
 # searchStruct 为搜索结构体，包含搜索搜索条件
 def searchByStrcut(searchStruct):
     # 连接es
-    es = Elasticsearch()
+    es = Elasticsearch(hosts=[{'host': 'yaexp.com', 'port': 80}])
     # 取出searchstruct中的allFieldKeyWord
     allFieldKeyWordQuery = allFieldSearch(searchStruct)
     allFieldNotKeyWordQuery = allFieldNotSearch(searchStruct)
