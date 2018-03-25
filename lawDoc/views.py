@@ -418,7 +418,7 @@ def groupBySearch(request):
 @csrf_exempt
 # 进入详细页面，java版本对应路径为searchresult
 def getDetail(request):
-    es = Elasticsearch(hosts=[{'host': 'yaexp.com', 'port': 80}])
+    es = Elasticsearch()
     if request.method == "POST":
         legalDocuments_pos = int(request.POST["legalDocuments_id"])
         legalDocument = legalDocuments[legalDocuments_pos]
@@ -554,10 +554,10 @@ def download(request):
 
 # 进入推荐页面，java版本对应路径为recommondDetail
 def getRecommondDetail(legalDocument):
-    fileResults = os.path.join(r'D:result','')
+    fileResults = os.path.join(r'/home/mianhuatang/model/提取','')
 
     id=legalDocument.id
-    es = Elasticsearch(hosts=[{'host': 'yaexp.com', 'port': 80}])
+    es = Elasticsearch()
     searchResult = es.get(
         index='legal_index',
         doc_type='legalDocument',
@@ -572,9 +572,10 @@ def getRecommondDetail(legalDocument):
         anyou=ay[i]
         searchResult=es.get(index='legal_keywords',doc_type='keyword',request_timeout=300,id=id)
         keywords=searchResult['_source']['keywords'].split('\t')
-        filepath = os.path.join(r'D:alltext2', anyou)
+        # 分词文件路径
+        filepath = os.path.join('/home/mianhuatang/model/提取', anyou)
         # 到该案由路径下载入获取已经训练好的模型
-        output = os.path.join(fileResults, anyou)
+        output = os.path.join('/home/mianhuatang/model/result', anyou)
 
         # 载入字典
         dictionary = corpora.Dictionary.load(os.path.join(output, "all.dic"))
@@ -827,7 +828,7 @@ def sortGroupByResults(countResult):
 # searchStruct 为搜索结构体，包含搜索搜索条件
 def searchByStrcut(searchStruct):
     # 连接es
-    es = Elasticsearch(hosts=[{'host': 'yaexp.com', 'port': 80}])
+    es = Elasticsearch()
     # 取出searchstruct中的allFieldKeyWord
     allFieldKeyWordQuery = allFieldSearch(searchStruct)
     allFieldNotKeyWordQuery = allFieldNotSearch(searchStruct)
