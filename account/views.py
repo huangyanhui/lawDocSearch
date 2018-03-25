@@ -18,7 +18,7 @@ def login(request):
     if request.method == 'POST':
         response = {'operation': 'login'}
         # 已经登录
-        if request.session['username'] != '':
+        if 'username' in request.session and request.session['username'] != '':
             response['status'] = 'logined'
         # 未登录
         else:
@@ -35,12 +35,12 @@ def login(request):
                         last_login_time = user.last_login_time
                         now = timezone.now()
                         # 如果大于 1 天，则刷新可查询次数
-                        if (now - last_login_time).days >= 1:
+                        if (now - last_login_time).days >= 1 and user.allowed_count < 5:
                             allowed_count = 5
                         else:
                             allowed_count = user.allowed_count
-                            request.session['allowed_count'] = allowed_count
-                            request.session['username'] = username
+                        request.session['allowed_count'] = allowed_count
+                        request.session['username'] = username
                         # 识别身份（1为普通用户，2为管理员）
                         request.session['identity'] = user.identity
                         # response
@@ -114,7 +114,8 @@ def register(request):
             elif len(username_filter_result) != 0:
                 response['status'] = 'Username exists.'
             else:
-                url = 'http://' + request.get_host() + '/account/active/'
+                # url = 'http://' + request.get_host() + '/account/active/'
+                url = 'http://yaexp.com/account/active/'
                 if send_your_email(email, username, url, 'register') == 1:
                     new_user = User.objects.create(
                         username=username,
@@ -163,7 +164,8 @@ def forget_password(request):
             elif len(filter_result) == 0:
                 response['status'] = 'Username unexists.'
             else:
-                url = 'http://' + request.get_host() + '/account/reset/'
+                # url = 'http://' + request.get_host() + '/account/reset/'
+                url = 'http://yaexp.com/account/reset/'
                 print(url)
                 # 邮箱匹配
                 if email == filter_result[0].email:

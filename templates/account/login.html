@@ -82,6 +82,8 @@
              } else if (status === "success") {
                  $("#tips").text("");
                  window.location.href = "/";
+             } else if (status == "not actived") {
+                 $("#tips").text("用户未激活");
              }
              
          });

@@ -90,9 +90,9 @@
              } else if (status === "Username exists.") {
                  $("#tips").text("用户已存在！");
              } else if (status === "Failed to send email") {
-                 $("tips").text("服务器错误，请重试");
+                 $("#tips").text("服务器错误，请重试");
              } else if (status === "Email exists.") {
-                 $("tips").text("该邮箱已经注册，请更换");
+                 $("#tips").text("该邮箱已经注册，请更换");
              }
          });
 
