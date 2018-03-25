@@ -2,8 +2,8 @@ from gensim import corpora, models, similarities, utils
 import os
 
 # # 重新编号
-allFile = os.listdir(r'D:alltext')
-filePath = r'D:alltext'
+allFile = os.listdir(r'D:alltext2')
+filePath = r'D:alltext2'
 resultFile = r'result'
 for fileOne in allFile:  # 遍历整个一级文件夹
     train_set = []
@@ -20,8 +20,8 @@ for fileOne in allFile:  # 遍历整个一级文件夹
         os.rename(tmp_path, os.path.join(tmp_pathall, j))
         i = i + 1
 # 收集训练集
-allFile = os.listdir(r'D:alltext')
-filePath = r'D:alltext'
+allFile = os.listdir(r'D:alltext2')
+filePath = r'D:alltext2'
 resultFile = r'result'
 for fileOne in allFile:  # 遍历整个一级文件夹
     train_set = []
@@ -54,8 +54,8 @@ for fileOne in allFile:  # 遍历整个一级文件夹
         os.makedirs(output)
         # 生成字典
     dictionary = corpora.Dictionary(train_set)
-    # 去除极低频的杂质词
 
+    # 去除极低频的杂质词
     dictionary.filter_extremes(no_below=1, no_above=1, keep_n=None)
 
 
