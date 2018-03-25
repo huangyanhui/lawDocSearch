@@ -44,6 +44,8 @@ def index(request):
     request.session['username'] = username
     request.session['identity'] = identity
 
+    print('allowed_count' + str(allowed_count))
+
     return render(request, 'index.html', {
         'username': username,
         'allowed_count': allowed_count,
@@ -461,7 +463,7 @@ def download(request):
         'static/download/demo.html', 'r',
         encoding='utf-8').readlines()  # 打开文件，读入每一行
     for s in lines:
-
+        print(legalDocument.sljg)
         fp.write(
             s.replace("标题", legalDocument.bt).replace(
                 "wenshuleixing", legalDocument.wslx).replace(
