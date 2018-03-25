@@ -11,16 +11,9 @@
     <body>
     <!--下载按钮-->
     {% csrf_token %}
-     <div class="detail-main" id="content">
-    <form style="float:right;width:20%;margin-right:10%" action="download" method="post">
-        <input type="hidden" name="legalDocuments_id" value="{{legalDocuments_id }}" />
-        <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
-        <button class="detail-download"  >&nbsp;下载  </button>
-            </div>
-    </form>
-     </div>
-
         <div class="detail-main" id="content">
+
+
             <div style="float:right;width:20%;margin-right:10%">
                 <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
                     <span class="nav-title-text">相似案例</span>
@@ -34,6 +27,14 @@
                     </div>
                     {% endfor %}
                 </div>
+
+                
+		<form  action="download" method="post">
+		<input type="hidden" name="legalDocuments_id" value="{{legalDocuments_id }}" />
+		<div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
+		<button class="detail-download"  >&nbsp;下载  </button>
+		</div>
+		</form>
             </div>
 
             <div class="detail-middle fl">
