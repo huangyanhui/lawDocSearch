@@ -22,7 +22,7 @@ from django.conf.urls.static import static
 from django.views.generic import RedirectView
 
 from lawDoc.views import index, indexSearch, getDetail, download, groupBySearch, addSearch, getMore, newSearch, \
-    searchlabel, getRecommond
+    searchlabel, getRecommond, getRecommondList
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'^newsearch$', newSearch, name="newSearch"),
     url(r'^searchlabel$', searchlabel, name="searchlabel"),
     url(r'^recommondDetail$',getRecommond,name='getRecommond'),
+    url(r'^recommondList$',getRecommondList,name='getRecommondLsit'),
     path('account/', include('account.urls')),
     path('upload/', include('upload.urls')),
 ]
