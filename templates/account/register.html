@@ -27,23 +27,22 @@
             </form>
         </div>
     </body>
-        <script>
-         function validate() {
-             var password = document.getElementById("password").value;
-             var re_password = document.getElementById("re-password").value;
-             if (password === re_password) {
-                 console.log(password);
-                 document.getElementById("submit").disabled = false;
-                 document.getElementById("tips").innerText="";
-             } else {
-                 console.log(password);
-                 console.log(re_password);
-                 document.getElementById("submit").disabled = true;
-                 document.getElementById("tips").innerText="两次密码不相同";
-             }
+    <script>
+     function validate() {
+         var password = document.getElementById("password").value;
+         var re_password = document.getElementById("re-password").value;
+         if (password === re_password) {
+             console.log(password);
+             document.getElementById("submit").disabled = false;
+             document.getElementById("tips").innerText="";
+         } else {
+             console.log(password);
+             console.log(re_password);
+             document.getElementById("submit").disabled = true;
+             document.getElementById("tips").innerText="两次密码不相同";
          }
-{#         逻辑处理#}
-            var request;
+     }
+     var request;
 
      // Bind to the submit event of our form
      $(".login-container").submit(function(event){
@@ -81,22 +80,20 @@
              // Log a message to the console
              var response_json = JSON.parse(response);
              var status = response_json.status
-             // if logined
              if (status === "Email invalidate") {
                  $("#tips").text("邮箱不合法");
-             // if wrong password
              } else if (status === "Success") {
-                 $("#tips").text("");
+                 $("#tips").text("以发送激活邮件，请及时激活");
                  window.location.href = "/";
-             // if user did not existed
              } else if (status === "You are LOGINED.") {
                  $("#tips").text("你已经登录！");
-             // success
              } else if (status === "Username exists.") {
                  $("#tips").text("用户已存在！");
-
+             } else if (status === "Failed to send email") {
+                 $("#tips").text("服务器错误，请重试");
+             } else if (status === "Email exists.") {
+                 $("#tips").text("该邮箱已经注册，请更换");
              }
-
          });
 
          // Callback handler that will be called on failure
@@ -116,6 +113,6 @@
          });
 
      });
-        </script>
+    </script>
 
 </html>

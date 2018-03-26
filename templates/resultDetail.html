@@ -1,6 +1,7 @@
 {% load static %}
 <!doctype html>
 <html lang="zh-Hans">
+
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -44,6 +45,14 @@
                 <div class="col-lg-9" style="width: 100%;">
                     <div class="text-center text-black" id="btvalue">{{ legaldoc.bt }}</div>
                 </div>
+
+                
+		<form  action="download" method="post">
+		<input type="hidden" name="legalDocuments_id" value="{{legalDocuments_id }}" />
+		<div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
+		<button class="detail-download"  >&nbsp;下载  </button>
+		</div>
+		</form>
             </div>
 
             <input type="hidden" id="lawDocId" value="{{ legaldoc.id }}" >
