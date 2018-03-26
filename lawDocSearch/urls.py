@@ -34,6 +34,7 @@ urlpatterns = [
     url(r'^download$', download, name="download"),
     url(r'^newsearch$', newSearch, name="newSearch"),
     url(r'^searchlabel$', searchlabel, name="searchlabel"),
+    url(r'^recommondDetail$',getDetail,name='getRecommond'),
     path('account/', include('account.urls')),
     path('upload/', include('upload.urls')),
 ]
