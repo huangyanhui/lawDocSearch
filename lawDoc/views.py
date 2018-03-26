@@ -176,16 +176,16 @@ def searchlabel(request):
         print("1")
         print(label[0])
         searchStruct.allFieldKeyWord.remove(label)
-    label1 = request.POST.get('allFieldNotKeyWord')
-    if (label1):
+    label = request.POST.get('allFieldNotKeyWord')
+    if (label):
         print("2")
         searchStruct.allFieldNotKeyWord.remove(label)
-    label2 = request.POST.get('FieldKeyWord')
-    if (label2 == "fieldSearch"):
+    label = request.POST.get('FieldKeyWord')
+    if (label == "fieldSearch"):
         print("3")
         searchStruct.FieldKeyWord = []
-    label3 = request.POST.get('OrderFieldKey')
-    if (label3 == "orderField"):
+    label = request.POST.get('OrderFieldKey')
+    if (label == "orderField"):
         print("4")
         searchStruct.OrderFieldKey = []
     label = request.POST.get('oneFieldKeyWord')
@@ -416,6 +416,88 @@ def groupBySearch(request):
 
 
 @csrf_exempt
+def getRecommond(request):
+    es = Elasticsearch(hosts=[{'host': 'yaexp.com', 'port': 80}])
+    if request.method == "POST":
+        id=int(request.POST['id'])
+        result=es.get(index='legal_index',
+                doc_type='legalDocument',
+                request_timeout=300,
+                id=id)
+        legalDocment = LegalDocument()
+        legalDocment.id = result['_source']['id']
+        legalDocment.fy = result['_source']['fy']
+        legalDocment.dsrxx = result['_source']['dsrxx']
+        legalDocment.ah = result['_source']['ah']
+        legalDocment.spry = result['_source']['spry']
+        legalDocment.ysfycm = result['_source']['ysfycm']
+        legalDocment.ysqqqk = result['_source']['ysqqqk']
+        legalDocment.byrw = result['_source']['byrw']
+        legalDocment.spjg = result['_source']['spjg']
+        legalDocment.ysdbqk = result['_source']['ysdbqk']
+        legalDocment.esqqqk = result['_source']['esqqqk']
+        legalDocment.ysfyrw = result['_source']['ysfyrw']
+        legalDocment.ajms = result['_source']['ajms']
+        legalDocment.xgft = result['_source']['xgft']
+        legalDocment.sprq = result['_source']['sprq']
+        legalDocment.sljg = result['_source']['sljg']
+        legalDocment.bycm = result['_source']['bycm']
+        legalDocment.sjy = result['_source']['sjy']
+        legalDocment.bt = result['_source']['bt']
+        legalDocment.wslx = result['_source']['wslx']
+        legalDocment.dy = result['_source']['dy']
+        legalDocment.nf = result['_source']['nf']
+        legalDocment.slcx = result['_source']['slcx']
+        legalDocment.ay = result['_source']['ay']
+        legalDocment.ft = result['_source']['ft']
+        legalDocment.tz = result['_source']['tz']
+        legalDocment.fycj = result['_source']['fycj']
+    recommendCounts = getRecommondDetail(legalDocment)
+    ids = recommendCounts.keys()
+    legaldoclist = []
+    for id in ids:
+        result = es.get(
+            index='legal_index',
+            doc_type='legalDocument',
+            request_timeout=300,
+            id=id)
+        legalDoc = LegalDocument()
+        legalDoc.id = result['_source']['id']
+        legalDoc.fy = result['_source']['fy']
+        legalDoc.dsrxx = result['_source']['dsrxx']
+        legalDoc.ah = result['_source']['ah']
+        legalDoc.spry = result['_source']['spry']
+        legalDoc.ysfycm = result['_source']['ysfycm']
+        legalDoc.ysqqqk = result['_source']['ysqqqk']
+        legalDoc.byrw = result['_source']['byrw']
+        legalDoc.spjg = result['_source']['spjg']
+        legalDoc.ysdbqk = result['_source']['ysdbqk']
+        legalDoc.esqqqk = result['_source']['esqqqk']
+        legalDoc.ysfyrw = result['_source']['ysfyrw']
+        legalDoc.ajms = result['_source']['ajms']
+        legalDoc.xgft = result['_source']['xgft']
+        legalDoc.sprq = result['_source']['sprq']
+        legalDoc.sljg = result['_source']['sljg']
+        legalDoc.bycm = result['_source']['bycm']
+        legalDoc.sjy = result['_source']['sjy']
+        legalDoc.bt = result['_source']['bt']
+        legalDoc.wslx = result['_source']['wslx']
+        legalDoc.dy = result['_source']['dy']
+        legalDoc.nf = result['_source']['nf']
+        legalDoc.slcx = result['_source']['slcx']
+        legalDoc.ay = result['_source']['ay']
+        legalDoc.ft = result['_source']['ft']
+        legalDoc.tz = result['_source']['tz']
+        legalDoc.fycj = result['_source']['fycj']
+        legaldoclist.append(legalDoc)
+    print(legaldoclist)
+    return render(request, "resultDetail.html", {
+        "legaldoc": legalDocment,
+        "legalDocuments_id": legalDocment.id,
+        "legaldoclist": legaldoclist,
+    })
+
+@csrf_exempt
 # 进入详细页面，java版本对应路径为searchresult
 def getDetail(request):
     es = Elasticsearch()
@@ -620,7 +702,13 @@ def getRecommondDetail(legalDocument):
                         ldaNumber[line.split('##')[1].strip('\n')] = keys[1]
         recommendResult.update(ldaNumber)
 
-    return recommendResult
+    sorted(recommendResult.items(), key=lambda d: d[1],reverse=True)
+
+    resultKeys=recommendResult.keys()
+    recommendResults={}
+    for key in resultKeys:
+        recommendResults[key]=recommendResult.get(key)
+    return recommendResults
 
 
 # 全领域搜索的解决思路是对每个域进行搜索，之间用should连接
@@ -838,6 +926,7 @@ def searchByStrcut(searchStruct):
     oneFieldKeyNotWordQuery = oneFieldNotSearch(searchStruct)
 
     query = {
+
         "size": 1000,
         "query": {
             "bool": {
@@ -852,6 +941,7 @@ def searchByStrcut(searchStruct):
             "fycj": {
                 "terms": {
                     "field": "fycj"
+
                 }
             },
             "wslx": {

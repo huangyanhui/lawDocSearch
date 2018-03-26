@@ -11,6 +11,10 @@
     <body>
     <!--下载按钮-->
     {% csrf_token %}
+
+
+
+
         <div class="detail-main" id="content">
 
 
@@ -22,7 +26,7 @@
                     {% for legalbt in legaldoclist %}
                     <div style="padding-top: 15px;">
                         <button class="detail-btn" onclick="recommondDetail(this)" value="{{ legalbt.id }}">
-                            {{ legalbt.bt }}
+                            {{ legalbt.bt }}   {{ legalbt.ay}}
                         </button>
                     </div>
                     {% endfor %}
