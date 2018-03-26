@@ -445,50 +445,12 @@ def getRecommond(request):
         legalDocment.ft = result['_source']['ft']
         legalDocment.tz = result['_source']['tz']
         legalDocment.fycj = result['_source']['fycj']
-    recommendCounts = getRecommondDetail(legalDocment)
-    ids = recommendCounts.keys()
-    legaldoclist = []
-    for id in ids:
-        result = es.get(
-            index='legal_index',
-            doc_type='legalDocument',
-            request_timeout=300,
-            id=id)
-        legalDoc = LegalDocument()
-        legalDoc.id = result['_source']['id']
-        legalDoc.fy = result['_source']['fy']
-        legalDoc.dsrxx = result['_source']['dsrxx']
-        legalDoc.ah = result['_source']['ah']
-        legalDoc.spry = result['_source']['spry']
-        legalDoc.ysfycm = result['_source']['ysfycm']
-        legalDoc.ysqqqk = result['_source']['ysqqqk']
-        legalDoc.byrw = result['_source']['byrw']
-        legalDoc.spjg = result['_source']['spjg']
-        legalDoc.ysdbqk = result['_source']['ysdbqk']
-        legalDoc.esqqqk = result['_source']['esqqqk']
-        legalDoc.ysfyrw = result['_source']['ysfyrw']
-        legalDoc.ajms = result['_source']['ajms']
-        legalDoc.xgft = result['_source']['xgft']
-        legalDoc.sprq = result['_source']['sprq']
-        legalDoc.sljg = result['_source']['sljg']
-        legalDoc.bycm = result['_source']['bycm']
-        legalDoc.sjy = result['_source']['sjy']
-        legalDoc.bt = result['_source']['bt']
-        legalDoc.wslx = result['_source']['wslx']
-        legalDoc.dy = result['_source']['dy']
-        legalDoc.nf = result['_source']['nf']
-        legalDoc.slcx = result['_source']['slcx']
-        legalDoc.ay = result['_source']['ay']
-        legalDoc.ft = result['_source']['ft']
-        legalDoc.tz = result['_source']['tz']
-        legalDoc.fycj = result['_source']['fycj']
-        legaldoclist.append(legalDoc)
-    print(legaldoclist)
-    return render(request, "resultDetail.html", {
+
+        return render(request, "resultDetail.html", {
         "legaldoc": legalDocment,
         "legalDocuments_id": legalDocment.id,
-        "legaldoclist": legaldoclist,
-    })
+
+        })
 
 @csrf_exempt
 # 进入详细页面，java版本对应路径为searchresult
@@ -497,49 +459,10 @@ def getDetail(request):
     if request.method == "POST":
         legalDocuments_pos = int(request.POST["legalDocuments_id"])
         legalDocument = legalDocuments[legalDocuments_pos]
-        recommendCounts=getRecommondDetail(legalDocument)
-        ids=recommendCounts.keys()
-        legaldoclist=[]
-        for id in ids:
-            result = es.get(
-                index='legal_index',
-                doc_type='legalDocument',
-                request_timeout=300,
-                id=id)
-            legalDoc=LegalDocument()
-            legalDoc.id=result['_source']['id']
-            legalDoc.fy = result['_source']['fy']
-            legalDoc.dsrxx = result['_source']['dsrxx']
-            legalDoc.ah = result['_source']['ah']
-            legalDoc.spry = result['_source']['spry']
-            legalDoc.ysfycm = result['_source']['ysfycm']
-            legalDoc.ysqqqk = result['_source']['ysqqqk']
-            legalDoc.byrw = result['_source']['byrw']
-            legalDoc.spjg = result['_source']['spjg']
-            legalDoc.ysdbqk = result['_source']['ysdbqk']
-            legalDoc.esqqqk = result['_source']['esqqqk']
-            legalDoc.ysfyrw = result['_source']['ysfyrw']
-            legalDoc.ajms = result['_source']['ajms']
-            legalDoc.xgft = result['_source']['xgft']
-            legalDoc.sprq = result['_source']['sprq']
-            legalDoc.sljg = result['_source']['sljg']
-            legalDoc.bycm = result['_source']['bycm']
-            legalDoc.sjy = result['_source']['sjy']
-            legalDoc.bt = result['_source']['bt']
-            legalDoc.wslx = result['_source']['wslx']
-            legalDoc.dy = result['_source']['dy']
-            legalDoc.nf = result['_source']['nf']
-            legalDoc.slcx = result['_source']['slcx']
-            legalDoc.ay = result['_source']['ay']
-            legalDoc.ft = result['_source']['ft']
-            legalDoc.tz = result['_source']['tz']
-            legalDoc.fycj = result['_source']['fycj']
-            legaldoclist.append(legalDoc)
-        print(legaldoclist)
+
         return render(request, "resultDetail.html", {
             "legaldoc": legalDocument,
             "legalDocuments_id": legalDocuments_pos,
-            "legaldoclist":legaldoclist,
         })
     else:
         return render(request, "resultDetail.html")
@@ -554,7 +477,7 @@ def readFile(filename, chunk_size=512):
             else:
                 break
 
-
+##提供下载功能
 @csrf_exempt
 def download(request):
     if request.method == "POST":
@@ -622,6 +545,95 @@ def download(request):
     response['Content-Type'] = 'application/octet-stream'
     response['Content-Disposition'] = 'attachment;filename="%s"' % (outpath)
     return response
+
+
+@csrf_exempt
+def getRecommondList(request):
+    es = Elasticsearch(hosts=[{'host': 'yaexp.com', 'port': 80}])
+
+    id = int(request.POST['id'])
+    result = es.get(index='legal_index',
+                        doc_type='legalDocument',
+                        request_timeout=300,
+                        id=id)
+    legalDocment = LegalDocument()
+    legalDocment.id = result['_source']['id']
+    legalDocment.fy = result['_source']['fy']
+    legalDocment.dsrxx = result['_source']['dsrxx']
+    legalDocment.ah = result['_source']['ah']
+    legalDocment.spry = result['_source']['spry']
+    legalDocment.ysfycm = result['_source']['ysfycm']
+    legalDocment.ysqqqk = result['_source']['ysqqqk']
+    legalDocment.byrw = result['_source']['byrw']
+    legalDocment.spjg = result['_source']['spjg']
+    legalDocment.ysdbqk = result['_source']['ysdbqk']
+    legalDocment.esqqqk = result['_source']['esqqqk']
+    legalDocment.ysfyrw = result['_source']['ysfyrw']
+    legalDocment.ajms = result['_source']['ajms']
+    legalDocment.xgft = result['_source']['xgft']
+    legalDocment.sprq = result['_source']['sprq']
+    legalDocment.sljg = result['_source']['sljg']
+    legalDocment.bycm = result['_source']['bycm']
+    legalDocment.sjy = result['_source']['sjy']
+    legalDocment.bt = result['_source']['bt']
+    legalDocment.wslx = result['_source']['wslx']
+    legalDocment.dy = result['_source']['dy']
+    legalDocment.nf = result['_source']['nf']
+    legalDocment.slcx = result['_source']['slcx']
+    legalDocment.ay = result['_source']['ay']
+    legalDocment.ft = result['_source']['ft']
+    legalDocment.tz = result['_source']['tz']
+    legalDocment.fycj = result['_source']['fycj']
+    recommendCounts = getRecommondDetail(legalDocment)
+    print(recommendCounts)
+    ids = recommendCounts.keys()
+    legaldoclist = []
+    for id in ids:
+        result = es.get(
+            index='legal_index',
+            doc_type='legalDocument',
+            request_timeout=300,
+            id=id)
+        legalDoc = LegalDocument()
+        legalDoc.id = result['_source']['id']
+        legalDoc.similarity=recommendCounts.get(id)
+        legalDoc.fy = result['_source']['fy']
+        legalDoc.dsrxx = result['_source']['dsrxx']
+        legalDoc.ah = result['_source']['ah']
+        legalDoc.spry = result['_source']['spry']
+        legalDoc.ysfycm = result['_source']['ysfycm']
+        legalDoc.ysqqqk = result['_source']['ysqqqk']
+        legalDoc.byrw = result['_source']['byrw']
+        legalDoc.spjg = result['_source']['spjg']
+        legalDoc.ysdbqk = result['_source']['ysdbqk']
+        legalDoc.esqqqk = result['_source']['esqqqk']
+        legalDoc.ysfyrw = result['_source']['ysfyrw']
+        legalDoc.ajms = result['_source']['ajms']
+        legalDoc.xgft = result['_source']['xgft']
+        legalDoc.sprq = result['_source']['sprq']
+        legalDoc.sljg = result['_source']['sljg']
+        legalDoc.bycm = result['_source']['bycm']
+        legalDoc.sjy = result['_source']['sjy']
+        legalDoc.bt = result['_source']['bt']
+        legalDoc.wslx = result['_source']['wslx']
+        legalDoc.dy = result['_source']['dy']
+        legalDoc.nf = result['_source']['nf']
+        legalDoc.slcx = result['_source']['slcx']
+        legalDoc.ay = result['_source']['ay']
+        legalDoc.ft = result['_source']['ft']
+        legalDoc.tz = result['_source']['tz']
+        legalDoc.fycj = result['_source']['fycj']
+        legaldoclist.append(legalDoc)
+        print(legaldoclist)
+
+    return render(request, "recommond.html", {
+
+            "legaldoclist": legaldoclist
+        })
+
+
+
+
 
 
 # 进入推荐页面，java版本对应路径为recommondDetail
@@ -695,8 +707,9 @@ def getRecommondDetail(legalDocument):
 
     resultKeys=recommendResult.keys()
     recommendResults={}
-    for key in resultKeys:
-        recommendResults[key]=recommendResult.get(key)
+    for key in resultKeys :
+        if int(key)!=id:
+            recommendResults[key]=recommendResult.get(key)
     return recommendResults
 
 
