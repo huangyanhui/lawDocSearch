@@ -2,12 +2,14 @@ import json
 import time
 import os
 import pdfkit
+import gc
 
 from django.shortcuts import render
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 from elasticsearch import Elasticsearch
 from lawDoc.Variable import legalDocuments, allSearchField, \
-    allSearchFieldList, countResults, resultCount, allSearchFieldListR
+    allSearchFieldList, countResults, resultCount, allSearchFieldListR, \
+    exceptionAY
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import os
@@ -50,7 +52,7 @@ def index(request):
     request.session['username'] = username
     request.session['identity'] = identity
 
-    print('allowed_count' + str(allowed_count))
+    # print('allowed_count' + str(allowed_count))
 
     return render(request, 'index.html', {
         'username': username,
@@ -173,33 +175,25 @@ def searchlabel(request):
     # 遍历检查，点击哪个标签就会在搜索体中删除该标签
     label = request.POST.get('allFieldKeyWord')
     if (label):
-        print("1")
-        print(label[0])
         searchStruct.allFieldKeyWord.remove(label)
     label = request.POST.get('allFieldNotKeyWord')
     if (label):
-        print("2")
         searchStruct.allFieldNotKeyWord.remove(label)
     label = request.POST.get('FieldKeyWord')
     if (label == "fieldSearch"):
-        print("3")
         searchStruct.FieldKeyWord = []
     label = request.POST.get('OrderFieldKey')
     if (label == "orderField"):
-        print("4")
         searchStruct.OrderFieldKey = []
     label = request.POST.get('oneFieldKeyWord')
     if (label):
-        print("5")
         field = label.split('@')[1]
         searchStruct.oneFieldKeyWord.pop(allSearchFieldList[field])
     label = request.POST.get('oneFieldnNotKeyWord')
     if (label):
-        print("6")
         field = label.split('@')[1]
         searchStruct.oneFieldNotKeyWord.pop(allSearchFieldList[field])
     legalDocuments.clear()
-    print(searchStruct.print())
     if len(searchStruct.OrderFieldKey) \
             or len(searchStruct.FieldKeyWord)\
             or len(searchStruct.oneFieldNotKeyWord)\
@@ -290,7 +284,7 @@ def addSearch(request):
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
     # 生成用于产生标签的语句
-    print(searchStruct)
+    # print(searchStruct)
     oneField = []
     for field in searchStruct.oneFieldKeyWord.keys():
         str = ""
@@ -386,7 +380,7 @@ def groupBySearch(request):
     else:
         searchStruct.oneFieldKeyWord.update({field: keyword})
     searchByStrcut(searchStruct)
-    print(searchStruct.oneFieldKeyWord.keys())
+    # print(searchStruct.oneFieldKeyWord.keys())
     oneField = []
     for field in searchStruct.oneFieldKeyWord.keys():
         str = ""
@@ -417,7 +411,7 @@ def groupBySearch(request):
 
 @csrf_exempt
 def getRecommond(request):
-    es = Elasticsearch(hosts=[{'host': 'yaexp.com', 'port': 80}])
+    es = Elasticsearch()
     if request.method == "POST":
         id=int(request.POST['id'])
         result=es.get(index='legal_index',
@@ -452,7 +446,7 @@ def getRecommond(request):
         legalDocment.ft = result['_source']['ft']
         legalDocment.tz = result['_source']['tz']
         legalDocment.fycj = result['_source']['fycj']
-
+        # print(legalDocment.to_dict())
         return render(request, "resultDetail.html", {
         "legaldoc": legalDocment,
         "legalDocuments_id": legalDocment.id,
@@ -466,6 +460,7 @@ def getDetail(request):
     if request.method == "POST":
         legalDocuments_pos = int(request.POST["legalDocuments_id"])
         legalDocument = legalDocuments[legalDocuments_pos]
+        print(legalDocument.id)
 
         return render(request, "resultDetail.html", {
             "legaldoc": legalDocument,
@@ -484,6 +479,42 @@ def readFile(filename, chunk_size=512):
             else:
                 break
 
+def getLegalDocument(legalDocument_id):
+    es = Elasticsearch()
+    result=es.get(index='legal_index',
+                doc_type='legalDocument',
+                request_timeout=300,
+                id=legalDocument_id)
+    legalDocment = LegalDocument()
+    legalDocment.id = result['_source']['id']
+    legalDocment.fy = result['_source']['fy']
+    legalDocment.dsrxx = result['_source']['dsrxx']
+    legalDocment.ah = result['_source']['ah']
+    legalDocment.spry = result['_source']['spry']
+    legalDocment.ysfycm = result['_source']['ysfycm']
+    legalDocment.ysqqqk = result['_source']['ysqqqk']
+    legalDocment.byrw = result['_source']['byrw']
+    legalDocment.spjg = result['_source']['spjg']
+    legalDocment.ysdbqk = result['_source']['ysdbqk']
+    legalDocment.esqqqk = result['_source']['esqqqk']
+    legalDocment.ysfyrw = result['_source']['ysfyrw']
+    legalDocment.ajms = result['_source']['ajms']
+    legalDocment.xgft = result['_source']['xgft']
+    legalDocment.sprq = result['_source']['sprq']
+    legalDocment.sljg = result['_source']['sljg']
+    legalDocment.bycm = result['_source']['bycm']
+    legalDocment.sjy = result['_source']['sjy']
+    legalDocment.bt = result['_source']['bt']
+    legalDocment.wslx = result['_source']['wslx']
+    legalDocment.dy = result['_source']['dy']
+    legalDocment.nf = result['_source']['nf']
+    legalDocment.slcx = result['_source']['slcx']
+    legalDocment.ay = result['_source']['ay']
+    legalDocment.ft = result['_source']['ft']
+    legalDocment.tz = result['_source']['tz']
+    legalDocment.fycj = result['_source']['fycj']
+    return legalDocment
+
 ##提供下载功能
 @csrf_exempt
 def download(request):
@@ -491,8 +522,9 @@ def download(request):
     if request.session['username'] == '':
         return render(request, 'account/login.html')
     if request.method == "POST":
-        legalDocuments_pos = int(request.POST["legalDocuments_id"])
-        legalDocument = legalDocuments[legalDocuments_pos]
+        # legalDocuments_pos = int(request.POST["legalDocuments_id"])
+        # legalDocument = legalDocuments[legalDocuments_pos]
+        legalDocument = getLegalDocument(int(request.POST["legalDocumentId"]))
     # 临时文件名
     curr_date = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     css = 'static/css/showDetail.css'
@@ -508,14 +540,14 @@ def download(request):
     # path_wk = r'D:\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
     # config = pdfkit.configuration(wkhtmltopdf=path_wk)
     # 读文件并且替换动态内容
-    print(os.getcwd())
+    # print(os.getcwd())
     fp = open(
         'static/download/pdf.html', 'w', encoding='utf-8')  # 打开你要写得文件test2.txt
     lines = open(
         'static/download/demo.html', 'r',
         encoding='utf-8').readlines()  # 打开文件，读入每一行
     for s in lines:
-        print(legalDocument.sljg)
+        # print(legalDocument.sljg)
         fp.write(
             s.replace("标题", legalDocument.bt).replace(
                 "wenshuleixing", legalDocument.wslx).replace(
@@ -559,7 +591,7 @@ def download(request):
 
 @csrf_exempt
 def getRecommondList(request):
-    es = Elasticsearch(hosts=[{'host': 'yaexp.com', 'port': 80}])
+    es = Elasticsearch()
 
     id = int(request.POST['id'])
     result = es.get(index='legal_index',
@@ -595,6 +627,7 @@ def getRecommondList(request):
     legalDocment.tz = result['_source']['tz']
     legalDocment.fycj = result['_source']['fycj']
     recommendCounts = getRecommondDetail(legalDocment)
+    print('返回')
     print(recommendCounts)
     ids = recommendCounts.keys()
     legaldoclist = []
@@ -634,22 +667,19 @@ def getRecommondList(request):
         legalDoc.tz = result['_source']['tz']
         legalDoc.fycj = result['_source']['fycj']
         legaldoclist.append(legalDoc)
-        print(legaldoclist)
+        # print(legaldoclist)
 
+    print(legaldoclist)
     return render(request, "recommond.html", {
-
-            "legaldoclist": legaldoclist
-        })
-
-
-
-
+ 
+             "legaldoclist": legaldoclist
+     })
 
 
 # 进入推荐页面，java版本对应路径为recommondDetail
 def getRecommondDetail(legalDocument):
-    fileResults = os.path.join(r'/home/mianhuatang/model/提取','')
-
+    fileResults = os.path.join(r'/home/mianhuatang/提取','')
+    print(gc.collect())
     id=legalDocument.id
     es = Elasticsearch()
     searchResult = es.get(
@@ -657,19 +687,20 @@ def getRecommondDetail(legalDocument):
         doc_type='legalDocument',
         request_timeout=300,
         id=id)
-    ay=searchResult['_source']['ay'].split('\t')
+    ay=searchResult['_source']['ay'].split('\t')[0:2]
     ayLen=len(ay)
     recommendResult={}
     for i in range(len(ay)):
-        if(ay[i]==''):
+        if(ay[i]=='' or ay[i] in exceptionAY ):
             continue
         anyou=ay[i]
+        print(anyou + " " + str(gc.collect()))
         searchResult=es.get(index='legal_keywords',doc_type='keyword',request_timeout=300,id=id)
         keywords=searchResult['_source']['keywords'].split('\t')
         # 分词文件路径
-        filepath = os.path.join('/home/mianhuatang/model/提取', anyou)
+        filepath = os.path.join('/home/mianhuatang/提取', anyou)
         # 到该案由路径下载入获取已经训练好的模型
-        output = os.path.join('/home/mianhuatang/model/result', anyou)
+        output = os.path.join('/home/mianhuatang/data/result', anyou)
 
         # 载入字典
         dictionary = corpora.Dictionary.load(os.path.join(output, "all.dic"))
@@ -714,13 +745,21 @@ def getRecommondDetail(legalDocument):
                         ldaNumber[line.split('##')[1].strip('\n')] = keys[1]
         recommendResult.update(ldaNumber)
 
+    print('排序前')
+    print(recommendResult)
     sorted(recommendResult.items(), key=lambda d: d[1],reverse=True)
 
     resultKeys=recommendResult.keys()
     recommendResults={}
+    i=0
     for key in resultKeys :
-        if int(key)!=id:
+        if int(key)!=id and i<11:
             recommendResults[key]=recommendResult.get(key)
+            i=i+1
+
+    print(gc.collect())
+    print('排序后')
+    print(recommendResults.items())
     return recommendResults
 
 
@@ -1085,7 +1124,7 @@ def searchByStrcut(searchStruct):
         }
     }
 
-    print(json.dumps(query))
+    # print(json.dumps(query))
     searchResults = es.search(
         index='legal_index',
         doc_type='legalDocument',

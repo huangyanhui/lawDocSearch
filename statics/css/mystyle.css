@@ -1,0 +1,101 @@
+.input-group .form-control, .input-group-addon, .input-group-btn {
+    display: table-cell;
+}
+.input-group-btn>.btn {
+    position: relative;
+}
+.header-search-index {
+    position: relative;
+    border-collapse: separate;
+    width: 508px;
+    border-width: 1px 0px 1px 1px;
+    border-style: solid solid solid;
+    border-color: rgb(213, 213, 213) rgb(213, 213, 213) rgb(213, 213, 213);
+    border-image: initial;
+    border-right: 0px;
+    border-radius: 3px;
+}
+.fl {
+    float: left;
+}
+
+/*搜索框位置样式*/
+.search-inner {
+    padding-left: 10%;
+    height: 36px;
+    position: relative;
+
+}
+.tab-content>.active {
+    display: block;
+}
+.header-sub-background {
+    background-color: #fafbfc;
+    border-bottom: 2px solid #3270a5;
+    overflow: hidden;
+}
+.jufa-btn-success {
+    background-color: rgb(50, 112, 165);
+    color: rgb(255, 255, 255);
+    display: inline-block;
+    border-color: rgb(72, 96, 130);
+}
+
+.btn {
+    box-shadow: none;
+}
+
+.newSearch-btn {
+    margin-right: 10px;
+    background: rgb(50, 112, 165);
+    padding: 6px 20px;
+}
+/*鼠标移动到按钮上面改变颜色*/
+.newSearch-btn:hover {
+    margin-right: 10px;
+    background:#E6E6FA;
+    padding: 6px 20px;
+}
+.search-btn {
+    height: 36px;
+    top: 0px;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+}
+.oldSeach-btn {
+    margin-right: 10px;
+    background: rgb(50, 112, 165);
+}
+/*鼠标移动到按钮上面改变颜色*/
+.oldSeach-btn:hover {
+    margin-right: 10px;
+    background: #E6E6FA;
+    padding: 6px 20px;
+}
+.search-btn {
+    height: 36px;
+    top: 0px;
+    border-width: initial;
+}
+
+.serach-field-button {
+    margin-left:10%;
+}
+
+.searchlabelmain{
+	float:left;
+    width: auto;
+}
+
+
+.searchlabelmain .searchlable{
+	float: left;
+	border:1px solid #939593;
+	margin-right: 5px;
+}
+
+#bd {
+    clear: both;
+}
