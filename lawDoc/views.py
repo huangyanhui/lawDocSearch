@@ -548,29 +548,32 @@ def download(request):
         encoding='utf-8').readlines()  # 打开文件，读入每一行
     for s in lines:
         # print(legalDocument.sljg)
+
         fp.write(
-            s.replace("标题", legalDocument.bt).replace(
-                "wenshuleixing", legalDocument.wslx).replace(
-                    "nianfen", legalDocument.nf).replace(
-                        "shenlichengxu", legalDocument.slcx).replace(
-                            "fayuancengji", legalDocument.fycj).replace(
-                                'diyu', legalDocument.dy)
-            .replace('anhao', legalDocument.ah).replace(
-                'dangshirenxingxi', legalDocument.dsrxx).replace(
-                    'anjianmiaoshu', legalDocument.ajms)
-            .replace('shenlijingguo', legalDocument.sljg).replace(
-                'yishenqingqiuqingkuang', legalDocument.ysqqqk).replace(
-                    'yishendabianqingkuang', legalDocument.ysdbqk).replace(
-                        'yishenfayuanchaming', legalDocument.ysfycm).replace(
-                            'yishenfayuanrenwei', legalDocument.ysfyrw)
-            .replace('ershenqingqiuqingkuang', legalDocument.esqqqk).replace(
-                'benyuanchaming', legalDocument.bycm).replace(
-                    'benyuanrenwei', legalDocument.byrw).replace(
-                        'shenpanjieguo', legalDocument.spjg).replace(
-                            'shenpanrenyuan', legalDocument.spry).replace(
-                                'shenpanriqi', legalDocument.sprq).replace(
-                                    'shujiyuan', legalDocument.sjy).replace(
-                                        'xiangguanfatiao', legalDocument.xgft))
+            s.replace('标题', '无' if not legalDocument.bt else legalDocument.bt)
+            .replace('wenshuleixing', '无' if not legalDocument.wslx else legalDocument.wslx)
+            .replace('nianfen', '无' if not legalDocument.nf else legalDocument.nf)
+            .replace('shenlichengxu', '无' if not legalDocument.slcx else legalDocument.slcx)
+            .replace('fayuancengji', '无' if not legalDocument.fycj else legalDocument.fycj)
+            .replace('diyu', '无' if not legalDocument.dy else legalDocument.dy)
+            .replace('anhao', '无' if not legalDocument.ah else legalDocument.ah)
+            .replace('dangshirenxingxi', '无' if not legalDocument.dsrxx else legalDocument.dsrxx)
+            .replace('anjianmiaoshu', '无' if not legalDocument.ajms else legalDocument.ajms)
+            .replace('shenlijingguo', '无' if not legalDocument.sljg else legalDocument.sljg)
+            .replace('yishenqingqiuqingkuang', '无' if not legalDocument.ysqqqk else legalDocument.ysqqqk)
+            .replace('yishendabianqingkuang', '无' if not legalDocument.ysdbqk else legalDocument.ysdbqk)
+            .replace('yishenfayuanchaming', '无' if not legalDocument.ysfycm else legalDocument.ysfycm)
+            .replace('yishenfayuanrenwei', '无' if not legalDocument.ysfyrw else legalDocument.ysfyrw)
+            .replace('ershenqingqiuqingkuang', '无' if not legalDocument.esqqqk else legalDocument.esqqqk)
+            .replace('benyuanchaming', '无' if not legalDocument.bycm else legalDocument.bycm)
+            .replace('benyuanrenwei', '无' if not legalDocument.byrw else legalDocument.byrw)
+            .replace('shenpanjieguo', '无' if not legalDocument.spjg else legalDocument.spjg)
+            .replace('shenpanrenyuan', '无' if not legalDocument.spry else legalDocument.spry)
+            .replace('shenpanriqi', '无' if not legalDocument.sprq else legalDocument.sprq)
+            .replace('shujiyuan', '无' if not legalDocument.sjy else legalDocument.sjy)
+            .replace('xiangguanfatiao', '无' if not legalDocument.xgft else legalDocument.xgft)
+            )
+
         # replace是替换，write是写入
 
     fp.close()  # 关闭文件
@@ -671,7 +674,7 @@ def getRecommondList(request):
 
     print(legaldoclist)
     return render(request, "recommond.html", {
- 
+
              "legaldoclist": legaldoclist
      })
 
@@ -700,7 +703,7 @@ def getRecommondDetail(legalDocument):
         # 分词文件路径
         filepath = os.path.join('/home/mianhuatang/提取', anyou)
         # 到该案由路径下载入获取已经训练好的模型
-        output = os.path.join('/home/mianhuatang/data/result', anyou)
+        output = os.path.join('/home/mianhuatang/data/results', anyou)
 
         # 载入字典
         dictionary = corpora.Dictionary.load(os.path.join(output, "all.dic"))
