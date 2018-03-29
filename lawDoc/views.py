@@ -2,43 +2,66 @@ import json
 import time
 import os
 import pdfkit
+import gc
 
 from django.shortcuts import render
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 from elasticsearch import Elasticsearch
 from lawDoc.Variable import legalDocuments, allSearchField, \
-    allSearchFieldList, countResults, resultCount
+    allSearchFieldList, countResults, resultCount, allSearchFieldListR, \
+    exceptionAY
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import os
+
+from gensim import corpora,models,similarities,utils
+
 
 # Create your views here.
 
 # 展示首页,java版本对应路径为“/”
 from lawDoc.models import SearchStruct, LegalDocument
+from utils.elastic_search import ElasticSearchClient
+from gensim import corpora,models,similarities,utils
 
 searchStruct = SearchStruct()
 
 
 def index(request):
     # 已经登录或已经访问过
-    if 'allowed_count' in request.session:
-        allowed_count = request.session['allowed_count']
-        username = request.session['username']
-    # 未登录
-    else:
-        allowed_count = 3
-        username = ''
+    # if 'username' in request.session and request.session['username'] != '':
+    # if 'username' in request.session:
+    allowed_count = request.session[
+        'allowed_count'] if 'allowed_count' in request.session else 3
+    username = request.session[
+        'username'] if 'username' in request.session else ''
+    identity = request.session[
+        'identity'] if 'identity' in request.session else 1
+    # 未登录，默认为普通用户
+    # else:
+    #     allowed_count = 3
+    #     username = ''
+    #     identity = 1
+
+    # 测试设置 allowed_count 为 9999999999999
+    # DEBUG 语句
+    # allowed_count = 9999999999999
+    # DEBUG 语句
 
     request.session['allowed_count'] = allowed_count
     request.session['username'] = username
+    request.session['identity'] = identity
+
+    # print('allowed_count' + str(allowed_count))
 
     return render(request, 'index.html', {
         'username': username,
         'allowed_count': allowed_count,
+        'identity': identity
     })
 
 
-#搜索结构体的构造
+# 搜索结构体的构造
 def buildSearchStruct(queryString):
     keyword = queryString.split('@')[0]
     if '@' in queryString:
@@ -54,10 +77,12 @@ def buildSearchStruct(queryString):
                 searchStruct.allFieldNotKeyWord = searchStruct.allFieldNotKeyWord + notkeywords
             else:
 
-                if (field in searchStruct.oneFieldKeyWord) and len(searchStruct.oneFieldKeyWord[field]) != 0:
+                if (field in searchStruct.oneFieldKeyWord) and len(
+                        searchStruct.oneFieldKeyWord[field]) != 0:
                     keywords += searchStruct.oneFieldKeyWord[field]
                 searchStruct.oneFieldKeyWord = {field: keywords}
-                if (field in searchStruct.oneFieldNotKeyWord) and len(searchStruct.oneFieldNotKeyWord[field]) != 0:
+                if (field in searchStruct.oneFieldNotKeyWord) and len(
+                        searchStruct.oneFieldNotKeyWord[field]) != 0:
                     notkeywords += searchStruct.oneFieldNotKeyWord[field]
                 searchStruct.oneFieldNotKeyWord = {field: notkeywords}
 
@@ -67,7 +92,8 @@ def buildSearchStruct(queryString):
                 searchStruct.allFieldNotKeyWord = searchStruct.allFieldNotKeyWord + notkeywords
             else:
 
-                if (field in searchStruct.oneFieldNotKeyWord) and len(searchStruct.oneFieldNotKeyWord[field]) != 0:
+                if (field in searchStruct.oneFieldNotKeyWord) and len(
+                        searchStruct.oneFieldNotKeyWord[field]) != 0:
                     notkeywords += searchStruct.oneFieldNotKeyWord[field]
                 searchStruct.oneFieldNotKeyWord = {field: notkeywords}
 
@@ -84,7 +110,8 @@ def buildSearchStruct(queryString):
 
         else:
 
-            if (field in searchStruct.oneFieldKeyWord) and len(searchStruct.oneFieldKeyWord[field]) != 0:
+            if (field in searchStruct.oneFieldKeyWord) and len(
+                    searchStruct.oneFieldKeyWord[field]) != 0:
                 keywords += searchStruct.oneFieldKeyWord[field]
             searchStruct.oneFieldKeyWord = {field: keywords}
 
@@ -99,8 +126,7 @@ def indexSearch(request):
         if request.session['username'] == '':
             return render(request, 'account/login.html')
         else:
-            # TODO: 画个提示页
-            return HttpResponse('该用户查询次数已经超过当天允许次数')
+            return render(request, 'tips.html')
 
     keyWord = request.POST.get('keyword')
     global searchStruct
@@ -110,18 +136,110 @@ def indexSearch(request):
     searchByStrcut(searchStruct)
 
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    # 生成用于产生标签的语句
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = "!"
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
+
     return render(
         request, "searchresult.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": len(legalDocuments)
+            "resultCount": resultCount,
+            "searchStruct": searchStruct,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
+        })
+
+
+# 点击搜索框下的小标签
+def searchlabel(request):
+    # 每次搜索减 1 次可用次数
+    request.session['allowed_count'] -= 1
+    if request.session['allowed_count'] < 0:
+        if request.session['username'] == '':
+            return render(request, 'account/login.html')
+        else:
+            return render(request, 'tips.html')
+    # 遍历检查，点击哪个标签就会在搜索体中删除该标签
+    label = request.POST.get('allFieldKeyWord')
+    if (label):
+        searchStruct.allFieldKeyWord.remove(label)
+    label = request.POST.get('allFieldNotKeyWord')
+    if (label):
+        searchStruct.allFieldNotKeyWord.remove(label)
+    label = request.POST.get('FieldKeyWord')
+    if (label == "fieldSearch"):
+        searchStruct.FieldKeyWord = []
+    label = request.POST.get('OrderFieldKey')
+    if (label == "orderField"):
+        searchStruct.OrderFieldKey = []
+    label = request.POST.get('oneFieldKeyWord')
+    if (label):
+        field = label.split('@')[1]
+        searchStruct.oneFieldKeyWord.pop(allSearchFieldList[field])
+    label = request.POST.get('oneFieldnNotKeyWord')
+    if (label):
+        field = label.split('@')[1]
+        searchStruct.oneFieldNotKeyWord.pop(allSearchFieldList[field])
+    legalDocuments.clear()
+    if len(searchStruct.OrderFieldKey) \
+            or len(searchStruct.FieldKeyWord)\
+            or len(searchStruct.oneFieldNotKeyWord)\
+            or len(searchStruct.allFieldNotKeyWord)\
+            or len(searchStruct.oneFieldKeyWord)\
+            or len(searchStruct.allFieldKeyWord):
+        print()
+    else:
+        return render(
+            request, 'index.html', {
+                'username': request.session['username'],
+                'alowed_count': request.session['allowed_count'],
+                'identity': request.session['identity']
+            })
+    searchByStrcut(searchStruct)
+    length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    # 生成用于产生标签的语句
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = "!"
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
+    return render(
+        request, "searchresult.html", {
+            "LegalDocList": legalDocuments[0:length:],
+            "countResults": countResults,
+            "resultCount": resultCount,
+            "searchStruct": searchStruct,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
         })
 
 
 @csrf_exempt
 # 搜索结果页的重新搜索，java版本对应路径为“newsearch”
 def newSearch(request):
-    countResults = {}
+    countResults.clear()
     global searchStruct
     searchStruct.clear()
     keyWord = request.POST.get('name')
@@ -130,11 +248,29 @@ def newSearch(request):
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
 
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = "!"
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
+
     return render(
-        request, "searchresult.html", {
+        request, "result.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": len(legalDocuments)
+            "resultCount": resultCount,
+            "searchStruct": searchStruct,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
         })
 
 
@@ -142,23 +278,58 @@ def newSearch(request):
 # 搜索结果页的结果内搜索，java版本对应路径为“addsearch”
 def addSearch(request):
     queryString = request.POST.get('name')
-    countResults = 0
+    countResults.clear()
     legalDocuments.clear()
-    searchStruct = buildSearchStruct(queryString)
+    buildSearchStruct(queryString)
     searchByStrcut(searchStruct)
     length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
+    # 生成用于产生标签的语句
+    # print(searchStruct)
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = "!"
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
 
     return render(
-        request, "searchresult.html", {
+        request, "result.html", {
             "LegalDocList": legalDocuments[0:length:],
             "countResults": countResults,
-            "resultCount": len(legalDocuments)
+            "resultCount": resultCount,
+            "searchStruct": searchStruct,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
         })
 
 
 @csrf_exempt
 # 加载更多，java版本对应路径为getMore
 def getMore(request):
+    # 生成用于产生标签的语句
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = "!"
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
 
     pageId = int(request.POST.get('name'))
     if pageId * 20 < len(legalDocuments):
@@ -166,14 +337,20 @@ def getMore(request):
             request, "result.html", {
                 "LegalDocList": legalDocuments[0:pageId * 20],
                 "countResults": countResults,
-                "resultCount": resultCount
+                "resultCount": resultCount,
+                "searchStruct": searchStruct,
+                "onefield": oneField,
+                "onefieldnot": oneFieldnot,
             })
     else:
         return render(
             request, "result.html", {
-                "LegalDocList": legalDocuments.index(0, len(legalDocuments)),
+                "LegalDocList": legalDocuments[0:len(legalDocuments)],
                 "countResults": countResults,
-                "resultCount": resultCount
+                "resultCount": resultCount,
+                "searchStruct": searchStruct,
+                "onefield": oneField,
+                "onefieldnot": oneFieldnot,
             })
 
         # paginator = Paginator(legalDocuments, 10)
@@ -203,22 +380,91 @@ def groupBySearch(request):
     else:
         searchStruct.oneFieldKeyWord.update({field: keyword})
     searchByStrcut(searchStruct)
+    # print(searchStruct.oneFieldKeyWord.keys())
+    oneField = []
+    for field in searchStruct.oneFieldKeyWord.keys():
+        str = ""
+        for key in searchStruct.oneFieldKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneField.append(str)
+    oneFieldnot = []
+    for field in searchStruct.oneFieldNotKeyWord.keys():
+        str = "!"
+        for key in searchStruct.oneFieldNotKeyWord[field]:
+            str = str + " " + key
+        str = str + "@" + allSearchFieldListR[field]
+        oneFieldnot.append(str)
 
-    return render(request, "searchresult.html", {
-        "LegalDocList": legalDocuments,
-        "countResults": countResults
-    })
+    length = 10 if len(legalDocuments) > 10 else len(legalDocuments)
 
+    return render(
+        request, "result.html", {
+            "LegalDocList": legalDocuments[0:length],
+            "countResults": countResults,
+            "resultCount": resultCount,
+            "searchStruct": searchStruct,
+            "onefield": oneField,
+            "onefieldnot": oneFieldnot,
+        })
+
+
+@csrf_exempt
+def getRecommond(request):
+    es = Elasticsearch()
+    if request.method == "POST":
+        id=int(request.POST['id'])
+        result=es.get(index='legal_index',
+                doc_type='legalDocument',
+                request_timeout=300,
+                id=id)
+        legalDocment = LegalDocument()
+        legalDocment.id = result['_source']['id']
+        legalDocment.fy = result['_source']['fy']
+        legalDocment.dsrxx = result['_source']['dsrxx']
+        legalDocment.ah = result['_source']['ah']
+        legalDocment.spry = result['_source']['spry']
+        legalDocment.ysfycm = result['_source']['ysfycm']
+        legalDocment.ysqqqk = result['_source']['ysqqqk']
+        legalDocment.byrw = result['_source']['byrw']
+        legalDocment.spjg = result['_source']['spjg']
+        legalDocment.ysdbqk = result['_source']['ysdbqk']
+        legalDocment.esqqqk = result['_source']['esqqqk']
+        legalDocment.ysfyrw = result['_source']['ysfyrw']
+        legalDocment.ajms = result['_source']['ajms']
+        legalDocment.xgft = result['_source']['xgft']
+        legalDocment.sprq = result['_source']['sprq']
+        legalDocment.sljg = result['_source']['sljg']
+        legalDocment.bycm = result['_source']['bycm']
+        legalDocment.sjy = result['_source']['sjy']
+        legalDocment.bt = result['_source']['bt']
+        legalDocment.wslx = result['_source']['wslx']
+        legalDocment.dy = result['_source']['dy']
+        legalDocment.nf = result['_source']['nf']
+        legalDocment.slcx = result['_source']['slcx']
+        legalDocment.ay = result['_source']['ay']
+        legalDocment.ft = result['_source']['ft']
+        legalDocment.tz = result['_source']['tz']
+        legalDocment.fycj = result['_source']['fycj']
+        # print(legalDocment.to_dict())
+        return render(request, "resultDetail.html", {
+        "legaldoc": legalDocment,
+        "legalDocuments_id": legalDocment.id,
+
+        })
 
 @csrf_exempt
 # 进入详细页面，java版本对应路径为searchresult
 def getDetail(request):
+    es = Elasticsearch()
     if request.method == "POST":
         legalDocuments_pos = int(request.POST["legalDocuments_id"])
         legalDocument = legalDocuments[legalDocuments_pos]
+        print(legalDocument.id)
+
         return render(request, "resultDetail.html", {
             "legaldoc": legalDocument,
-            "legalDocuments_id": legalDocuments_pos
+            "legalDocuments_id": legalDocuments_pos,
         })
     else:
         return render(request, "resultDetail.html")
@@ -233,17 +479,55 @@ def readFile(filename, chunk_size=512):
             else:
                 break
 
+def getLegalDocument(legalDocument_id):
+    es = Elasticsearch()
+    result=es.get(index='legal_index',
+                doc_type='legalDocument',
+                request_timeout=300,
+                id=legalDocument_id)
+    legalDocment = LegalDocument()
+    legalDocment.id = result['_source']['id']
+    legalDocment.fy = result['_source']['fy']
+    legalDocment.dsrxx = result['_source']['dsrxx']
+    legalDocment.ah = result['_source']['ah']
+    legalDocment.spry = result['_source']['spry']
+    legalDocment.ysfycm = result['_source']['ysfycm']
+    legalDocment.ysqqqk = result['_source']['ysqqqk']
+    legalDocment.byrw = result['_source']['byrw']
+    legalDocment.spjg = result['_source']['spjg']
+    legalDocment.ysdbqk = result['_source']['ysdbqk']
+    legalDocment.esqqqk = result['_source']['esqqqk']
+    legalDocment.ysfyrw = result['_source']['ysfyrw']
+    legalDocment.ajms = result['_source']['ajms']
+    legalDocment.xgft = result['_source']['xgft']
+    legalDocment.sprq = result['_source']['sprq']
+    legalDocment.sljg = result['_source']['sljg']
+    legalDocment.bycm = result['_source']['bycm']
+    legalDocment.sjy = result['_source']['sjy']
+    legalDocment.bt = result['_source']['bt']
+    legalDocment.wslx = result['_source']['wslx']
+    legalDocment.dy = result['_source']['dy']
+    legalDocment.nf = result['_source']['nf']
+    legalDocment.slcx = result['_source']['slcx']
+    legalDocment.ay = result['_source']['ay']
+    legalDocment.ft = result['_source']['ft']
+    legalDocment.tz = result['_source']['tz']
+    legalDocment.fycj = result['_source']['fycj']
+    return legalDocment
 
+##提供下载功能
 @csrf_exempt
 def download(request):
+    # 没有登录
+    if request.session['username'] == '':
+        return render(request, 'account/login.html')
     if request.method == "POST":
-        print("abcabc" + request.POST["legalDocuments_id"])
-        legalDocuments_pos = int(request.POST["legalDocuments_id"])
-        print("abc" + str(legalDocuments_pos))
-        legalDocument = legalDocuments[legalDocuments_pos]
+        # legalDocuments_pos = int(request.POST["legalDocuments_id"])
+        # legalDocument = legalDocuments[legalDocuments_pos]
+        legalDocument = getLegalDocument(int(request.POST["legalDocumentId"]))
     # 临时文件名
     curr_date = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-    css = r'static\css\showDetail.css'
+    css = 'static/css/showDetail.css'
     options = {
         'page-size': 'Letter',
         'margin-top': '0.75in',
@@ -253,45 +537,53 @@ def download(request):
         'encoding': "UTF-8",
         'no-outline': None
     }
-    path_wk = r'D:\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
-    config = pdfkit.configuration(wkhtmltopdf=path_wk)
+    # path_wk = r'D:\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
+    # config = pdfkit.configuration(wkhtmltopdf=path_wk)
     # 读文件并且替换动态内容
+    # print(os.getcwd())
     fp = open(
-        r"static\download\pdf.html", 'w',
-        encoding='utf-8')  # 打开你要写得文件test2.txt
+        'static/download/pdf.html', 'w', encoding='utf-8')  # 打开你要写得文件test2.txt
     lines = open(
-        r'static\download\demo.html', 'r',
+        'static/download/demo.html', 'r',
         encoding='utf-8').readlines()  # 打开文件，读入每一行
     for s in lines:
+        # print(legalDocument.sljg)
 
         fp.write(
-            s.replace("标题", legalDocument.bt).replace('diyu', legalDocument.dy)
-            .replace('anhao', legalDocument.ah).replace(
-                'dangshirenxingxi', legalDocument.dsrxx).replace(
-                    'anjianmiaoshu', legalDocument.ajms).replace(
-                        'shenlijingguo', legalDocument.sljg)
-            .replace('yishenqingqiuqingkuang', legalDocument.ysqqqk).replace(
-                'yishendabianqingkuang', legalDocument.ysdbqk).replace(
-                    'yishenfayuanchaming', legalDocument.ysfycm).replace(
-                        'yishenfayuanrenwei', legalDocument.ysfyrw).replace(
-                            'ershenqingqiuqingkuang', legalDocument.esqqqk)
-            .replace('benyuanchaming', legalDocument.bycm).replace(
-                'benyuanrenwei', legalDocument.byrw).replace(
-                    'shenpanjieguo', legalDocument.spjg).replace(
-                        'shenpanrenyuan', legalDocument.spry).replace(
-                            'shenpanriqi', legalDocument.sprq).replace(
-                                'shujiyuan', legalDocument.sjy).replace(
-                                    'xiangguanfatiao',
-                                    legalDocument.xgft))  # replace是替换，write是写入
+            s.replace('标题', '无' if not legalDocument.bt else legalDocument.bt)
+            .replace('wenshuleixing', '无' if not legalDocument.wslx else legalDocument.wslx)
+            .replace('nianfen', '无' if not legalDocument.nf else legalDocument.nf)
+            .replace('shenlichengxu', '无' if not legalDocument.slcx else legalDocument.slcx)
+            .replace('fayuancengji', '无' if not legalDocument.fycj else legalDocument.fycj)
+            .replace('diyu', '无' if not legalDocument.dy else legalDocument.dy)
+            .replace('anhao', '无' if not legalDocument.ah else legalDocument.ah)
+            .replace('dangshirenxingxi', '无' if not legalDocument.dsrxx else legalDocument.dsrxx)
+            .replace('anjianmiaoshu', '无' if not legalDocument.ajms else legalDocument.ajms)
+            .replace('shenlijingguo', '无' if not legalDocument.sljg else legalDocument.sljg)
+            .replace('yishenqingqiuqingkuang', '无' if not legalDocument.ysqqqk else legalDocument.ysqqqk)
+            .replace('yishendabianqingkuang', '无' if not legalDocument.ysdbqk else legalDocument.ysdbqk)
+            .replace('yishenfayuanchaming', '无' if not legalDocument.ysfycm else legalDocument.ysfycm)
+            .replace('yishenfayuanrenwei', '无' if not legalDocument.ysfyrw else legalDocument.ysfyrw)
+            .replace('ershenqingqiuqingkuang', '无' if not legalDocument.esqqqk else legalDocument.esqqqk)
+            .replace('benyuanchaming', '无' if not legalDocument.bycm else legalDocument.bycm)
+            .replace('benyuanrenwei', '无' if not legalDocument.byrw else legalDocument.byrw)
+            .replace('shenpanjieguo', '无' if not legalDocument.spjg else legalDocument.spjg)
+            .replace('shenpanrenyuan', '无' if not legalDocument.spry else legalDocument.spry)
+            .replace('shenpanriqi', '无' if not legalDocument.sprq else legalDocument.sprq)
+            .replace('shujiyuan', '无' if not legalDocument.sjy else legalDocument.sjy)
+            .replace('xiangguanfatiao', '无' if not legalDocument.xgft else legalDocument.xgft)
+            )
+
+        # replace是替换，write是写入
 
     fp.close()  # 关闭文件
-    outpath = r'static\download\out%s.pdf' % (curr_date)
+    outpath = 'static/download/out%s.pdf' % (curr_date)
     pdfkit.from_file(
-        r'static\download\pdf.html',
+        'static/download/pdf.html',
         options=options,
         css=css,
-        output_path=outpath,
-        configuration=config)
+        output_path=outpath)
+    # configuration=config)
     # 文件下载
     file = open(r'%s' % (outpath), 'rb')
     response = FileResponse(file)
@@ -300,9 +592,178 @@ def download(request):
     return response
 
 
+@csrf_exempt
+def getRecommondList(request):
+    es = Elasticsearch()
+
+    id = int(request.POST['id'])
+    result = es.get(index='legal_index',
+                        doc_type='legalDocument',
+                        request_timeout=300,
+                        id=id)
+    legalDocment = LegalDocument()
+    legalDocment.id = result['_source']['id']
+    legalDocment.fy = result['_source']['fy']
+    legalDocment.dsrxx = result['_source']['dsrxx']
+    legalDocment.ah = result['_source']['ah']
+    legalDocment.spry = result['_source']['spry']
+    legalDocment.ysfycm = result['_source']['ysfycm']
+    legalDocment.ysqqqk = result['_source']['ysqqqk']
+    legalDocment.byrw = result['_source']['byrw']
+    legalDocment.spjg = result['_source']['spjg']
+    legalDocment.ysdbqk = result['_source']['ysdbqk']
+    legalDocment.esqqqk = result['_source']['esqqqk']
+    legalDocment.ysfyrw = result['_source']['ysfyrw']
+    legalDocment.ajms = result['_source']['ajms']
+    legalDocment.xgft = result['_source']['xgft']
+    legalDocment.sprq = result['_source']['sprq']
+    legalDocment.sljg = result['_source']['sljg']
+    legalDocment.bycm = result['_source']['bycm']
+    legalDocment.sjy = result['_source']['sjy']
+    legalDocment.bt = result['_source']['bt']
+    legalDocment.wslx = result['_source']['wslx']
+    legalDocment.dy = result['_source']['dy']
+    legalDocment.nf = result['_source']['nf']
+    legalDocment.slcx = result['_source']['slcx']
+    legalDocment.ay = result['_source']['ay']
+    legalDocment.ft = result['_source']['ft']
+    legalDocment.tz = result['_source']['tz']
+    legalDocment.fycj = result['_source']['fycj']
+    recommendCounts = getRecommondDetail(legalDocment)
+    print('返回')
+    print(recommendCounts)
+    ids = recommendCounts.keys()
+    legaldoclist = []
+    for id in ids:
+        result = es.get(
+            index='legal_index',
+            doc_type='legalDocument',
+            request_timeout=300,
+            id=id)
+        legalDoc = LegalDocument()
+        legalDoc.id = result['_source']['id']
+        legalDoc.similarity=recommendCounts.get(id)
+        legalDoc.fy = result['_source']['fy']
+        legalDoc.dsrxx = result['_source']['dsrxx']
+        legalDoc.ah = result['_source']['ah']
+        legalDoc.spry = result['_source']['spry']
+        legalDoc.ysfycm = result['_source']['ysfycm']
+        legalDoc.ysqqqk = result['_source']['ysqqqk']
+        legalDoc.byrw = result['_source']['byrw']
+        legalDoc.spjg = result['_source']['spjg']
+        legalDoc.ysdbqk = result['_source']['ysdbqk']
+        legalDoc.esqqqk = result['_source']['esqqqk']
+        legalDoc.ysfyrw = result['_source']['ysfyrw']
+        legalDoc.ajms = result['_source']['ajms']
+        legalDoc.xgft = result['_source']['xgft']
+        legalDoc.sprq = result['_source']['sprq']
+        legalDoc.sljg = result['_source']['sljg']
+        legalDoc.bycm = result['_source']['bycm']
+        legalDoc.sjy = result['_source']['sjy']
+        legalDoc.bt = result['_source']['bt']
+        legalDoc.wslx = result['_source']['wslx']
+        legalDoc.dy = result['_source']['dy']
+        legalDoc.nf = result['_source']['nf']
+        legalDoc.slcx = result['_source']['slcx']
+        legalDoc.ay = result['_source']['ay']
+        legalDoc.ft = result['_source']['ft']
+        legalDoc.tz = result['_source']['tz']
+        legalDoc.fycj = result['_source']['fycj']
+        legaldoclist.append(legalDoc)
+        # print(legaldoclist)
+
+    print(legaldoclist)
+    return render(request, "recommond.html", {
+
+             "legaldoclist": legaldoclist
+     })
+
+
 # 进入推荐页面，java版本对应路径为recommondDetail
-def getRecommondDetail(request):
-    pass
+def getRecommondDetail(legalDocument):
+    fileResults = os.path.join(r'/home/mianhuatang/提取','')
+    print(gc.collect())
+    id=legalDocument.id
+    es = Elasticsearch()
+    searchResult = es.get(
+        index='legal_index',
+        doc_type='legalDocument',
+        request_timeout=300,
+        id=id)
+    ay=searchResult['_source']['ay'].split('\t')[0:2]
+    ayLen=len(ay)
+    recommendResult={}
+    for i in range(len(ay)):
+        if(ay[i]=='' or ay[i] in exceptionAY ):
+            continue
+        anyou=ay[i]
+        print(anyou + " " + str(gc.collect()))
+        searchResult=es.get(index='legal_keywords',doc_type='keyword',request_timeout=300,id=id)
+        keywords=searchResult['_source']['keywords'].split('\t')
+        # 分词文件路径
+        filepath = os.path.join('/home/mianhuatang/提取', anyou)
+        # 到该案由路径下载入获取已经训练好的模型
+        output = os.path.join('/home/mianhuatang/data/results', anyou)
+
+        # 载入字典
+        dictionary = corpora.Dictionary.load(os.path.join(output, "all.dic"))
+
+        # # 载入LDA模型和索引
+        ldaModel = models.LdaModel.load(os.path.join(output, "allLDATopic.mdl"))
+        indexLDA = similarities.MatrixSimilarity.load(os.path.join(output, "allLDATopic.idx"))
+
+        # query就是测试数据，先切词
+        query_bow = dictionary.doc2bow(keywords)
+
+        # 载入TFIDF模型和索引
+        tfidfModel = models.TfidfModel.load(os.path.join(output, "allTFIDF.mdl"))
+        indexTfidf = similarities.MatrixSimilarity.load(os.path.join(output, "allTFIDF.idx"))
+
+        # 使用TFIDF模型向量化
+        tfidfvect = tfidfModel[query_bow]
+
+        # 然后LDA向量化，因为我们训练时的LDA是在TFIDF基础上做的，所以用itidfvect再向量化一次
+        ldavec = ldaModel[tfidfvect]
+
+        # TFIDF相似性，相似性列表记录与每份模型中的文书的相似度
+        simstfidf = indexTfidf[tfidfvect]
+
+        # LDA相似性，相似性列表记录与每份模型中的文书的相似度
+        simlda = indexLDA[ldavec]
+
+        sort_sims = sorted(enumerate(simlda), key=lambda item: -item[1])
+
+        ldaNumber = {}
+        for keys in sort_sims[0:11]:
+            key = keys[0]
+            key = str(key)
+            while len(key) < 8:
+                key = "0" + key
+            key = key + '.txt'
+            file = open(os.path.join(filepath, key), encoding='UTF-8')
+            lines = file.readlines()
+            for line in lines:  # 将文件中的编号装入列表
+                if len(line) != 1:
+                    if line.split('##')[0] == '编号':
+                        ldaNumber[line.split('##')[1].strip('\n')] = keys[1]
+        recommendResult.update(ldaNumber)
+
+    print('排序前')
+    print(recommendResult)
+    sorted(recommendResult.items(), key=lambda d: d[1],reverse=True)
+
+    resultKeys=recommendResult.keys()
+    recommendResults={}
+    i=0
+    for key in resultKeys :
+        if int(key)!=id and i<11:
+            recommendResults[key]=recommendResult.get(key)
+            i=i+1
+
+    print(gc.collect())
+    print('排序后')
+    print(recommendResults.items())
+    return recommendResults
 
 
 # 全领域搜索的解决思路是对每个域进行搜索，之间用should连接
@@ -321,7 +782,7 @@ def allFieldSearch(searchStruct):
         allFieldKeyWordMiniQuery = []
 
     allFieldKeyWordQuery = {"bool": {"must": allFieldKeyWordQuery}}
-    print(allFieldKeyWordQuery)
+
     return allFieldKeyWordQuery
 
 
@@ -341,7 +802,6 @@ def allFieldNotSearch(searchStruct):
         allFieldNotKeyWordMiniQuery = []
 
     allFieldNotKeyWordQuery = {"bool": {"must": allFieldNotKeyWordQuery}}
-    print(allFieldNotKeyWordQuery)
 
     return allFieldNotKeyWordQuery
 
@@ -350,7 +810,7 @@ def allFieldNotSearch(searchStruct):
 def oneFieldSearch(searchStruct):
     oneFieldKeyWordQuery = []
     oneFieldKeyWordMiniQuery = []
-    if len(searchStruct.oneFieldKeyWord) != 0:
+    if searchStruct.oneFieldKeyWord:
         oneFieldKeyWord = searchStruct.oneFieldKeyWord
         # oneFieldKeyWord = {"byrw" :["盗窃", "窃取"], "bt": ["盗窃"]}
         fieldSet = oneFieldKeyWord.keys()
@@ -369,31 +829,33 @@ def oneFieldSearch(searchStruct):
             oneFieldKeyWordMiniQuery = []
 
     oneFieldKeyWordQuery = {"bool": {"must": oneFieldKeyWordQuery}}
-    print(oneFieldKeyWordQuery)
 
     return oneFieldKeyWordQuery
+
+
 # 单领域否定搜索:输出：oneFieldKeyNotWordQuery
 def oneFieldNotSearch(searchStruct):
     oneFieldKeyNotWordQuery = []
     oneFieldKeyNotWordMiniQuery = []
-    if len(searchStruct.oneFieldNotKeyWord) != 0:
+    if searchStruct.oneFieldNotKeyWord:
         oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord
         fieldSet = oneFieldNotKeyWord.keys()
         for field in fieldSet:
             for keyWord in oneFieldNotKeyWord[field]:
-                oneFieldKeyNotWordMiniQuery.append({"match_phrase": {field: keyWord}})
+                oneFieldKeyNotWordMiniQuery.append({
+                    "match_phrase": {
+                        field: keyWord
+                    }
+                })
             oneFieldKeyNotWordQuery = ({
                 "bool": {
                     "must_not": oneFieldKeyNotWordMiniQuery
                 }
             })
             oneFieldKeyNotWordMiniQuery = []
-    oneFieldKeyNotWordQuery = {
-        "bool":{
-            "must":oneFieldKeyNotWordQuery
-        }
-    }
+    oneFieldKeyNotWordQuery = {"bool": {"must": oneFieldKeyNotWordQuery}}
     return oneFieldKeyNotWordQuery
+
 
 # 同域搜索
 def fieldSearch(searchStruct):
@@ -428,7 +890,6 @@ def fieldSearch(searchStruct):
         fieldKeyWordQuery = {"bool": {"should": fieldKeyWordQueryCopy}}
 
     fieldKeyWordQuery = {"bool": {"must": fieldKeyWordQuery}}
-    print(fieldKeyWordQuery)
 
     return fieldKeyWordQuery
 
@@ -491,32 +952,8 @@ def orderFieldSearch(searchStruct):
         }
 
     orderFieldKeyWordQuery = {"bool": {"must": orderFieldKeyWordQuery}}
-    print(orderFieldKeyWordQuery)
 
     return orderFieldKeyWordQuery
-
-
-# 单领域否定搜索:输出：oneFieldKeyNotWordQuery
-def oneFieldNotSearch(searchStruct):
-    oneFieldKeyNotWordQuery = []
-    if len(searchStruct.oneFieldNotKeyWord) != 0:
-        oneFieldKeyWord = searchStruct.oneFieldKeyWord
-        oneFieldNotKeyWord = searchStruct.oneFieldNotKeyWord
-        field = allSearchFieldList[oneFieldNotKeyWord["field"]]
-        oneFieldKeyNotWordMiniQuery = []
-
-        for i in oneFieldNotKeyWord["notkeywords"]:
-            oneFieldKeyNotWordMiniQuery.append({"match_phrase": {field: i}})
-        oneFieldKeyNotWordQuery = {
-            "bool": {
-                "must_not": oneFieldKeyNotWordMiniQuery
-            }
-        }
-
-    oneFieldKeyNotWordQuery = {"bool": {"must": oneFieldKeyNotWordQuery}}
-    print(oneFieldKeyNotWordQuery)
-
-    return oneFieldKeyNotWordQuery
 
 
 #对于聚合结果进行排序
@@ -544,6 +981,7 @@ def searchByStrcut(searchStruct):
     oneFieldKeyNotWordQuery = oneFieldNotSearch(searchStruct)
 
     query = {
+
         "size": 1000,
         "query": {
             "bool": {
@@ -558,6 +996,7 @@ def searchByStrcut(searchStruct):
             "fycj": {
                 "terms": {
                     "field": "fycj"
+
                 }
             },
             "wslx": {
@@ -587,7 +1026,7 @@ def searchByStrcut(searchStruct):
             }
         },
         "highlight": {
-            "require_field_match": False,
+            "require_field_match": True,
             "fields": {
                 "fy": {
                     "pre_tags": "<span style=\"color:red\">",
@@ -688,7 +1127,7 @@ def searchByStrcut(searchStruct):
         }
     }
 
-    print(json.dumps(query))
+    # print(json.dumps(query))
     searchResults = es.search(
         index='legal_index',
         doc_type='legalDocument',
@@ -710,92 +1149,107 @@ def searchByStrcut(searchStruct):
 
     for result in results:
         legalDoc = LegalDocument()
-        if (result['highlight'].__contains__('fy')):
+        legalDoc.id=result['_source']['id']
+        if ('highlight' in result and result['highlight'].__contains__('fy')):
             legalDoc.fy = result['highlight']['fy'][0]
         else:
             legalDoc.fy = result['_source']['fy']
 
-        if (result['highlight'].__contains__('dsrxx')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('dsrxx')):
             legalDoc.dsrxx = result['highlight']['dsrxx'][0]
         else:
             legalDoc.dsrxx = result['_source']['dsrxx']
 
-        if (result['highlight'].__contains__('ah')):
+        if ('highlight' in result and result['highlight'].__contains__('ah')):
             legalDoc.ah = result['highlight']['ah'][0]
         else:
             legalDoc.ah = result['_source']['ah']
 
-        if (result['highlight'].__contains__('spry')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('spry')):
             legalDoc.spry = result['highlight']['spry'][0]
         else:
             legalDoc.spry = result['_source']['spry']
 
-        if (result['highlight'].__contains__('ysfycm')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('ysfycm')):
             legalDoc.ysfycm = result['highlight']['ysfycm'][0]
         else:
             legalDoc.ysfycm = result['_source']['ysfycm']
 
-        if (result['highlight'].__contains__('ysqqqk')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('ysqqqk')):
             legalDoc.ysqqqk = result['highlight']['ysqqqk'][0]
         else:
             legalDoc.ysqqqk = result['_source']['ysqqqk']
 
-        if (result['highlight'].__contains__('byrw')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('byrw')):
             legalDoc.byrw = result['highlight']['byrw'][0]
         else:
             legalDoc.byrw = result['_source']['byrw']
 
-        if (result['highlight'].__contains__('spjg')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('spjg')):
             legalDoc.spjg = result['highlight']['spjg'][0]
         else:
             legalDoc.spjg = result['_source']['spjg']
 
-        if (result['highlight'].__contains__('ysdbqk')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('ysdbqk')):
             legalDoc.ysdbqk = result['highlight']['ysdbqk'][0]
         else:
             legalDoc.ysdbqk = result['_source']['ysdbqk']
 
-        if (result['highlight'].__contains__('esqqqk')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('esqqqk')):
             legalDoc.esqqqk = result['highlight']['esqqqk'][0]
         else:
             legalDoc.esqqqk = result['_source']['esqqqk']
 
-        if (result['highlight'].__contains__('ysfyrw')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('ysfyrw')):
             legalDoc.ysfyrw = result['highlight']['ysfyrw'][0]
         else:
             legalDoc.ysfyrw = result['_source']['ysfyrw']
 
-        if (result['highlight'].__contains__('ajms')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('ajms')):
             legalDoc.ajms = result['highlight']['ajms'][0]
         else:
             legalDoc.ajms = result['_source']['ajms']
 
-        if (result['highlight'].__contains__('xgft')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('xgft')):
             legalDoc.xgft = result['highlight']['xgft'][0]
         else:
             legalDoc.xgft = result['_source']['xgft']
 
-        if (result['highlight'].__contains__('sprq')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('sprq')):
             legalDoc.sprq = result['highlight']['sprq'][0]
         else:
             legalDoc.sprq = result['_source']['sprq']
 
-        if (result['highlight'].__contains__('sljg')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('sljg')):
             legalDoc.sljg = result['highlight']['sljg'][0]
         else:
             legalDoc.sljg = result['_source']['sljg']
 
-        if (result['highlight'].__contains__('bycm')):
+        if ('highlight' in result
+                and result['highlight'].__contains__('bycm')):
             legalDoc.bycm = result['highlight']['bycm'][0]
         else:
             legalDoc.bycm = result['_source']['bycm']
 
-        if (result['highlight'].__contains__('sjy')):
+        if ('highlight' in result and result['highlight'].__contains__('sjy')):
             legalDoc.sjy = result['highlight']['sjy'][0]
         else:
             legalDoc.sjy = result['_source']['sjy']
 
-        if (result['highlight'].__contains__('bt')):
+        if ('highlight' in result and result['highlight'].__contains__('bt')):
             legalDoc.bt = result['highlight']['bt'][0]
         else:
             legalDoc.bt = result['_source']['bt']

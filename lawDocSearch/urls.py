@@ -21,8 +21,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 
-from lawDoc.views import index, indexSearch, getDetail, download, groupBySearch, addSearch, getMore, newSearch
-
+from lawDoc.views import index, indexSearch, getDetail, download, groupBySearch, addSearch, getMore, newSearch, \
+    searchlabel, getRecommond, getRecommondList
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +34,9 @@ urlpatterns = [
     url(r'^addsearch$', addSearch, name="addSearch"),
     url(r'^download$', download, name="download"),
     url(r'^newsearch$', newSearch, name="newSearch"),
+    url(r'^searchlabel$', searchlabel, name="searchlabel"),
+    url(r'^recommondDetail$',getRecommond,name='getRecommond'),
+    url(r'^recommondList$',getRecommondList,name='getRecommondLsit'),
     path('account/', include('account.urls')),
     path('upload/', include('upload.urls')),
 ]

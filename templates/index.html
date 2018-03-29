@@ -19,6 +19,9 @@
                 <ul>
                     {% if username != '' %}
                     <li><a href="#"><span class="glyphicon glyphicon-user"></span>{{ username }}</a></li>
+                    {% if identity != 1 %}
+                    <li><a href="/upload"><span class="glyphicon glyphicon-pencil"></span>上传</a></li>
+                    {% endif %}
                     <li><a href="/account/logout"><span class="glyphicon glyphicon-log-out"></span>登出</a></li>
                     {% else %}
                     <li><a href="/account/register"><span class="glyphicon glyphicon-user"></span>注册</a></li>

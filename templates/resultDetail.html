@@ -1,428 +1,471 @@
 {% load static %}
 <!doctype html>
 <html lang="zh-Hans">
-    <head>
-        <meta charset="UTF-8">
-        <title>Title</title>
-        <link href="{% static '/css/showDetail.css' %}" rel="stylesheet" type="text/css" />
-        <script type="text/javascript" src="{% static '/js/jquery-3.2.1.js' %}"></script>
-        <script type="text/javascript" src="{% static '/js/sendjs.js' %}"></script>
-    </head>
-    <body>
-    <!--下载按钮-->
-    {% csrf_token %}
-     <div class="detail-main" id="content">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="{% static '/css/showDetail.css' %}" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="{% static '/js/jquery-3.2.1.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/sendjs.js' %}"></script>
+</head>
+<body>
+<!--下载按钮-->
+{% csrf_token %}
+<div id="content">
     <form style="float:right;width:20%;margin-right:10%" action="download" method="post">
-        <input type="hidden" name="legalDocuments_id" value="{{legalDocuments_id }}" />
+        <input type="hidden" name="legalDocumentId" value="{{ legaldoc.id }}" />
         <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
-        <button class="detail-download"  >&nbsp;下载  </button>
-            </div>
+            <button class="detail-download"  >&nbsp;下载  </button>
+
     </form>
-     </div>
+</div>
 
-        <div class="detail-main" id="content">
-            <div style="float:right;width:20%;margin-right:10%">
-                <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
-                    <span class="nav-title-text">相似案例</span>
+<div class="detail-main" >
+    <div style="float:right;width:20%;margin-right:10%">
+        <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
+            <span class="nav-title-text">相似案例</span>
+        </div>
+        <div id="caseText" class="col-lg-12 col-lg-12-padding detail-middle-main ">
+            {% for legalbt in legaldoclist %}
+                <div style="padding-top: 15px;">
+                    <button class="detail-btn" onclick="recommondDetail(this)" value="{{ legalbt.id }}">
+                        {{ legalbt.bt }}   {{ legalbt.similarity}}
+                    </button>
                 </div>
-                <div id="caseText" class="col-lg-12 col-lg-12-padding detail-middle-main ">
-                    {% for legalbt in legaldoclist %}
-                    <div style="padding-top: 15px;">
-                        <button class="detail-btn" onclick="recommondDetail(this)" value="{{ legalbt.id }}">
-                            {{ legalbt.bt }}
-                        </button>
-                    </div>
-                    {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="detail-middle fl" >
+        <div class="detail-container">
+
+            <!--文章标题-->
+            <div class="detail-title">
+                <div class="col-lg-9" style="width: 100%;">
+                    <div class="text-center text-black" id="btvalue">{{ legaldoc.bt }}</div>
                 </div>
             </div>
 
-            <div class="detail-middle fl">
-                <div class="detail-container">
+            <input type="hidden" id="lawDocId" value="{{ legaldoc.id }}" >
 
-                    <!--文章标题-->
-                    <div class="detail-title">
-                        <div class="col-lg-9" style="width: 100%;">
-                            <div class="text-center text-black" id="btvalue">{{ legaldoc.bt }}</div>
+            <!--正文展示-->
+            <div class="row row-position">
+                <div class="col-lg-9" style="width: 100%">
+
+                    <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
+                        <span class="nav-title-text">基本信息</span>
+                    </div>
+
+                    <div class="detail-middle-text">
+                        <div class="detail-middle-text-container">
+                            <div class="col-lg-6 detail-info-right" style="float:right">
+                                <span class="title-area" id="wslx">文书类型</span>
+                                <span class="info-item info-item-gray info-area" id="wslxvalue">{{ legaldoc.wslx }}</span>
+                            </div>
+
+                            <div class="col-lg-6 detail-info-left "  >
+                                <span class="title-area" id="ah">案号</span>
+                                <span class="info-item info-item-gray info-area" id="ahvalue">{{ legaldoc.ah }}</span>
+                            </div>
+
+                            <div class="col-lg-6 detail-info-right" style="float:right">
+                                <span class="title-area">审理程序</span>
+                                <span class="info-item info-item-gray info-area">{{ legaldoc.slcx }}</span>
+                            </div>
+
+                            <div class="col-lg-6 detail-info-left">
+                                <span class="title-area">年份</span>
+                                <span class="info-item info-item-gray info-area">{{ legaldoc.nf }}</span>
+                            </div>
+
+                            <div class="col-lg-6 detail-info-right" style="float:right">
+                                <span class="title-area">法院层级</span>
+                                <span class="info-item info-item-gray info-area">{{ legaldoc.fycj  }}</span>
+                            </div>
+
+                            <div class="col-lg-6 detail-info-left">
+                                <span class="title-area">地域</span>
+                                <span class="info-item info-item-gray info-area">{{ legaldoc.dy }}</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!--正文展示-->
-                    <div class="row row-position">
-                        <div class="col-lg-9" style="width: 100%">
+                    <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
+                        <span class="nav-title-text">文书正文</span>
+                    </div>
 
-                            <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
-                                <span class="nav-title-text">基本信息</span>
-                            </div>
-
-                            <div class="detail-middle-text">
-                                <div class="detail-middle-text-container">
-                                    <div class="col-lg-6 detail-info-right" style="float:right">
-                                        <span class="title-area" id="wslx">文书类型</span>
-                                        <span class="info-item info-item-gray info-area" id="wslxvalue">{{ legaldoc.wslx }}</span>
-                                    </div>
-
-                                    <div class="col-lg-6 detail-info-left "  >
-                                        <span class="title-area" id="ah">案号</span>
-                                        <span class="info-item info-item-gray info-area" id="ahvalue">{{ legaldoc.ah }}</span>
-                                    </div>
-
-                                    <div class="col-lg-6 detail-info-right" style="float:right">
-                                        <span class="title-area">审理程序</span>
-                                        <span class="info-item info-item-gray info-area">{{ legaldoc.slcx }}</span>
-                                    </div>
-
-                                    <div class="col-lg-6 detail-info-left">
-                                        <span class="title-area">年份</span>
-                                        <span class="info-item info-item-gray info-area">{{ legaldoc.nf }}</span>
-                                    </div>
-
-                                    <div class="col-lg-6 detail-info-right" style="float:right">
-                                        <span class="title-area">法院层级</span>
-                                        <span class="info-item info-item-gray info-area">{{ legaldoc.fycj  }}</span>
-                                    </div>
-
-                                    <div class="col-lg-6 detail-info-left">
-                                        <span class="title-area">地域</span>
-                                        <span class="info-item info-item-gray info-area">{{ legaldoc.dy }}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
-                                <span class="nav-title-text">文书正文</span>
-                            </div>
-
-                            <div class="col-lg-12 col-lg-12-padding detail-middle-main">
+                    <div class="col-lg-12 col-lg-12-padding detail-middle-main">
 
 
-                                <div style="padding-top:30px;">
-                                    <div class="detail-middle-item" id="dsrxx">当事人信息</div>
-                                </div>
-                                <p class="detail-word" id="dsrxxvalue">{{ legaldoc.dsrxx }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="ajms">案件描述</div>
-                                </div>
-                                <p class="detail-word" id="ajmsvalue">{{ legaldoc.ajms }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="sljg">审理经过</div>
-                                </div>
-                                <p class="detail-word" id="sljgvalue">{{ legaldoc.sljg }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="ysqqqk">一审请求情况</div>
-                                </div>
-                                <p class="detail-word" id="ysqqqkvalue">{{ legaldoc.ysqqqk }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="ysdbqk">一审答辩情况</div>
-                                </div>
-                                <p class="detail-word" id="ysdbqkvalue">{{ legaldoc.ysdbqk }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="ysfycm">一审法院查明</div>
-                                </div>
-                                <p class="detail-word" id="ysfycmvalue">{{ legaldoc.ysfycm }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="ysfyrw">一审法院认为</div>
-                                </div>
-                                <p class="detail-word" id="ysfyrwvalue">{{ legaldoc.ysfyrw }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="esqqqk">二审请求情况</div>
-                                </div>
-                                <p class="detail-word" id="esqqqkvalue">{{ legaldoc.esqqqk }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="bycm">本院查明</div>
-                                </div>
-                                <p class="detail-word" id="bycmvalue">{{ legaldoc.bycm }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="byrw">本院认为</div>
-                                </div>
-                                <p class="detail-word" id="byrwvalue">{{ legaldoc.byrw }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="spjg">审判结果</div>
-                                </div>
-                                <p class="detail-word" id="spjgvalue">{{ legaldoc.spjg }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="spry">审判人员</div>
-                                </div>
-                                <p class="detail-word" id="spryvalue" name="spry">{{ legaldoc.spry }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="sprq">审判日期</div>
-                                </div>
-                                <p class="detail-word" id="sprqvalue">{{ legaldoc.sprq }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="sjy">书记员</div>
-                                </div>
-                                <p class="detail-word" id="sjyvalue">{{ legaldoc.sjy }}</p>
-
-
-
-                                <div class="detail-item">
-                                    <div class="detail-middle-item" id="xgft">相关法条</div>
-                                </div>
-                                <p class="detail-word" id="xgftvalue">{{ legaldoc.xgft }}</p>
-
-
-                                <div style="background-color: white;height:15px;"></div>
-                            </div>
+                        <div style="padding-top:30px;">
+                            <div class="detail-middle-item" id="dsrxx">当事人信息</div>
                         </div>
+                        <p class="detail-word" id="dsrxxvalue">{{ legaldoc.dsrxx }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="ajms">案件描述</div>
+                        </div>
+                        <p class="detail-word" id="ajmsvalue">{{ legaldoc.ajms }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="sljg">审理经过</div>
+                        </div>
+                        <p class="detail-word" id="sljgvalue">{{ legaldoc.sljg }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="ysqqqk">一审请求情况</div>
+                        </div>
+                        <p class="detail-word" id="ysqqqkvalue">{{ legaldoc.ysqqqk }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="ysdbqk">一审答辩情况</div>
+                        </div>
+                        <p class="detail-word" id="ysdbqkvalue">{{ legaldoc.ysdbqk }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="ysfycm">一审法院查明</div>
+                        </div>
+                        <p class="detail-word" id="ysfycmvalue">{{ legaldoc.ysfycm }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="ysfyrw">一审法院认为</div>
+                        </div>
+                        <p class="detail-word" id="ysfyrwvalue">{{ legaldoc.ysfyrw }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="esqqqk">二审请求情况</div>
+                        </div>
+                        <p class="detail-word" id="esqqqkvalue">{{ legaldoc.esqqqk }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="bycm">本院查明</div>
+                        </div>
+                        <p class="detail-word" id="bycmvalue">{{ legaldoc.bycm }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="byrw">本院认为</div>
+                        </div>
+                        <p class="detail-word" id="byrwvalue">{{ legaldoc.byrw }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="spjg">审判结果</div>
+                        </div>
+                        <p class="detail-word" id="spjgvalue">{{ legaldoc.spjg }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="spry">审判人员</div>
+                        </div>
+                        <p class="detail-word" id="spryvalue" name="spry">{{ legaldoc.spry }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="sprq">审判日期</div>
+                        </div>
+                        <p class="detail-word" id="sprqvalue">{{ legaldoc.sprq }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="sjy">书记员</div>
+                        </div>
+                        <p class="detail-word" id="sjyvalue">{{ legaldoc.sjy }}</p>
+
+
+
+                        <div class="detail-item">
+                            <div class="detail-middle-item" id="xgft">相关法条</div>
+                        </div>
+                        <p class="detail-word" id="xgftvalue">{{ legaldoc.xgft }}</p>
+
+
+                        <div style="background-color: white;height:15px;"></div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+</div>
 
-        <script type="text/javascript">
-         var bt='{% autoescape off  %}{{ legaldoc.bt }}{%  endautoescape %}';
+<script type="text/javascript">
+    var bt='{% autoescape off  %}{{ legaldoc.bt }}{%  endautoescape %}';
 
-         $("#btvalue").html(bt);
-
-
-         var wslx='{% autoescape off  %}{{ legaldoc.wslx }}{%  endautoescape %}';
-         if(wslx=="")
-             {
-                 document.getElementById("wslx").style.display="none";
-             }
-         else
-             {
-                 $("#wslxvalue").html(wslx);
-             }
-         console.log(wslx);
-         var ay='{% autoescape off  %}{{ legaldoc.ay }}{%  endautoescape %}';
-         if(ay=="")
-             {
-                 document.getElementById("ay").style.display="none";
-             }
-         else
-             {
-                 $("#ayvalue").html(ay);
-             }
-
-         var dsrxx='{% autoescape off  %}{{ legaldoc.dsrxx }}{%  endautoescape %}';
-         if(dsrxx=="")
-             {
-                 document.getElementById("dsrxx").style.display="none";
-             }
-         else
-             {
-                 $("#dsrxxvalue").html(dsrxx);
-             }
-
-         var ajms='{% autoescape off  %}{{ legaldoc.ajms }}{%  endautoescape %}';
-         if(ajms=="")
-             {
-                 document.getElementById("ajms").style.display="none";
-             }
-         else
-             {
-                 $("#ajmsvalue").html(ajms);
-             }
+    $("#btvalue").html(bt);
 
 
+    var wslx='{% autoescape off  %}{{ legaldoc.wslx }}{%  endautoescape %}';
+    if(wslx=="")
+    {
+        document.getElementById("wslx").style.display="none";
+    }
+    else
+    {
+        $("#wslxvalue").html(wslx);
+    }
+    console.log(wslx);
+    var ay='{% autoescape off  %}{{ legaldoc.ay }}{%  endautoescape %}';
+    if(ay=="")
+    {
+        document.getElementById("ay").style.display="none";
+    }
+    else
+    {
+        $("#ayvalue").html(ay);
+    }
 
-         var sljg='{% autoescape off  %}{{ legaldoc.sljg }}{%  endautoescape %}';
-         if(sljg=="")
-             {
-                 document.getElementById("sljg").style.display="none";
-             }
-         else
-             {
-                 $("#sljgvalue").html(sljg);
-             }
+    var dsrxx='{% autoescape off  %}{{ legaldoc.dsrxx }}{%  endautoescape %}';
+    if(dsrxx=="")
+    {
+        document.getElementById("dsrxx").style.display="none";
+    }
+    else
+    {
+        $("#dsrxxvalue").html(dsrxx);
+    }
+
+    var ajms='{% autoescape off  %}{{ legaldoc.ajms }}{%  endautoescape %}';
+    if(ajms=="")
+    {
+        document.getElementById("ajms").style.display="none";
+    }
+    else
+    {
+        $("#ajmsvalue").html(ajms);
+    }
 
 
 
-         var ysqqqk='{% autoescape off  %}{{ legaldoc.ysqqqk }}{%  endautoescape %}';
-         if(ysqqqk=="")
-             {
-                 document.getElementById("ysqqqk").style.display="none";
-             }
-         else
-             {
-                 $("#ysqqqkvalue").html(ysqqqk);
-             }
+    var sljg='{% autoescape off  %}{{ legaldoc.sljg }}{%  endautoescape %}';
+    if(sljg=="")
+    {
+        document.getElementById("sljg").style.display="none";
+    }
+    else
+    {
+        $("#sljgvalue").html(sljg);
+    }
 
 
 
-         var ysdbqk='{% autoescape off  %}{{ legaldoc.ysdbqk }}{%  endautoescape %}';
-         if(ysdbqk=="")
-             {
-                 document.getElementById("ysdbqk").style.display="none";
-             }
-         else
-             {
-                 $("#ysdbqkvalue").html(ysdbqk);
-             }
+    var ysqqqk='{% autoescape off  %}{{ legaldoc.ysqqqk }}{%  endautoescape %}';
+    if(ysqqqk=="")
+    {
+        document.getElementById("ysqqqk").style.display="none";
+    }
+    else
+    {
+        $("#ysqqqkvalue").html(ysqqqk);
+    }
 
 
 
-         var ysfycm='{% autoescape off  %}{{ legaldoc.ysfycm }}{%  endautoescape %}';
-         if(ysfycm=="")
-             {
-                 document.getElementById("ysfycm").style.display="none";
-             }
-         else
-             {
-                 $("#ysfycmvalue").html(ysfycm);
-             }
+    var ysdbqk='{% autoescape off  %}{{ legaldoc.ysdbqk }}{%  endautoescape %}';
+    if(ysdbqk=="")
+    {
+        document.getElementById("ysdbqk").style.display="none";
+    }
+    else
+    {
+        $("#ysdbqkvalue").html(ysdbqk);
+    }
 
 
 
-         var ysfyrw='{% autoescape off  %}{{ legaldoc.ysfyrw }}{%  endautoescape %}';
-         if(ysfyrw=="")
-             {
-                 document.getElementById("ysfyrw").style.display="none";
-             }
-         else
-             {
-                 $("#ysfyrwvalue").html(ysfyrw);
-             }
+    var ysfycm='{% autoescape off  %}{{ legaldoc.ysfycm }}{%  endautoescape %}';
+    if(ysfycm=="")
+    {
+        document.getElementById("ysfycm").style.display="none";
+    }
+    else
+    {
+        $("#ysfycmvalue").html(ysfycm);
+    }
 
 
 
-         var esqqqk='{% autoescape off  %}{{ legaldoc.esqqqk }}{%  endautoescape %}';
-         if(esqqqk=="")
-             {
-                 document.getElementById("esqqqk").style.display="none";
-             }
-         else
-             {
-                 $("#esqqqkvalue").html(esqqqk);
-             }
+    var ysfyrw='{% autoescape off  %}{{ legaldoc.ysfyrw }}{%  endautoescape %}';
+    if(ysfyrw=="")
+    {
+        document.getElementById("ysfyrw").style.display="none";
+    }
+    else
+    {
+        $("#ysfyrwvalue").html(ysfyrw);
+    }
 
 
 
-         var bycm='{% autoescape off  %}{{ legaldoc.bycm }}{%  endautoescape %}';
-         if(bycm=="")
-             {
-                 document.getElementById("bycm").style.display="none";
-             }
-         else
-             {
-                 $("#bycmvalue").html(bycm);
-             }
+    var esqqqk='{% autoescape off  %}{{ legaldoc.esqqqk }}{%  endautoescape %}';
+    if(esqqqk=="")
+    {
+        document.getElementById("esqqqk").style.display="none";
+    }
+    else
+    {
+        $("#esqqqkvalue").html(esqqqk);
+    }
 
 
 
-         var byrw='{% autoescape off  %}{{ legaldoc.byrw }}{%  endautoescape %}';
-         if(byrw=="")
-             {
-                 document.getElementById("byrw").style.display="none";
-             }
-         else
-             {
-                 $("#byrwvalue").html(byrw);
-             }
+    var bycm='{% autoescape off  %}{{ legaldoc.bycm }}{%  endautoescape %}';
+    if(bycm=="")
+    {
+        document.getElementById("bycm").style.display="none";
+    }
+    else
+    {
+        $("#bycmvalue").html(bycm);
+    }
 
 
 
-         var spjg='{% autoescape off  %}{{ legaldoc.spjg }}{%  endautoescape %}';
-         if(spjg=="")
-             {
-                 document.getElementById("spjg").style.display="none";
-             }
-         else
-             {
-                 $("#spjgvalue").html(spjg);
-             }
+    var byrw='{% autoescape off  %}{{ legaldoc.byrw }}{%  endautoescape %}';
+    if(byrw=="")
+    {
+        document.getElementById("byrw").style.display="none";
+    }
+    else
+    {
+        $("#byrwvalue").html(byrw);
+    }
 
 
-function hereDoc(f) {　
-    return f.toString().replace(/^[^\/]+\/\*!?\s?/, '').replace(/\*\/[^\/]+$/, '');
-}
-         var spry= hereDoc(function() { /*
+
+    var spjg='{% autoescape off  %}{{ legaldoc.spjg }}{%  endautoescape %}';
+    if(spjg=="")
+    {
+        document.getElementById("spjg").style.display="none";
+    }
+    else
+    {
+        $("#spjgvalue").html(spjg);
+    }
+
+
+    function hereDoc(f) {
+        return f.toString().replace(/^[^\/]+\/\*!?\s?/, '').replace(/\*\/[^\/]+$/, '');
+    }
+    var spry= hereDoc(function() { /*
              {{ legaldoc.spry }}
               */ });
 
-         if(spry=="")
-             {
-                 document.getElementById("spry").style.display="none";
-             }
-         else
-             {
-                 var spryhtml="";
-                 var spryArray=new Array();
-                 spryArray=spry.split("/n");
-                 for(i=0;i<spryArray.length-2;i++)
-                     {
-                         spryhtml=spryhtml+spryArray[i+1]+"<br />";
-                     }
-                 spryhtml=spryhtml+spryArray[spryArray.length-1];
-                 $('#spryvalue').html(spryhtml);
+    if(spry=="")
+    {
+        document.getElementById("spry").style.display="none";
+    }
+    else
+    {
+        var spryhtml="";
+        var spryArray=new Array();
+        spryArray=spry.split("/n");
+        for(i=0;i<spryArray.length-2;i++)
+        {
+            spryhtml=spryhtml+spryArray[i+1]+"<br />";
+        }
+        spryhtml=spryhtml+spryArray[spryArray.length-1];
+        $('#spryvalue').html(spryhtml);
 
-             }
+    }
 
-         var sprq='{% autoescape off  %}{{ legaldoc.sprq }}{%  endautoescape %}';
-         if(sprq=="")
-             {
-                 document.getElementById("sprq").style.display="none";
+    var sprq='{% autoescape off  %}{{ legaldoc.sprq }}{%  endautoescape %}';
+    if(sprq=="")
+    {
+        document.getElementById("sprq").style.display="none";
 
-             }
-         else
-             {
-                 $("#sprqvalue").html(sprq);
-             }
-
-
-
-         var sjy='{% autoescape off  %}{{ legaldoc.sjy }}{%  endautoescape %}';
-         if(sjy=="")
-             {
-                 document.getElementById("sjy").style.display="none";
-             }
-         else
-             {
-                 $("#sjyvalue").html(sjy);
-             }
+    }
+    else
+    {
+        $("#sprqvalue").html(sprq);
+    }
 
 
 
-         var xgft='{% autoescape off  %}{{ legaldoc.xgft }}{%  endautoescape %}';
-         if(xgft=="")
-             {
-                 document.getElementById("xgft").style.display="none";
-             }
-         else
-             {
-                 $("#xgftvalue").html(xgft);
-             }
+    var sjy='{% autoescape off  %}{{ legaldoc.sjy }}{%  endautoescape %}';
+    if(sjy=="")
+    {
+        document.getElementById("sjy").style.display="none";
+    }
+    else
+    {
+        $("#sjyvalue").html(sjy);
+    }
 
 
-        </script>
-    </body>
+
+    var xgft='{% autoescape off  %}{{ legaldoc.xgft }}{%  endautoescape %}';
+    if(xgft=="")
+    {
+        document.getElementById("xgft").style.display="none";
+    }
+    else
+    {
+        $("#xgftvalue").html(xgft);
+    }
+
+    function createXMLHttpRequest()
+    {
+        //判断浏览器是否支持ActiveXObject对象
+        if(window.ActiveXObject)
+        {
+            xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        //判断浏览器是否支持XMLHttpRequest对象
+        else if (window.XMLHttpRequest)
+        {
+            xmlHttp = new XMLHttpRequest();
+        }
+    }
+
+    function handleStateChange2() {
+        if (xmlHttp.readyState == 4) {
+            if (xmlHttp.status == 200) {
+
+                $('#caseText').html(xmlHttp.response);
+
+            }
+        }
+    }
+
+    createXMLHttpRequest();
+    //设置在请求结束后调用handleStateChange函数
+    xmlHttp.onreadystatechange = handleStateChange2;
+    //用get方法请求服务器端的simple.xml
+    xmlHttp.open("POST","recommondList",true);
+    // 添加超时
+    xmlHttp.timeout = 600000;
+
+    var id=document.getElementById("lawDocId").value;
+    var form=new FormData();
+    form.append("id",id);
+    xmlHttp.send(form);
+    xmlHttp.ontimeout = function() {
+        alert(xmlHttp.timeout);
+    }
+
+</script>
+</body>
 </html>

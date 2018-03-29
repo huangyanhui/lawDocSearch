@@ -79,3 +79,23 @@
     top: 0px;
     border-width: initial;
 }
+
+.serach-field-button {
+    margin-left:10%;
+}
+
+.searchlabelmain{
+	float:left;
+    width: auto;
+}
+
+
+.searchlabelmain .searchlable{
+	float: left;
+	border:1px solid #939593;
+	margin-right: 5px;
+}
+
+#bd {
+    clear: both;
+}

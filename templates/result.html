@@ -1,9 +1,116 @@
-{% load static %}
 
-<!doctype html>
-<html lang="zh-Hans">
+       <section class="serach-field-button">
+          <div class="searchlabelmain">
+                {%  for allFieldKeyWord in searchStruct.allFieldKeyWord %}
+                    <form class="searchlable" action="searchlabel" method="post">
+                        {% csrf_token %}
+                        <div >
+                            <input type="hidden" name="allFieldKeyWord" value="{{ allFieldKeyWord }}">
+                            <button target="_blank" action="searchlabel">
+                                <span></span>
+                                {{ allFieldKeyWord }}
+                            </button>
+                        </div>
+                    </form>
+                {% endfor %}
+            </div>
 
-    <body>
+{#        allFieldNotKeyWord #}
+            <div class="searchlabelmain">
+                {%  for allFieldNotKeyWord in searchStruct.allFieldNotKeyWord %}
+                    <form action="searchlabel" class="searchlable" method="post">
+                        {% csrf_token %}
+                        <div >
+                            <input type="hidden" name="allFieldNotKeyWord" value="{{ allFieldNotKeyWord }}">
+                            <button target="_blank"  action="searchlabel">
+                                <span></span>
+                                !{{ allFieldNotKeyWord }}
+                            </button>
+                        </div>
+                    </form>
+                {% endfor %}
+            </div>
+        {#        FieldKeyWord #}
+            <div class="searchlabelmain">
+                    {% if searchStruct.FieldKeyWord %}
+
+
+                    <form action="searchlabel"  class="searchlable" method="post">
+                        {% csrf_token %}
+                        <div >
+                            <input type="hidden" name="FieldKeyWord" value="fieldSearch">
+                            <button target="_blank"  action="searchlabel">
+                                <span></span>
+                                {%  for FieldKeyWord in searchStruct.FieldKeyWord %}
+                                {% if forloop.last %}
+                                {{ FieldKeyWord }}
+                                {% else %}
+                                {{ FieldKeyWord }}~
+                                {% endif %}
+                                {% endfor %}
+                            （同域搜索）
+                            </button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        {#        OrderFieldKey #}
+            <div class="searchlabelmain">
+                    {% if searchStruct.OrderFieldKey %}
+                    <form action="searchlabel" class="searchlable" method="post">
+                        {% csrf_token %}
+                        <div >
+                            <input type="hidden" name="OrderFieldKey" value="orderField">
+                            <button target="_blank"  action="searchlabel">
+                                <span></span>
+                                {%  for OrderFieldKey in searchStruct.OrderFieldKey %}
+                                {% if forloop.last %}
+                                {{ OrderFieldKey }}
+                                {% else %}
+                                {{ OrderFieldKey }}>
+                                {% endif %}
+                                 {% endfor %}
+                                （顺序搜索）
+                            </button>
+                        </div>
+                    </form>
+
+
+            {% endif %}
+            </div>
+{#          oneFieldKeyWord #}
+            <div class="searchlabelmain">
+                {%  for str in onefield %}
+                    <form action="searchlabel" class="searchlable" method="post">
+                        {% csrf_token %}
+                        <div >
+                            <input type="hidden" name="oneFieldKeyWord" value="{{ str }}">
+                            <button target="_blank"  action="searchlabel">
+                                <span></span>
+                                {{ str }}
+                            </button>
+                        </div>
+                    </form>
+                {% endfor %}
+            </div>
+
+{#            oneFieldNotKeyWord #}
+            <div class="searchlabelmain">
+                {%   for str in onefieldnot %}
+                    <form action="searchlabel" class="searchlable" method="post">
+                        {% csrf_token %}
+                        <div >
+                            <input type="hidden" name="oneFieldNotKeyWord" value="{{ str }}">
+                            <button target="_blank" action="searchlabel">
+                                <span></span>
+                                {{str}}
+                            </button>
+                        </div>
+                    </form>
+                {% endfor %}
+            </div>
+        </section>
+
             <div id="bd" class="ue-clear">
                 <div id="main">
                     <div class="row">
@@ -196,19 +303,36 @@
 
 
 
-        <script type="text/javascript">
+
+<script type="text/javascript">
+    var btarray=new Array();
+    var byrwarray=new Array();
+    {% for legaldoc in LegalDocList %}
+        btarray.push('{% autoescape off  %}{{ legaldoc.bt }}{%  endautoescape %}');
+        byrwarray.push('{% autoescape off  %}{{ legaldoc.byrw }}{%  endautoescape %}');
+    {% endfor %}
+    var i=0;
+    var j=0;
+    $(".title").each(function () {
+
+        $(this).html("<button>"+btarray[i]+"</button>");
+        i=i+1;
+    });
+    $(".itemBody").each(function () {
+
+        $(this).html(byrwarray[j]);
+        j=j+1;
+    })
+
             $(document).ready(function() {
                 //限制字符个数
                 $(".wordControl").each(function() {
-                    var maxwidth = 130;
-                    if ($(this).text().length > maxwidth) {
-                        $(this).text($(this).text().substring(0, maxwidth));
+                    var maxwidth = 300;
+                    if ($(this).html().length > maxwidth) {
+                        console.log($(this).html());
+                        $(this).html($(this).html().substring(0, maxwidth));
                         $(this).html($(this).html() + '...');
                     }
                 });
             });
-
-         <!-- </script> -->
-    </body>
-
-</html>
+</script>

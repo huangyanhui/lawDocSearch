@@ -5,6 +5,7 @@ class LegalDocument():
     # 构造函数,id,法院，当事人信息，案号，审判人员，一审法院查明
     def __init__(self):
         self.id = 0
+        self.similarity=0
         self.fy = ""
         self.dsrxx = ""
         self.dsrxxcopy = ""
@@ -65,6 +66,7 @@ class LegalDocument():
         '''
         return {
             'id': self.id,
+            'similirity':self.similarity,
             'fy': self.fy,
             'dsrxx': self.dsrxx,
             'dsrxxcopy': self.dsrxxcopy,
@@ -137,6 +139,17 @@ class SearchStruct():
         self.oneFieldNotKeyWord = {}
         self.FieldKeyWord = []
         self.OrderFieldKey = []
+
+    def print(self):
+        return {
+            '全域搜索': self.allFieldKeyWord,
+            '单领域搜索': self.oneFieldKeyWord,
+            '全域否定搜索': self.allFieldNotKeyWord,
+            '单域否定搜索': self.oneFieldNotKeyWord,
+            '同域搜索': self.FieldKeyWord,
+            '顺序搜索': self.OrderFieldKey
+
+        }
 
     # 数据格式为列表
     @property

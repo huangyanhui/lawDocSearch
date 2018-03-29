@@ -1,0 +1,9 @@
+<div id="caseText" class="col-lg-12 col-lg-12-padding detail-middle-main ">
+    {% for legalbt in legaldoclist %}
+        <div style="padding-top: 15px;">
+            <button class="detail-btn" onclick="recommondDetail(this)" value="{{ legalbt.id }}">
+                {{ legalbt.bt }}   {{ legalbt.similarity}}
+            </button>
+        </div>
+    {% endfor %}
+</div>

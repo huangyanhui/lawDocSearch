@@ -185,3 +185,6 @@ venv.bak/
 Pipfile
 Pipfile.lock
 .idea/
+
+# static-backup
+statics/

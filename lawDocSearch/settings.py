@@ -24,7 +24,7 @@ SECRET_KEY = '(1dgbxu7x)vt))w&g^bx$1l+jl45!p%!c#9mmam48-en958cf+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['yaexp.com', '139.219.111.204', 'localhost']
 
 # Application definition
 
@@ -129,3 +129,18 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
     'django.contrib.auth.hashers.BCryptPasswordHasher',
 ]
+
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'smtp.163.com'  #邮件服务器  在邮箱设置内可以找到
+EMAIL_PORT = 465                      #固定端口
+EMAIL_HOST_USER = 'flwssshuang@163.com'   #邮箱用户名
+EMAIL_HOST_PASSWORD = 'huang123'          #这个我们看一下官方文档         #默认False
+EMAIL_FROM = EMAIL_HOST_USER      #与用户名保持一致
+
+# RuntimeError: You called this URL via POST, but the URL doesn't end in a slash and you have APPEND_SLASH set.
+# Django can't redirect to the slash URL while maintaining POST data.
+# Change your form to point to 127.0.0.1:8000/account/reset/ (note the trailing slash),
+# or set APPEND_SLASH=False in your Django settings.
+    # APPEND_SLASH = False
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'statics')

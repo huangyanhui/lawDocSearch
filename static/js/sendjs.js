@@ -100,6 +100,8 @@ function recommondDetail(btn) {
     xmlHttp.onreadystatechange = handleStateChange;
     //用get方法请求服务器端的simple.xml
     xmlHttp.open("POST","recommondDetail",true);
+    // 添加超时
+    xmlHttp.timeout = 300000;
 
     var id=btn.value;
     var form=new FormData();

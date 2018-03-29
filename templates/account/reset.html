@@ -1,9 +1,9 @@
 {% load static %}
 <!doctype html>
-<html lang="zh">	
+<html lang="zh">
     <head>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8" /> 
-        <title>登录</title>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+        <title>更改密码</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="{% static 'css/login_style.css' %}" rel='stylesheet' type='text/css' />
         <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
@@ -12,17 +12,15 @@
     <body>
         <div class="login">
             <div class="login-triangle"></div>
-            
-            <h2 class="login-header">登录</h2>
 
-            <form class="login-container">
-                <p><input name="username" type="text" placeholder="用户名"></p>
-                <p><input name="password" type="password" placeholder="密码"></p>
+            <h2 class="login-header">忘记密码</h2>
+
+            <form class="login-container" method="post">
+                {% csrf_token %}
+                <p><input id="password" name="password" type="password" placeholder="密码" name="password"></p>
+                <p><input id="re-password"  type="password" placeholder="确认密码" name="re-password"></p>
                 <p id="tips"></p>
-                <p><input type="submit" value="登录"></p>
-                <p class="register">没有帐号？ <a href="/account/register">注册帐号</a> </p>
-                <p class="register"> <a href="/account/forget_password">忘记密码</a> </p>
-
+                <p><input id="submit" type="submit" value="修改"></p>
             </form>
 
         </div>
@@ -56,36 +54,32 @@
          // Note: we disable elements AFTER the form data has been serialized.
          // Disabled form elements will not be serialized.
          $inputs.prop("disabled", true);
+          var url = window.location.href.split('/');
+          var code = url[url.length  - 1];
 
          // Fire off the request to /form.php
          request = $.ajax({
-             url: "/account/login",
+             url: "/account/reset/" + code,
              type: "post",
              data: serializedData,
          });
-
          // Callback handler that will be called on success
          request.done(function (response, textStatus, jqXHR){
              // Log a message to the console
              var response_json = JSON.parse(response);
              var status = response_json.status
              // if logined
-             if (status === "logined") {
-                 $("#tips").text("您已经登录");
-             // if wrong password
-             } else if (status === "wrong password") {
-                 $("#tips").text("输入密码有误，请重新输入");
-             // if user did not existed
-             } else if (status === "user did not existed") {
-                 $("#tips").text("用户不存在");
-             // success
-             } else if (status === "success") {
+             if (status === "Sucess") {
                  $("#tips").text("");
-                 window.location.href = "/";
-             } else if (status == "not actived") {
-                 $("#tips").text("用户未激活");
+                  window.location.href = "/";
+             // if wrong password
+             } else if (status === "query error") {
+                 $("#tips").text("查询错误，请重试");
+             // if user did not existed
+             } else if (status === "email error") {
+                 $("#tips").text("邮箱不匹配")
              }
-             
+
          });
 
          // Callback handler that will be called on failure

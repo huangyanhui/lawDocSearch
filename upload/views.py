@@ -10,32 +10,43 @@ import json
 
 @csrf_exempt
 def upload(request):
-    if request.method == 'POST':
-        response = {}
-        response['operation'] = 'upload'
-        original_text = request.POST.get('orignal-text')
-        split_sign = '##'
-        if request.method.get('split_sign') == '':
-            split_sign = '##'
-        else:
-            split_sign = request.method.get('split_sign')
-        original_dict = text_split(original_text, sign=split_sign)
-        # 如果存在与数据库中
-        if is_in_database(original_dict['案号']):
-            response['status'] = 'failed'
-            response['message'] = 'exists'
-        # 不在数据库时上传
-        else:
-            es_utils = ElasticSearchUtils()
-            new_id = get_total() + 1
-            new_legal_doc = wrapper(new_id, original_dict)
-            es_utils.add_data(new_legal_doc)
-            response['status'] = 'success'
-
-        return HttpResponse(json.dumps(response, ensure_ascii=False))
-    # 跳转到上传页面
+    # DEBUG 语句
+    # request.session['identity'] = 2
+    # DEBUG 语句
+    # 普通用户直接返回主页
+    if request.session['identity'] == 1:
+        return render(
+            request, 'index.html', {
+                'username': request.session['username'],
+                'allowed_count': request.session['allowed_count']
+            })
     else:
-        return render(request, 'upload/index.html')
+        if request.method == 'POST':
+            response = {}
+            response['operation'] = 'upload'
+            original_text = request.POST.get('orignal-text')
+            split_sign = '##'
+            if request.POST.get('split-sign') == '':
+                split_sign = '##'
+            else:
+                split_sign = request.POST.get('split-sign')
+                original_dict = text_split(original_text, sign=split_sign)
+                # 如果存在与数据库中
+                if is_in_database(original_dict['案号']):
+                    response['status'] = 'failed'
+                    response['message'] = 'exists'
+                # 不在数据库时上传
+                else:
+                    es_utils = ElasticSearchUtils()
+                    new_id = get_total() + 1
+                    new_legal_doc = wrapper(new_id, original_dict)
+                    es_utils.add_data(new_legal_doc)
+                    response['status'] = 'success'
+
+            return HttpResponse(json.dumps(response, ensure_ascii=False))
+        # 跳转到上传页面
+        else:
+            return render(request, 'upload/index.html')
 
 
 def text_split(text, sign='##'):
