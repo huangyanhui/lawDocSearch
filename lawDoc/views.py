@@ -146,7 +146,7 @@ def indexSearch(request):
         oneField.append(str)
     oneFieldnot = []
     for field in searchStruct.oneFieldNotKeyWord.keys():
-        str = ""
+        str = "!"
         for key in searchStruct.oneFieldNotKeyWord[field]:
             str = str + " " + key
         str = str + "@" + allSearchFieldListR[field]
@@ -220,7 +220,7 @@ def searchlabel(request):
         oneField.append(str)
     oneFieldnot = []
     for field in searchStruct.oneFieldNotKeyWord.keys():
-        str = ""
+        str = "!"
         for key in searchStruct.oneFieldNotKeyWord[field]:
             str = str + " " + key
         str = str + "@" + allSearchFieldListR[field]
@@ -257,7 +257,7 @@ def newSearch(request):
         oneField.append(str)
     oneFieldnot = []
     for field in searchStruct.oneFieldNotKeyWord.keys():
-        str = ""
+        str = "!"
         for key in searchStruct.oneFieldNotKeyWord[field]:
             str = str + " " + key
         str = str + "@" + allSearchFieldListR[field]
@@ -294,7 +294,7 @@ def addSearch(request):
         oneField.append(str)
     oneFieldnot = []
     for field in searchStruct.oneFieldNotKeyWord.keys():
-        str = ""
+        str = "!"
         for key in searchStruct.oneFieldNotKeyWord[field]:
             str = str + " " + key
         str = str + "@" + allSearchFieldListR[field]
@@ -325,7 +325,7 @@ def getMore(request):
 
     oneFieldnot = []
     for field in searchStruct.oneFieldNotKeyWord.keys():
-        str = ""
+        str = "!"
         for key in searchStruct.oneFieldNotKeyWord[field]:
             str = str + " " + key
         str = str + "@" + allSearchFieldListR[field]
@@ -390,7 +390,7 @@ def groupBySearch(request):
         oneField.append(str)
     oneFieldnot = []
     for field in searchStruct.oneFieldNotKeyWord.keys():
-        str = ""
+        str = "!"
         for key in searchStruct.oneFieldNotKeyWord[field]:
             str = str + " " + key
         str = str + "@" + allSearchFieldListR[field]
