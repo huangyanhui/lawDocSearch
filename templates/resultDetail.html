@@ -14,7 +14,7 @@
 {% csrf_token %}
 <div id="content">
     <form style="float:right;width:20%;margin-right:10%" action="download" method="post">
-        <input type="hidden" name="legalDocuments_id" value="{{legalDocuments_id }}" />
+        <input type="hidden" name="legalDocumentId" value="{{ legaldoc.id }}" />
         <div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
             <button class="detail-download"  >&nbsp;下载  </button>
 
@@ -45,14 +45,6 @@
                 <div class="col-lg-9" style="width: 100%;">
                     <div class="text-center text-black" id="btvalue">{{ legaldoc.bt }}</div>
                 </div>
-
-                
-		<form  action="download" method="post">
-		<input type="hidden" name="legalDocuments_id" value="{{legalDocuments_id }}" />
-		<div class="nav-title left-nav-top detail-ietm-index detail-middle-title">
-		<button class="detail-download"  >&nbsp;下载  </button>
-		</div>
-		</form>
             </div>
 
             <input type="hidden" id="lawDocId" value="{{ legaldoc.id }}" >
@@ -463,11 +455,16 @@
     xmlHttp.onreadystatechange = handleStateChange2;
     //用get方法请求服务器端的simple.xml
     xmlHttp.open("POST","recommondList",true);
+    // 添加超时
+    xmlHttp.timeout = 600000;
 
     var id=document.getElementById("lawDocId").value;
     var form=new FormData();
     form.append("id",id);
     xmlHttp.send(form);
+    xmlHttp.ontimeout = function() {
+        alert(xmlHttp.timeout);
+    }
 
 </script>
 </body>

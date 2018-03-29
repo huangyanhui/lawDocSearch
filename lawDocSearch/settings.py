@@ -24,7 +24,7 @@ SECRET_KEY = '(1dgbxu7x)vt))w&g^bx$1l+jl45!p%!c#9mmam48-en958cf+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['yaexp.com', '139.219.111.204', 'localhost']
 
 # Application definition
 
@@ -142,3 +142,5 @@ EMAIL_FROM = EMAIL_HOST_USER      #与用户名保持一致
 # Change your form to point to 127.0.0.1:8000/account/reset/ (note the trailing slash),
 # or set APPEND_SLASH=False in your Django settings.
     # APPEND_SLASH = False
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'statics')
